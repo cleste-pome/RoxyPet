@@ -1,0 +1,10 @@
+# 根目录的临时构建产物不入库（正式成品快照保存在 06-dist/）
+/RoxyPet.app/
+*.dmg
+
+# macOS 杂物
+.DS_Store
+
+# 本地运行数据
+task-history.json
+.claude/
