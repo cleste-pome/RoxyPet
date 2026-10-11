@@ -1,0 +1,11 @@
+# 构建产物（成品通过 Releases 里的 dmg 分发，不进仓库）
+RoxyPet.app/
+*.app/
+*.dmg
+
+# macOS 杂物
+.DS_Store
+
+# 本地运行数据
+task-history.json
+.claude/
