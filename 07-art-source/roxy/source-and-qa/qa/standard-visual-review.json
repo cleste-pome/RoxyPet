@@ -1,0 +1,72 @@
+{
+  "reviewer": "independent-standard-visual-worker",
+  "review_mode": "ordered stills, normal-cell images, and alpha bounds; animated playback not observed",
+  "artifacts_inspected": [
+    "qa/contact-sheet.png",
+    "frames/running-right/00.png",
+    "frames/running-right/01.png",
+    "frames/running-right/02.png",
+    "frames/running-right/03.png",
+    "frames/jumping/00.png",
+    "frames/jumping/02.png",
+    "frames/jumping/04.png",
+    "frames/running/00.png",
+    "frames/running/04.png"
+  ],
+  "blocking_defects": [],
+  "still_review_ok": true,
+  "playback_verified": false,
+  "rows": [
+    {
+      "state": "idle",
+      "verdict": "pass",
+      "evidence": "Six frames; open, half-lidded and closed-eye blink with quiet body variation. Same blue braids, face, outfit and planted baseline in all six."
+    },
+    {
+      "state": "running-right",
+      "verdict": "warning",
+      "evidence": "Eight full figures face screen-right with hair trailing left. Extended stride, planted support and lifted-knee phases are visible. Consecutive support phases 1 and 2 are similar; anatomical leg alternation cannot be confidently certified from stills. Requires timed loop review for cadence. No wrong-direction or clipped pose observed."
+    },
+    {
+      "state": "running-left",
+      "verdict": "warning",
+      "evidence": "Eight figures face screen-left with hair trailing right; extended stride and bent-leg support phases present. Similar adjacent support poses warrant cadence check during playback. No clipped pose or wrong direction observed."
+    },
+    {
+      "state": "waving",
+      "verdict": "pass",
+      "evidence": "Four poses raise attached hand beside face then return; boots remain grounded. No detached wave marks."
+    },
+    {
+      "state": "jumping",
+      "verdict": "pass",
+      "evidence": "Five poses move from crouch to lift, airborne high point, descent and crouched landing. Alpha bottom changes 203,191,175,192,203 pixels, proving 28-pixel lift and return. Hat and head stay recognizably consistent; crouch explains shorter silhouette, with no apparent whole-character resizing in ordered stills."
+    },
+    {
+      "state": "failed",
+      "verdict": "pass",
+      "evidence": "Eight poses progress from hands close to chest into bowed head, drooping arms and closed/downcast eyes, then recover. No extra prop or loose effect."
+    },
+    {
+      "state": "waiting",
+      "verdict": "pass",
+      "evidence": "Six poses gather hands at chest, tilt head, open asking palm(s), and return. Expectant gesture is distinct from idle and review."
+    },
+    {
+      "state": "running",
+      "verdict": "pass",
+      "evidence": "Six active-work thinking poses keep boots planted and one hand at chin with thoughtful gaze/blink. This is task effort, not foot-running."
+    },
+    {
+      "state": "review",
+      "verdict": "pass",
+      "evidence": "Six folded-arm inspection poses show forward lean, narrowed eyes, alternating head tilts and blink. Distinct from chin-thinking and asking palms."
+    }
+  ],
+  "global_observations": [
+    "Consistent blue braids, blue eyes, white/black/blue costume, black skirt, white boots and witch hat across rows. Directional side-view hat changes follow orientation.",
+    "No missing frame, visible clipping, detached effect, or guide mark observed on contact sheet.",
+    "Small magenta edge fringe is visible before final despill; final cleanup and byte validation remain parent responsibilities.",
+    "Ordered stills do not establish timing or perceptual playback smoothness. No claim of observed GIF playback is made."
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "pairs": [
+    {
+      "pair": "horizontal-1",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A: nose and mouth sit slightly toward screen-left, with the left cheek contour facing outward and eyes directed left/up. B: nose and mouth project toward screen-right, with the right cheek contour facing outward and eyes directed right/up.",
+      "displayed_pair": "Horizontal pair 1"
+    },
+    {
+      "pair": "horizontal-2",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A: nose tip projects right, the chin is displaced right of the neck, and the visible face opens right. B: nose tip projects left, the chin is displaced left of the neck, and the face opens left.",
+      "displayed_pair": "Horizontal pair 2"
+    },
+    {
+      "pair": "horizontal-3",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A: nose silhouette protrudes left, with the face and eye line oriented left. B: nose silhouette protrudes right, with the chin and eye line oriented right.",
+      "displayed_pair": "Horizontal pair 3"
+    },
+    {
+      "pair": "horizontal-4",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A: rightward nose profile, rightward chin and visible near cheek identify a right-facing head. B: leftward nose profile and leftward chin identify a left-facing head; the eyes also look left.",
+      "displayed_pair": "Horizontal pair 4"
+    },
+    {
+      "pair": "horizontal-5",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A: the nose and lower face project right beyond the neck, with eyes turned right. B: the nose and lower face project left beyond the neck, with eyes turned left and slightly down.",
+      "displayed_pair": "Horizontal pair 5"
+    },
+    {
+      "pair": "horizontal-6",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A: despite downward pitch, the nose tip and tucked chin remain on the right side of the face and the eyes point right/down. B: the nose tip and tucked chin are on the left side, and eyes point left/down.",
+      "displayed_pair": "Horizontal pair 6"
+    },
+    {
+      "pair": "horizontal-7",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A: lowered head has nose and mouth offset left and an outward left cheek contour, with gaze left/down. B: lowered head has nose and mouth offset right and an outward right cheek contour, with gaze right/down.",
+      "displayed_pair": "Horizontal pair 7"
+    },
+    {
+      "pair": "vertical-1",
+      "A": "down",
+      "B": "up",
+      "reason": "A: the brim covers the upper eye region, the eyes look downward, and the chin is tucked close to the collar. B: eyes look upward beneath a raised face, with nose lifted and chin held above an exposed neck area.",
+      "displayed_pair": "Vertical pair 1"
+    },
+    {
+      "pair": "vertical-2",
+      "A": "down",
+      "B": "up",
+      "reason": "A: lowered nose and tucked chin sit close to the collar; eyes are partly concealed beneath the brim and point downward. B: nose is lifted, the chin rises away from the collar, and eyes look upward.",
+      "displayed_pair": "Vertical pair 2"
+    },
+    {
+      "pair": "vertical-3",
+      "A": "up",
+      "B": "down",
+      "reason": "A: right-facing nose tilts upward, eyes look above horizontal, and the chin is lifted away from the neck. B: nose points right/down, eyes sit low beneath the brim, and chin tucks toward the neck.",
+      "displayed_pair": "Vertical pair 3"
+    },
+    {
+      "pair": "vertical-4",
+      "A": "up",
+      "B": "down",
+      "reason": "A: right-facing profile has a slightly elevated nose tip, raised eyes and chin projecting above the neck. B: right-facing profile has a lowered nose, downward-looking eye and chin pitched toward the collar.",
+      "displayed_pair": "Vertical pair 4"
+    },
+    {
+      "pair": "vertical-5",
+      "A": "up",
+      "B": "down",
+      "reason": "A: eyes and nose angle upward, with lifted chin and visible space between chin and collar. B: eyes look downward beneath the low brim, nose angles down and chin is tucked.",
+      "displayed_pair": "Vertical pair 5"
+    },
+    {
+      "pair": "vertical-6",
+      "A": "up",
+      "B": "down",
+      "reason": "A: left-facing nose tip points slightly upward, the eyes look up and the chin is raised. B: left-facing nose tip angles downward and the chin is tucked near the collar, with lowered eyes.",
+      "displayed_pair": "Vertical pair 6"
+    },
+    {
+      "pair": "vertical-7",
+      "A": "down",
+      "B": "up",
+      "reason": "A: left-facing profile has a downward nose angle, low eye direction and tucked chin. B: nose tip is elevated, eyes look upward and the chin lifts away from the neck.",
+      "displayed_pair": "Vertical pair 7"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "ok": true,
+  "atlas": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/outputs/roxy/spritesheet.png",
+  "encoded_bytes": 2835550,
+  "sha256": "0d6da509f754e232ea6a651af0e2b0d47d17058a104944c4548552a42eb644f8",
+  "jump": {
+    "idle_baseline": 202,
+    "jump_baselines": [
+      202,
+      189,
+      173,
+      190,
+      202
+    ],
+    "airborne_lift_pixels": 29,
+    "landing_delta_pixels": 0
+  },
+  "look_registration": {
+    "neutral_center_x": 96.0,
+    "look_centers_x": [
+      95.0,
+      93.0,
+      94.0,
+      93.5,
+      96.0,
+      96.5,
+      99.0,
+      100.0,
+      94.0,
+      92.5,
+      92.0,
+      93.0,
+      98.0,
+      100.5,
+      103.5,
+      97.5
+    ],
+    "look_widths": [
+      102,
+      98,
+      96,
+      95,
+      98,
+      99,
+      102,
+      98,
+      108,
+      109,
+      108,
+      108,
+      108,
+      107,
+      103,
+      103
+    ],
+    "maximum_center_drift_pixels": 7.5,
+    "maximum_width_ratio": 1.1473684210526316
+  },
+  "errors": [],
+  "warnings": [
+    "157.5->180 diff is a local outlier (2714 pixels vs neighbor average 1718)",
+    "157.5->180 sprite area ratio is high (1.15)"
+  ]
+}

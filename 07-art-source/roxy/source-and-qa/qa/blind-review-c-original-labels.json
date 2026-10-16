@@ -1,0 +1,18 @@
+{
+  "pairs": [
+    {"pair":"Horizontal pair 1","A":"screen-left","B":"screen-right","reason":"A's nose and lower-face center sit left of the head center, with a slightly more exposed cheek on the right. B's nose and chin shift right, with the opposite cheek exposed."},
+    {"pair":"Horizontal pair 2","A":"screen-right","B":"screen-left","reason":"A has a rightward nose silhouette and chin, with the visible ear on the left. B has a leftward nose silhouette and chin, with the visible ear on the right."},
+    {"pair":"Horizontal pair 3","A":"screen-left","B":"screen-right","reason":"A's nose projects left and the visible face narrows toward the left; the exposed ear is on the right. B's nose projects right, and its ear is on the left."},
+    {"pair":"Horizontal pair 4","A":"screen-right","B":"screen-left","reason":"A presents a right-facing profile: nose, lips, and chin project right of its ear. B presents a left-facing profile with those landmarks projecting left."},
+    {"pair":"Horizontal pair 5","A":"screen-right","B":"screen-left","reason":"A's downturned face still places its nose and chin toward the right, with an exposed left-side ear. B's nose and chin point left and its exposed ear sits on the right."},
+    {"pair":"Horizontal pair 6","A":"screen-right","B":"screen-left","reason":"A's nose and chin are offset right beneath the eyes, with more exposed ear and side hair on the left. B's nose and chin are offset left, with the exposed ear on the right."},
+    {"pair":"Horizontal pair 7","A":"screen-left","B":"screen-right","reason":"A's lowered face has its nose and chin slightly left of center and a clearer ear on the right. B's nose and chin lie slightly right of center, with a clearer left ear."},
+    {"pair":"Vertical pair 1","A":"down","B":"up","reason":"A's brim covers the brow, with eyes and chin tucked low toward the collar. B exposes a broad face beneath the brim, with raised eyes and lifted chin above the collar."},
+    {"pair":"Vertical pair 2","A":"down","B":"up","reason":"A's eyes sit low under the brim and its chin is tucked into the collar. B's nose and eyes tilt upward, and its chin lifts away from the collar."},
+    {"pair":"Vertical pair 3","A":"up","B":"down","reason":"A has an upward nose angle and an elevated chin with neck space beneath it. B's nose slopes downward, eyes sit low under the brim, and chin approaches the collar."},
+    {"pair":"Vertical pair 4","A":"up","B":"down","reason":"A's profile holds the nose and eyes higher and lifts its chin away from the collar. B's nose, eye line, and chin angle downward, with the chin tucked closer to the collar."},
+    {"pair":"Vertical pair 5","A":"up","B":"down","reason":"A shows a lifted chin and upward-facing eyes beneath an open brim. B's brim overlaps the brow and its lowered chin tucks toward the chest."},
+    {"pair":"Vertical pair 6","A":"up","B":"down","reason":"A raises its nose and chin, exposing neck below the jaw. B lowers its eye line and nose beneath the brim and brings the chin toward the collar."},
+    {"pair":"Vertical pair 7","A":"down","B":"up","reason":"A's nose points diagonally downward with a low chin close to its collar. B's nose points diagonally upward, its eyes are raised, and its chin is visibly lifted."}
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "ok": false,
+  "atlas": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/outputs/roxy/spritesheet.png",
+  "encoded_bytes": 2896169,
+  "sha256": "7430fc29525f2b371357cdec3f56e0f7395e5251a735fc9a13c7ed9dfff53162",
+  "jump": {
+    "idle_baseline": 202,
+    "jump_baselines": [
+      202,
+      189,
+      173,
+      190,
+      202
+    ],
+    "airborne_lift_pixels": 29,
+    "landing_delta_pixels": 0
+  },
+  "look_registration": {
+    "neutral_center_x": 96.0,
+    "look_centers_x": [
+      95.0,
+      93.0,
+      94.0,
+      94.0,
+      95.5,
+      96.5,
+      99.5,
+      98.0,
+      94.5,
+      92.5,
+      91.5,
+      93.0,
+      98.0,
+      100.5,
+      100.5,
+      96.5
+    ],
+    "look_widths": [
+      102,
+      98,
+      96,
+      96,
+      97,
+      99,
+      103,
+      102,
+      109,
+      109,
+      109,
+      108,
+      108,
+      107,
+      109,
+      105
+    ],
+    "maximum_center_drift_pixels": 4.5,
+    "maximum_width_ratio": 1.1354166666666667
+  },
+  "errors": [
+    "look directions contain transparent interior holes or seam bands: 000, 022.5, 045, 067.5, 090, 112.5, 135, 157.5, 180, 225, 270, 315, 337.5"
+  ],
+  "warnings": [
+    "000 has transparent interior hole rows (y=147, y=148)",
+    "022.5 has transparent interior hole rows (y=147, y=148)",
+    "045 has transparent interior hole rows (y=147, y=148)",
+    "067.5 has transparent interior hole rows (y=147, y=148)",
+    "090 has transparent interior hole rows (y=147, y=148, y=149)",
+    "112.5 has transparent interior hole rows (y=147, y=148, y=149)",
+    "135 has transparent interior hole rows (y=147, y=148, y=149)",
+    "157.5 has transparent interior hole rows (y=148, y=149, y=150, y=151, +1 more)",
+    "180 has transparent interior hole rows (y=147, y=148, y=149, y=150)",
+    "202.5 has transparent interior hole rows (y=149)",
+    "225 has transparent interior hole rows (y=149, y=150)",
+    "247.5 has transparent interior hole rows (y=149)",
+    "270 has transparent interior hole rows (y=149, y=150)",
+    "292.5 has transparent interior hole rows (y=149)",
+    "315 has transparent interior hole rows (y=148, y=149)",
+    "337.5 has transparent interior hole rows (y=146, y=147, y=148)"
+  ]
+}

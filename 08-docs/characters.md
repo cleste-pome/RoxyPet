@@ -53,8 +53,8 @@ JSON 为「分类名 → 字符串数组」。支持 chat、greeting、hover、d
 艾丽丝图片由内置 image_gen 按用户设定图生成；原图和最终提示词记录见 [素材制作记录](eris-art-generation.md)。将生成原图重新组装为高清图集（Python 需要 Pillow、numpy）：
 
 ```sh
-python3 03-scripts/pack-eris-atlas.py 07-art-source/eris/short/sources 02-assets/characters/eris-short
-python3 03-scripts/pack-eris-atlas.py 07-art-source/eris/long/sources 02-assets/characters/eris-long
+python3 03-scripts/pack-eris-atlas.py 07-art-source/eris-short/sources 02-assets/characters/eris-short
+python3 03-scripts/pack-eris-atlas.py 07-art-source/eris-long/sources 02-assets/characters/eris-long
 python3 03-scripts/pack-eris-atlas.py --self-test
 python3 03-scripts/render-character-previews.py
 bash 03-scripts/build.sh

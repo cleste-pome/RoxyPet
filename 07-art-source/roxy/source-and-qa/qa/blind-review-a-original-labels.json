@@ -1,0 +1,88 @@
+{
+  "pairs": [
+    {
+      "pair": "Horizontal pair 1",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A nose and raised chin sit left of the facial center with the right cheek more exposed; B nose and chin point right with the left cheek more exposed."
+    },
+    {
+      "pair": "Horizontal pair 2",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A nose projects right and the left side of the face is broad; B nose projects left and the right cheek is broad."
+    },
+    {
+      "pair": "Horizontal pair 3",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A has a clearly left-projecting nose and left-facing facial outline; B has a clearly right-projecting nose and right-facing facial outline."
+    },
+    {
+      "pair": "Horizontal pair 4",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A nose and chin form a right-facing partial profile; B nose and chin form a left-facing partial profile."
+    },
+    {
+      "pair": "Horizontal pair 5",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A visible cheek and nose point right beneath the fringe; B visible cheek and nose point left beneath the fringe."
+    },
+    {
+      "pair": "Horizontal pair 6",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A lowered nose and chin are displaced right beneath the eyes; B lowered nose and chin are displaced left beneath the eyes."
+    },
+    {
+      "pair": "Horizontal pair 7",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A lowered face has its nose and chin subtly left of center, with the right eye more exposed; B lowered face has its nose and chin subtly right of center, with the left eye more exposed."
+    },
+    {
+      "pair": "Vertical pair 1",
+      "A": "down",
+      "B": "up",
+      "reason": "A eyes are under the brim, pupils and nose low, chin tucked toward collar; B eyes gaze high, nose lifted and underside of chin exposed."
+    },
+    {
+      "pair": "Vertical pair 2",
+      "A": "down",
+      "B": "up",
+      "reason": "A brow is hidden by the brim and chin is tucked; B pupils are high and nose and chin lift away from the collar."
+    },
+    {
+      "pair": "Vertical pair 3",
+      "A": "up",
+      "B": "down",
+      "reason": "A eyes look above the horizontal with a raised nose and exposed chin; B face slopes downward with a lowered nose and tucked chin."
+    },
+    {
+      "pair": "Vertical pair 4",
+      "A": "ambiguous",
+      "B": "down",
+      "reason": "A is close to a level sideward glance, with no strong upward tilt of chin or pupils; B nose and gaze angle lower and chin tucks toward the collar."
+    },
+    {
+      "pair": "Vertical pair 5",
+      "A": "up",
+      "B": "down",
+      "reason": "A pupils sit high with raised nose and broad exposed chin; B eyes sit under the low brim and the chin is tucked."
+    },
+    {
+      "pair": "Vertical pair 6",
+      "A": "up",
+      "B": "down",
+      "reason": "A nose tilts upward with pupils directed high and chin lifted; B lowered eyes and downward nose terminate in a tucked chin."
+    },
+    {
+      "pair": "Vertical pair 7",
+      "A": "down",
+      "B": "up",
+      "reason": "A visible eye and nose point downward and chin is tucked toward collar; B pupils and nose are elevated and the chin extends upward away from collar."
+    }
+  ]
+}
