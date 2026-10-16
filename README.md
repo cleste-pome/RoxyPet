@@ -250,12 +250,15 @@ RoxyPet-GitHub/
 - 纯聊天直连你**自己配置**的 API；勾选「让她动手做」时调用本机 `claude` CLI（跳过权限确认执行）；「透视魔法 / 想句话」同样读取 `~/.claude/settings.json` 中的端点与凭据
 - 所有任务与历史记录只写入本机 `~/.roxy-pet/`，不上传任何地方
 
+## 💛 致谢
+
+- **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希的角色美术与序列帧动画**（Character Art & Sprite Animation）。
+
+## 🐾 作者与维护
+
+项目由 **[cleste-pome](https://github.com/cleste-pome)** 发起、开发与维护。
+
 ## ⚖️ 版权
 
 - 《无职转生》及其角色版权归 理不尽な孫の手 及原作相关权利方所有
 - 本项目为非商业粉丝作品；仓库内美术素材请勿商用；再分发本代码时请替换为你自己拥有权利的素材
-
-## 💛 致谢
-
-- **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希的角色美术与序列帧动画**（Character Art & Sprite Animation）。
-- **项目发起与维护（Author & Maintainer）**：[cleste-pome](https://github.com/cleste-pome)
