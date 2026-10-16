@@ -47,7 +47,7 @@
    - 4.2 [与 Claude Code 联动](#-与-claude-code-联动可选)
      - 4.2.1 [任务执行器（可切换）](#任务执行器可切换)
      - 4.2.2 [状态联动（可多选）](#状态联动可多选)
-   - 4.3 [自定义](#-自定义)
+   - 4.3 [自定义与扩展](#-自定义与扩展)
 5. [声明与致谢](#-声明与致谢)
    - 5.1 [隐私](#-隐私)
    - 5.2 [致谢](#-致谢)
@@ -94,6 +94,8 @@ RoxyPet-GitHub/
 
 根目录的构建产物（`RoxyPet.app`、`*.dmg`）由 `.gitignore` 排除、不入库——仓库本体是纯源码与素材，安装包一律走 Releases 的 dmg。
 
+---
+
 ### 🎭 角色介绍
 
 #### 洛琪希 · 魔法师
@@ -112,6 +114,8 @@ RoxyPet-GitHub/
 |:---:|:---:|:---:|:---:|
 | <img src="05-images/preview-idle.gif" width="150"/> | <img src="05-images/preview-run.gif" width="150"/> | <img src="05-images/preview-wave.gif" width="150"/> | <img src="05-images/preview-look.gif" width="150"/> |
 
+---
+
 #### 艾丽丝 · 短发 · 旅行装
 
 红发少女的旅行装束。
@@ -128,6 +132,8 @@ RoxyPet-GitHub/
 |:---:|:---:|:---:|:---:|
 | <img src="05-images/eris/short-idle.gif" width="150"/> | <img src="05-images/eris/short-run.gif" width="150"/> | <img src="05-images/eris/short-wave.gif" width="150"/> | <img src="05-images/eris/short-look.gif" width="150"/> |
 
+---
+
 #### 艾丽丝 · 长发 · 连衣裙
 
 白色露肩上衣、黑色领结、深棕荷叶边裙。
@@ -143,6 +149,8 @@ RoxyPet-GitHub/
 | 待机 | 奔跑 | 挥手 | 转头 |
 |:---:|:---:|:---:|:---:|
 | <img src="05-images/eris/long-idle.gif" width="150"/> | <img src="05-images/eris/long-run.gif" width="150"/> | <img src="05-images/eris/long-wave.gif" width="150"/> | <img src="05-images/eris/long-look.gif" width="150"/> |
+
+---
 
 菜单和窗口随人物切换：洛琪希是「**吩咐洛琪希**」，艾丽丝是「**拜托艾丽丝**」；隐藏 / 显示、退出、设置、记录窗口与 AI 人设一起更新。长短发艾丽丝共享语料和 Claude 会话，历史记录保留当时的角色名称。
 
@@ -164,6 +172,8 @@ RoxyPet-GitHub/
 - 🔮 **透视魔法**（可选）：截屏交给视觉大模型，用洛琪希的口吻点评你的屏幕
 - 🗣 **Siri 唤醒**：配合「快捷指令」导入一条指令后，喊「嘿 Siri，洛琪希」即可召唤
 - 🪶 **原生轻量**：单个可执行文件 + 角色序列帧图；无网络请求（本机外部功能除外，见「隐私」）
+
+---
 
 ### 🎞 动作与分镜
 
@@ -208,6 +218,8 @@ open ../RoxyPet.app
 
 > 运行要求：macOS 14+（Apple Silicon）；构建需要 Xcode Command Line Tools（`xcode-select --install`）。
 
+---
+
 ### 🔧 构建与发布
 
 Releases 里的 `RoxyPet.dmg` **不是来路不明的二进制**——它完全由本仓库里可见的源码与素材、通过仓库内两个公开脚本构建而来：
@@ -245,6 +257,8 @@ cd RoxyPet-GitHub/03-scripts
 
 > 发布包的 SHA-256 校验值会随每次 Release 说明一同提供，便于校验下载完整性。
 
+---
+
 ### 🔌 API 配置
 
 这三项功能需要一个 **Anthropic 兼容 API**，两种配置方式任选：
@@ -272,6 +286,8 @@ cd RoxyPet-GitHub/03-scripts
 | 右键「吩咐洛琪希…」 | 输入想说的话（她直接回答）；勾选「让她动手做」则交给 Claude Code 执行（全程有记录）|
 | 右键 | 说句话（本地台词）· 说句话（大模型）｜吩咐洛琪希…（聊天 / 做事）· 看看屏幕（透视魔法）｜查看吩咐记录 · 回到屏幕右下角｜隐藏洛琪希 / 退出洛琪希｜最底部：设置…（称呼 / API / 执行器 / 联动）|
 | 菜单栏小图标 | 随时隐藏 / 显示她，或使用全部菜单功能（隐身时点任意功能会自动唤出）|
+
+---
 
 ### 🤝 与 Claude Code 联动（可选）
 
@@ -317,11 +333,25 @@ cd RoxyPet-GitHub/03-scripts
 
 「任务执行器」（派活给谁）与「状态联动」（盯谁干活）相互独立：你可以派活给 Claude Code，同时盯着 Codex 和 opencode 的动态。
 
-### 🎨 自定义
+---
+
+### 🎨 自定义与扩展
 
 - **台词**：改 `01-src/speech.swift`（每个池子都是纯字符串数组），运行时追加可放 `~/.roxy-pet/speech.json`
 - **手感参数**（`01-src/main.swift` 顶部）：`WINDOW_SCALE` 显示大小、`LOOK_WINDOW_SECONDS` 跟随秒数、`HEAD_CENTER_Y_RATIO` 视角基准、`CHIME_QUIET_FROM/TO` 报时静音时段
-- **换角色**：右键 →「角色」即可切换；添加角色使用独立文件夹中的 `character.json` + `spritesheet.png`，详见 [角色扩展说明](07-docs/characters.md)（新角色模板：`07-docs/character-template/`）。无需替换洛琪希原图。
+- **换角色**：右键 →「角色」即可切换；无需替换洛琪希原图
+
+**添加一位新角色（扩展落位表）**——每样东西只有一个去处，复制模板即可：
+
+| 内容 | 落位 | 生成方式 |
+|---|---|---|
+| 序列帧图 + 角色配置 | `02-assets/characters/<装束ID>/` | 复制 `07-docs/character-template/` 后替换字段与图 |
+| 语料 JSON | `02-assets/speech/<人物ID>.json` | `03-scripts/import-speech.py` 从语料原稿导入 |
+| 语料原稿 | `07-docs/corpora/<人物ID>.md` | 单独写作产出 |
+| 素材工程（母版 / 原图 / 提示词 / 帧） | `06-art-source/<装束ID>/` | 生成流程留档 |
+| 预览图（可选） | `05-images/<装束ID>/` | `03-scripts/render-character-previews.py` |
+
+运行时也可扩展：`~/.roxy-pet/characters/` 放角色文件夹、`~/.roxy-pet/speech/<人物ID>.json` 放语料，点「重新载入角色与语料」即刻生效。完整规范：[角色扩展说明](07-docs/characters.md)。
 
 ---
 
@@ -333,6 +363,8 @@ cd RoxyPet-GitHub/03-scripts
 - 纯聊天直连你**自己配置**的 API；勾选「让她动手做」时调用本机 `claude` CLI（跳过权限确认执行）；「透视魔法 / 想句话」同样读取 `~/.claude/settings.json` 中的端点与凭据
 - 所有任务与历史记录只写入本机 `~/.roxy-pet/`，不上传任何地方
 
+---
+
 ### 💛 致谢
 
 - **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希的角色美术与序列帧动画**（Character Art & Sprite Animation）。
@@ -340,9 +372,13 @@ cd RoxyPet-GitHub/03-scripts
 - **[ChatGPT](https://chatgpt.com/)** —— 艾丽丝素材（AI 图像生成）与多角色功能的协作开发
 - **[DeepSeek](https://www.deepseek.com/)** —— 文本创作协助与 API 对话支持
 
+---
+
 ### 🐾 作者与维护
 
 项目由 **[Cleste](https://github.com/cleste-pome)** 发起、开发与维护。
+
+---
 
 ### ⚖️ 版权
 
