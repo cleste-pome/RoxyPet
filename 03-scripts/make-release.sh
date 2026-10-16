@@ -1,18 +1,17 @@
 #!/bin/bash
 # RoxyPet 发布脚本：编译 → 组装 app → 打包成 dmg
-# 用法：./make-release.sh [版本号]    例如 ./make-release.sh 2.1（默认 2.0）
+# 用法：./make-release.sh（产出 RoxyPet.dmg；版本号体现在 Release 标签上）
 set -e
 cd "$(dirname "$0")"
 ROOT="$(cd .. && pwd)"
-VER="${1:-2.0}"
-DMG="$ROOT/RoxyPet-v$VER.dmg"
+DMG="$ROOT/RoxyPet.dmg"
 
 # 第 1 步：构建 RoxyPet.app（内部会调用 build.sh）
 ./build.sh
 
 # 第 2 步：把 app 装进一个干净的"安装舞台"：app + Applications 快捷方式 + 说明
 echo ""
-echo "== 打包 dmg（RoxyPet-v$VER.dmg）=="
+echo "== 打包 dmg（RoxyPet.dmg）=="
 STAGE="$(mktemp -d /tmp/roxy-dmg.XXXXXX)"
 trap 'rm -rf "$STAGE"' EXIT
 cp -R "$ROOT/RoxyPet.app" "$STAGE/"
