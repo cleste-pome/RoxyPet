@@ -1,5 +1,5 @@
 # 根目录的构建产物不入库（发布安装包走 Releases 的 dmg）
-/RoxyPet*.app/
+/Roxy*.app/
 *.dmg
 
 # macOS 杂物

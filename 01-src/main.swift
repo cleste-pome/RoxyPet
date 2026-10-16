@@ -500,7 +500,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         character = characters.first(where: { $0.id == savedID }) ?? characters[0]
         if !loadAtlas() { character = characters[0] }
         guard !frames.isEmpty || loadAtlas() else {
-            NSLog("RoxyPet: failed to load spritesheet")
+            NSLog("Roxy: failed to load spritesheet")
             NSApp.terminate(nil)
             return
         }
@@ -778,14 +778,14 @@ final class PetController: NSObject, NSApplicationDelegate {
     }
 
     private func openResumeTerminal(sid: String) {
-        let path = NSTemporaryDirectory() + "RoxyPet接续会话.command"
+        let path = NSTemporaryDirectory() + "Roxy接续会话.command"
         let script = "#!/bin/bash\ncd \"$HOME\"\nexec claude --resume \(sid)\n"
         do {
             try script.write(toFile: path, atomically: true, encoding: .utf8)
             try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: path)
             NSWorkspace.shared.open(URL(fileURLWithPath: path))
         } catch {
-            NSLog("RoxyPet: resume command failed: \(error)")
+            NSLog("Roxy: resume command failed: \(error)")
         }
     }
 
@@ -1394,7 +1394,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             if checkFailed {
                 alert.informativeText = "还没检测到授权——如果刚刚勾选，可能需要重启我才能识别。可以点「帮我重启再看」，或回到「打开设置」再确认一下勾选。"
             } else {
-                alert.informativeText = "macOS 要求应用截屏前必须先获得授权。\n\n请点「打开设置」→ 在「屏幕录制」里勾选「RoxyPet」（如有多条旧记录，请先移除旧条目）→ 回来点「检查并继续」。"
+                alert.informativeText = "macOS 要求应用截屏前必须先获得授权。\n\n请点「打开设置」→ 在「屏幕录制」里勾选「Roxy」（如有多条旧记录，请先移除旧条目）→ 回来点「检查并继续」。"
             }
             alert.addButton(withTitle: "打开设置")
             alert.addButton(withTitle: checkFailed ? "帮我重启再看" : "检查并继续")
@@ -2280,7 +2280,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             let img = NSImage(named: NSImage.applicationIconName)
             img?.size = NSSize(width: 18, height: 18)
             btn.image = img
-            btn.toolTip = "\(character.menuTitle) · RoxyPet"
+            btn.toolTip = "\(character.menuTitle) · Roxy"
         }
         item.menu = makeMenu(forStatusBar: true)
         statusItem = item
@@ -2391,7 +2391,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         mood = .calm; moodUntil = 0; petStreak = 0; lastPetAt = 0
         bubbleVisible = false; bubbleWindow?.orderOut(nil)
         show(row: 0, col: 0)
-        statusItem?.button?.toolTip = "\(character.menuTitle) · RoxyPet"
+        statusItem?.button?.toolTip = "\(character.menuTitle) · Roxy"
         statusItem?.menu = makeMenu(forStatusBar: true)
         settingsWindow?.title = "\(characterName) · 设置"
         historyWindow?.title = "\(characterName) · \(character.historyTitle)"
@@ -2420,7 +2420,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             let guide = folder.appendingPathComponent("添加角色.txt")
             if !FileManager.default.fileExists(atPath: guide.path) {
-                let text = "每个角色放在独立子文件夹，包含 character.json 和透明 PNG 序列帧图。序列帧图使用 8 列 × 11 行，动作顺序与 RoxyPet 相同。可复制项目 02-assets/characters 中的角色文件夹作为模板，修改 id、characterID、name、appearance、actionVerb、persona 和图片。完成后，在角色菜单选择「重新载入角色与语料」。详细说明见仓库 07-docs/characters.md。"
+                let text = "每个角色放在独立子文件夹，包含 character.json 和透明 PNG 序列帧图。序列帧图使用 8 列 × 11 行，动作顺序与 Roxy 相同。可复制项目 02-assets/characters 中的角色文件夹作为模板，修改 id、characterID、name、appearance、actionVerb、persona 和图片。完成后，在角色菜单选择「重新载入角色与语料」。详细说明见仓库 07-docs/characters.md。"
                 try text.write(to: guide, atomically: true, encoding: .utf8)
             }
             NSWorkspace.shared.open(folder)

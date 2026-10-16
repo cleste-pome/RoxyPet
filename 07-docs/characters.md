@@ -72,7 +72,7 @@ python3 03-scripts/pack-eris-atlas.py 06-art-source/eris-long/sources 02-assets/
 python3 03-scripts/pack-eris-atlas.py --self-test
 python3 03-scripts/render-character-previews.py
 bash 03-scripts/build.sh
-./RoxyPet.app/Contents/MacOS/RoxyPet --self-test
+./Roxy.app/Contents/MacOS/Roxy --self-test
 ```
 
 自检验证三种装束连续切换、动画帧完整性、Retina 原始像素保留、两处菜单、语料与人设路由、损坏图集回退、旧记录和新记录的角色名称。需要在 macOS 图形会话中运行；不调用 API，不修改用户偏好或聊天记录。

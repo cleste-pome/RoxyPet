@@ -56,6 +56,6 @@ for i,(name,detail,path) in enumerate([
     canvas.paste(sprite,(x,100),sprite)
     draw.text((i*330+165,455),name,font=font,fill='#302a2a',anchor='mm')
     draw.text((i*330+165,493),detail,font=small,fill='#746a65',anchor='mm')
-draw.text((495,42),'RoxyPet · 桌面伙伴',font=font,fill='#302a2a',anchor='mm')
+draw.text((495,42),'Roxy · 桌面伙伴',font=font,fill='#302a2a',anchor='mm')
 canvas.save(OUT/'characters.png')
 print('Rendered static comparison and ten animation previews.')

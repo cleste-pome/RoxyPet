@@ -1,7 +1,7 @@
 # RoxyMac · 洛琪希桌宠
 
 <p align="center">
-  <img src="05-images/icon.png" width="160" alt="RoxyPet App Icon"/>
+  <img src="05-images/icon.png" width="160" alt="Roxy App Icon"/>
 </p>
 
 <p align="center">
@@ -74,10 +74,10 @@ RoxyPet-GitHub/
 │   ├── spritesheet.png  # 洛琪希序列帧图（8 列 × 11 行）
 │   ├── characters/      # 艾丽丝两套图集与角色配置
 │   ├── speech/          # 艾丽丝 / 希露菲 JSON 语料
-│   ├── RoxyPet.icns     # 应用图标
+│   ├── Roxy.icns        # 应用图标
 │   └── pet.json
 ├── 03-scripts/          # 构建与工具
-│   ├── build.sh                 # 编译 → 组装 → 签名，产出 RoxyPet.app
+│   ├── build.sh                 # 编译 → 组装 → 签名，产出 Roxy.app
 │   ├── build-and-run.command    # 双击即构建 + 运行
 │   ├── make-release.sh          # 一键出安装包（构建 + 打 dmg）
 │   ├── import-speech.py         # 语料 Markdown → JSON
@@ -91,7 +91,7 @@ RoxyPet-GitHub/
 └── 07-docs/             # 角色扩展 · 语料 · 素材制作记录
 ```
 
-根目录的构建产物（`RoxyPet.app`、`*.dmg`）由 `.gitignore` 排除、不入库——仓库本体是纯源码与素材，安装包一律走 Releases 的 dmg。
+根目录的构建产物（`Roxy.app`、`*.dmg`）由 `.gitignore` 排除、不入库——仓库本体是纯源码与素材，安装包一律走 Releases 的 dmg。
 
 ---
 
@@ -203,7 +203,7 @@ RoxyPet-GitHub/
 
 **方式一：下载成品（推荐给只想用的）**
 
-到 [Releases](../../releases) 下载 `RoxyPet.dmg` → 把 App 拖进「应用程序」。
+到 [Releases](../../releases) 下载 `Roxy.dmg` → 把 App 拖进「应用程序」。
 首次打开若提示"无法验证开发者"：右键 App → 打开 → 再点「打开」。
 
 **方式二：双击构建（推荐给想看源码的）**
@@ -215,8 +215,8 @@ RoxyPet-GitHub/
 
 ```bash
 cd 03-scripts
-./build.sh            # 产出 RoxyPet.app 到仓库根目录
-open ../RoxyPet.app
+./build.sh            # 产出 Roxy.app 到仓库根目录
+open ../Roxy.app
 ```
 
 > 运行要求：macOS 14+（Apple Silicon）；构建需要 Xcode Command Line Tools（`xcode-select --install`）。
@@ -225,22 +225,22 @@ open ../RoxyPet.app
 
 ### 🔧 构建与发布
 
-Releases 里的 `RoxyPet.dmg` **不是来路不明的二进制**——它完全由本仓库里可见的源码与素材、通过仓库内两个公开脚本构建而来：
+Releases 里的 `Roxy.dmg` **不是来路不明的二进制**——它完全由本仓库里可见的源码与素材、通过仓库内两个公开脚本构建而来：
 
 ```
 01-src/ + 02-assets/                ← 你正在看的一切（人类可读）
       │
       │  03-scripts/build.sh
-      │   ① swiftc 把 main.swift + speech.swift 编译成机器码可执行文件
-      │   ② 与 Info.plist、spritesheet.png、RoxyPet.icns 一起组装为 RoxyPet.app
+      │   ① swiftc 把 main.swift + speech.swift + characters.swift 编译成机器码可执行文件
+      │   ② 与 Info.plist、spritesheet.png、Roxy.icns 一起组装为 Roxy.app
       │   ③ codesign 签名
       ▼
-  RoxyPet.app
+  Roxy.app
       │
       │  03-scripts/make-release.sh
       │   把 App + Applications 快捷方式 + 安装说明 压成只读磁盘镜像
       ▼
-  RoxyPet.dmg                       ← Releases 里供下载的安装包
+  Roxy.dmg                          ← Releases 里供下载的安装包
 ```
 
 **任何人都可以原地复现**：
@@ -255,7 +255,7 @@ cd RoxyPet-GitHub/03-scripts
 
 - **零第三方依赖**：构建只用到 macOS 自带工具（`swiftc` / `codesign` / `hdiutil`），全程不联网、不下载任何东西
 - **脚本极短可读**：`build.sh` 与 `make-release.sh` 加起来不到 80 行，从头到尾读完用不了一分钟
-- **安装包内容一目了然**：挂载 dmg 或右键「显示包内容」，里面只有——`RoxyPet` 可执行文件（由 01-src 编译）、`spritesheet.png`（02-assets）、`RoxyPet.icns`、`Info.plist`；**没有任何安装器脚本、没有自启动项、不联网**
+- **安装包内容一目了然**：挂载 dmg 或右键「显示包内容」，里面只有——`Roxy` 可执行文件（由 01-src 编译）、`spritesheet.png`（02-assets）、`Roxy.icns`、`Info.plist`；**没有任何安装器脚本、没有自启动项、不联网**
 - **对任何二进制都保持警惕的话**：可以完全跳过 dmg——直接 clone 源码自己跑一遍 `build.sh`，得到的应用与发布包出自同一条流水线
 
 > 发布包的 SHA-256 校验值会随每次 Release 说明一同提供，便于校验下载完整性。

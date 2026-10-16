@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleName</key>
-	<string>RoxyPet</string>
+	<string>Roxy</string>
 	<key>CFBundleDisplayName</key>
-	<string>RoxyPet</string>
+	<string>Roxy</string>
 	<key>CFBundleIdentifier</key>
 	<string>local.roxypet.desktop</string>
 	<key>CFBundleExecutable</key>
-	<string>RoxyPet</string>
+	<string>Roxy</string>
 	<key>CFBundleIconFile</key>
-	<string>RoxyPet</string>
+	<string>Roxy</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

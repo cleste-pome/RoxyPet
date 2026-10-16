@@ -1,30 +1,30 @@
 #!/bin/bash
-# RoxyPet 构建脚本（仓库版：源码在 01-src/，素材在 02-assets/，产物输出到仓库根目录）
+# Roxy 构建脚本（仓库版：源码在 01-src/，素材在 02-assets/，产物输出到仓库根目录）
 # 需要：macOS 14+（Apple Silicon）+ Xcode Command Line Tools
 set -e
 cd "$(dirname "$0")"
 ROOT="$(cd .. && pwd)"
 SRC="$ROOT/01-src"
 ASSETS="$ROOT/02-assets"
-APPNAME="RoxyPet.app"
+APPNAME="Roxy.app"
 TMP="$(mktemp -d /tmp/roxy-build.XXXXXX)"
 trap 'rm -rf "$TMP"' EXIT
 
 echo "== 1/6 编译 =="
-swiftc -O -module-cache-path "$TMP/module-cache" -swift-version 5 -target arm64-apple-macosx14.0 "$SRC/main.swift" "$SRC/speech.swift" "$SRC/characters.swift" -o "$TMP/RoxyPet"
+swiftc -O -module-cache-path "$TMP/module-cache" -swift-version 5 -target arm64-apple-macosx14.0 "$SRC/main.swift" "$SRC/speech.swift" "$SRC/characters.swift" -o "$TMP/Roxy"
 
 echo "== 2/6 组装 app bundle =="
 APP="$TMP/$APPNAME"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$TMP/RoxyPet" "$APP/Contents/MacOS/RoxyPet"
+cp "$TMP/Roxy" "$APP/Contents/MacOS/Roxy"
 cp "$SRC/Info.plist" "$APP/Contents/Info.plist"
 cp "$ASSETS/spritesheet.png" "$APP/Contents/Resources/spritesheet.png"
 cp -R "$ASSETS/characters" "$APP/Contents/Resources/characters"
 if [ -d "$ASSETS/speech" ]; then
   cp -R "$ASSETS/speech" "$APP/Contents/Resources/speech"
 fi
-if [ -f "$ASSETS/RoxyPet.icns" ]; then
-  cp "$ASSETS/RoxyPet.icns" "$APP/Contents/Resources/RoxyPet.icns"
+if [ -f "$ASSETS/Roxy.icns" ]; then
+  cp "$ASSETS/Roxy.icns" "$APP/Contents/Resources/Roxy.icns"
 fi
 
 echo "== 3/6 清理扩展属性 =="

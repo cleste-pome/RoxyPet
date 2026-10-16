@@ -1,25 +1,25 @@
 #!/bin/bash
-# RoxyPet 发布脚本：编译 → 组装 app → 打包成 dmg
-# 用法：./make-release.sh（产出 RoxyPet.dmg；版本号体现在 Release 标签上）
+# Roxy 发布脚本：编译 → 组装 app → 打包成 dmg
+# 用法：./make-release.sh（产出 Roxy.dmg；版本号体现在 Release 标签上）
 set -e
 cd "$(dirname "$0")"
 ROOT="$(cd .. && pwd)"
-DMG="$ROOT/RoxyPet.dmg"
+DMG="$ROOT/Roxy.dmg"
 
-# 第 1 步：构建 RoxyPet.app（内部会调用 build.sh）
+# 第 1 步：构建 Roxy.app（内部会调用 build.sh）
 ./build.sh
 
 # 第 2 步：把 app 装进一个干净的"安装舞台"：app + Applications 快捷方式 + 说明
 echo ""
-echo "== 打包 dmg（RoxyPet.dmg）=="
+echo "== 打包 dmg（Roxy.dmg）=="
 STAGE="$(mktemp -d /tmp/roxy-dmg.XXXXXX)"
 trap 'rm -rf "$STAGE"' EXIT
-cp -R "$ROOT/RoxyPet.app" "$STAGE/"
+cp -R "$ROOT/Roxy.app" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 cat > "$STAGE/install-notes.txt" <<'EOF'
-RoxyPet · 安装说明
+Roxy · 安装说明
 
-① 把 RoxyPet.app 拖到 Applications（或直接双击运行）
+① 把 Roxy.app 拖到 Applications（或直接双击运行）
 ② 首次打开若提示「无法验证开发者」：
    右键 App → 打开 → 再点「打开」；
    或到「系统设置 → 隐私与安全性」里点「仍要打开」
@@ -28,7 +28,7 @@ RoxyPet · 安装说明
 EOF
 
 # 第 3 步：把"安装舞台"压成一张只读 dmg
-hdiutil create -volname "RoxyPet" -srcfolder "$STAGE" -ov -format UDZO "$DMG"
+hdiutil create -volname "Roxy" -srcfolder "$STAGE" -ov -format UDZO "$DMG"
 
 echo ""
 echo "✅ 发布包已生成: $DMG"
