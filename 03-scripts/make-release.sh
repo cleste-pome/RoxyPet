@@ -1,10 +1,10 @@
 #!/bin/bash
 # RoxyPet 发布脚本：编译 → 组装 app → 打包成 dmg
-# 用法：./make-release.sh [版本号]    例如 ./make-release.sh 1.1（默认 1.0）
+# 用法：./make-release.sh [版本号]    例如 ./make-release.sh 2.1（默认 2.0）
 set -e
 cd "$(dirname "$0")"
 ROOT="$(cd .. && pwd)"
-VER="${1:-1.0}"
+VER="${1:-2.0}"
 DMG="$ROOT/RoxyPet-v$VER.dmg"
 
 # 第 1 步：构建 RoxyPet.app（内部会调用 build.sh）

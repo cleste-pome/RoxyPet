@@ -86,7 +86,7 @@
 
 **方式一：下载成品（推荐给只想用的）**
 
-到 [Releases](../../releases) 下载 `RoxyPet-v1.0.dmg` → 把 App 拖进「应用程序」。
+到 [Releases](../../releases) 下载 `RoxyPet-v2.0.dmg` → 把 App 拖进「应用程序」。
 首次打开若提示"无法验证开发者"：右键 App → 打开 → 再点「打开」。
 
 **方式二：双击构建（推荐给想看源码的）**
@@ -106,7 +106,7 @@ open ../RoxyPet.app
 
 ## 🔧 构建与发布：安装包是可复现的
 
-Releases 里的 `RoxyPet-v1.0.dmg` **不是来路不明的二进制**——它完全由本仓库里可见的源码与素材、通过仓库内两个公开脚本构建而来：
+Releases 里的 `RoxyPet-v2.0.dmg` **不是来路不明的二进制**——它完全由本仓库里可见的源码与素材、通过仓库内两个公开脚本构建而来：
 
 ```
 01-src/ + 02-assets/                ← 你正在看的一切（人类可读）
@@ -121,7 +121,7 @@ Releases 里的 `RoxyPet-v1.0.dmg` **不是来路不明的二进制**——它�
       │  03-scripts/make-release.sh
       │   把 App + Applications 快捷方式 + 安装说明 压成只读磁盘镜像
       ▼
-  RoxyPet-v1.0.dmg                  ← Releases 里供下载的安装包
+  RoxyPet-v2.0.dmg                  ← Releases 里供下载的安装包
 ```
 
 **任何人都可以原地复现**：
@@ -129,7 +129,7 @@ Releases 里的 `RoxyPet-v1.0.dmg` **不是来路不明的二进制**——它�
 ```bash
 git clone <本仓库>
 cd RoxyPet-GitHub/03-scripts
-./make-release.sh 1.0     # 走同一条流水线，构建出同款安装包
+./make-release.sh 2.0     # 走同一条流水线，构建出同款安装包
 ```
 
 **这条流水线为什么让人放心**：

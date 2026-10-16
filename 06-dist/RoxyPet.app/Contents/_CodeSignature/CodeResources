@@ -8,6 +8,38 @@
 		<data>
 		TlFTmfp/4QgPtN6rKG5ZVWJ8PSw=
 		</data>
+		<key>Resources/characters/eris-long/atlas-qa.json</key>
+		<data>
+		pz7KWghUpsyrb4rPYnk+qyriFUM=
+		</data>
+		<key>Resources/characters/eris-long/character.json</key>
+		<data>
+		pg922GLCWGkLTbAWfstl3P0G0/c=
+		</data>
+		<key>Resources/characters/eris-long/spritesheet.png</key>
+		<data>
+		MjHlpJXvhW+dSSQRwAj1vAgdrlk=
+		</data>
+		<key>Resources/characters/eris-short/atlas-qa.json</key>
+		<data>
+		7B4zAeXZwBoUJqY1Ww+ekaQfsig=
+		</data>
+		<key>Resources/characters/eris-short/character.json</key>
+		<data>
+		4W2s6wBR8FTMnAFAQ77kGoby6RU=
+		</data>
+		<key>Resources/characters/eris-short/spritesheet.png</key>
+		<data>
+		dwvCQie2u6cnV52C7XgkVHXVcPU=
+		</data>
+		<key>Resources/speech/eris.json</key>
+		<data>
+		2TN5cjuUyF6I73Kd5fBQB6SLYts=
+		</data>
+		<key>Resources/speech/sylphie.json</key>
+		<data>
+		ZKo8UD/eQBsEBWP+tt0nwTVTUL8=
+		</data>
 		<key>Resources/spritesheet.png</key>
 		<data>
 		tyJfDdSO2rVNThXpciBWQbyg0uc=
@@ -20,6 +52,62 @@
 			<key>hash2</key>
 			<data>
 			lx091uc2Wt025adR/Poe6IJf9UpKjA+wpGnDNz9DBFM=
+			</data>
+		</dict>
+		<key>Resources/characters/eris-long/atlas-qa.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			En8osqbxRY220FA/WRzx1D0PK6OuePshaL0+7yeZ/GY=
+			</data>
+		</dict>
+		<key>Resources/characters/eris-long/character.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			JbtklkOLS8MR9rHQ1dlNqwb2WGUzcrlw7Lo/vn3nikk=
+			</data>
+		</dict>
+		<key>Resources/characters/eris-long/spritesheet.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			icDD5x8tlBgc4SDN6I/lDY+aMaHHBdkRXh3MiVg/cTU=
+			</data>
+		</dict>
+		<key>Resources/characters/eris-short/atlas-qa.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			RXc7guitLzW/6o/wS++2ZTVjyd3FYnMwv87eVKIpaKE=
+			</data>
+		</dict>
+		<key>Resources/characters/eris-short/character.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			oXdEPdOe32/lNNtTalsiyBuNk+kPTLOkqvhp3CijLI8=
+			</data>
+		</dict>
+		<key>Resources/characters/eris-short/spritesheet.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			oA8c7zKEJe3L6cAKcCZiYQa2Jg1ZDxkEHLMpV8XwM6A=
+			</data>
+		</dict>
+		<key>Resources/speech/eris.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			dEezwjaF6CC40euX61brwctxl/VeULeG4wr754Zo81E=
+			</data>
+		</dict>
+		<key>Resources/speech/sylphie.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			0NET9FjsvpPreFFwm0h3sXxW+bV7jXnkHT0wkAe0JaQ=
 			</data>
 		</dict>
 		<key>Resources/spritesheet.png</key>
