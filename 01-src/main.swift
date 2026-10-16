@@ -2273,13 +2273,55 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     @objc private func closeSettingsWindow() { settingsWindow?.orderOut(nil) }
 
+
+    // ---------- 菜单栏图标：从当前角色自己的图集里裁出头部 ----------
+    // 任何角色都自动适用，不需要额外的图标素材。
+    private func makeStatusIcon(from frames: [[NSImage]]) -> NSImage? {
+        guard let src = frames.first?.first,
+              let cg = src.cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let data = cg.dataProvider?.data,
+              let ptr = CFDataGetBytePtr(data) else { return nil }
+        let w = cg.width, h = cg.height
+        let bpr = cg.bytesPerRow, bpp = max(1, cg.bitsPerPixel / 8)
+        // 1) 找不透明像素的外接框（隔行采样即可）
+        var minX = w, maxX = -1, minY = h, maxY = -1
+        for y in stride(from: 0, to: h, by: 2) {
+            for x in stride(from: 0, to: w, by: 2) {
+                let a = ptr[y * bpr + x * bpp + (bpp - 1)]
+                if a > 24 {
+                    if x < minX { minX = x }
+                    if x > maxX { maxX = x }
+                    if y < minY { minY = y }
+                    if y > maxY { maxY = y }
+                }
+            }
+        }
+        guard maxX > minX, maxY > minY else { return nil }
+        // 2) 取人物上方「头肩」部分，横向居中裁成正方形
+        let boxW = CGFloat(maxX - minX + 1), boxH = CGFloat(maxY - minY + 1)
+        let side = min(boxW, boxH * 0.62)
+        let cx = CGFloat(minX) + boxW / 2
+        let x0 = max(0, min(CGFloat(w) - side, cx - side / 2))
+        let rect = CGRect(x: x0, y: CGFloat(minY), width: side, height: side)
+        guard side > 8, let cropped = cg.cropping(to: rect) else { return nil }
+        let img = NSImage(cgImage: cropped, size: NSSize(width: 18, height: 18))
+        img.isTemplate = false          // 保留角色配色，不走系统单色模板
+        return img
+    }
+
+    private func refreshStatusIcon() {
+        let fallback = NSImage(named: NSImage.applicationIconName)
+        fallback?.size = NSSize(width: 18, height: 18)
+        statusItem?.button?.image = makeStatusIcon(from: frames) ?? fallback
+    }
+
     // ---------- 隐身 / 菜单栏图标 ----------
     private func setupStatusItem() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let btn = item.button {
-            let img = NSImage(named: NSImage.applicationIconName)
-            img?.size = NSSize(width: 18, height: 18)
-            btn.image = img
+            let fallback = NSImage(named: NSImage.applicationIconName)
+            fallback?.size = NSSize(width: 18, height: 18)
+            btn.image = makeStatusIcon(from: frames) ?? fallback
             btn.toolTip = "\(character.menuTitle) · Roxy"
         }
         item.menu = makeMenu(forStatusBar: true)
@@ -2339,7 +2381,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         ai.target = self
         menu.addItem(ai)
         menu.addItem(.separator())
-        let task = NSMenuItem(title: "\(character.actionTitle)…（聊天 / 做事）", action: #selector(askClaudeCode), keyEquivalent: "")
+        let task = NSMenuItem(title: "\(character.actionTitle)（聊天 / 做事）", action: #selector(askClaudeCode), keyEquivalent: "")
         task.target = self
         menu.addItem(task)
         let look = NSMenuItem(title: character.screenTitle, action: #selector(lookAtScreen), keyEquivalent: "")
@@ -2391,6 +2433,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         bubbleVisible = false; bubbleWindow?.orderOut(nil)
         show(row: 0, col: 0)
         statusItem?.button?.toolTip = "\(character.menuTitle) · Roxy"
+        refreshStatusIcon()                       // 图标跟着角色走
         statusItem?.menu = makeMenu(forStatusBar: true)
         settingsWindow?.title = "\(characterName) · 设置"
         historyWindow?.title = "\(characterName) · \(character.historyTitle)"
@@ -2445,7 +2488,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                 } }
                 for status in [true, false] {
                     let menu = makeMenu(forStatusBar: status)
-                    precondition(menu.items.contains { $0.title == "\(profile.actionTitle)…（聊天 / 做事）" })
+                    precondition(menu.items.contains { $0.title == "\(profile.actionTitle)（聊天 / 做事）" })
                     precondition(menu.items.contains { $0.title == "退出\(profile.name)" })
                     precondition(menu.items.contains { $0.title == "查看\(profile.historyTitle)" })
                     let picker = menu.items.first!.submenu!
