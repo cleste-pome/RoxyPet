@@ -20,6 +20,7 @@ cp "$TMP/Roxy" "$APP/Contents/MacOS/Roxy"
 cp "$SRC/Info.plist" "$APP/Contents/Info.plist"
 cp "$ASSETS/characters/roxy/spritesheet.png" "$APP/Contents/Resources/spritesheet.png"
 cp -R "$ASSETS/characters" "$APP/Contents/Resources/characters"
+rm -rf "$APP/Contents/Resources/characters/roxy"   # 洛琪希从 Resources/spritesheet.png 读取，避免图集打包两份
 if [ -d "$ASSETS/speech" ]; then
   cp -R "$ASSETS/speech" "$APP/Contents/Resources/speech"
 fi
