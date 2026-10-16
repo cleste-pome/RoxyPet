@@ -17,27 +17,84 @@
 
 ---
 
+## 📖 目录
+
+- [角色与预览](#-角色与预览)
+- [功能](#-功能)
+- [动作与分镜](#-动作与分镜)
+- [快速开始](#-快速开始)
+- [构建与发布](#-构建与发布)
+- [API 配置](#-api-配置)
+- [使用](#-使用)
+- [与 Claude Code 联动](#-与-claude-code-联动可选)
+- [自定义](#-自定义)
+- [目录结构](#-目录结构)
+- [隐私](#-隐私)
+- [致谢](#-致谢)
+- [作者与维护](#-作者与维护)
+- [版权](#%EF%B8%8F-%E7%89%88%E6%9D%83)
+
+---
+
 ## 🖼 角色与预览
 
-可选角色（右键桌宠 → **角色**，选择会自动记住）：
+目前可选 **3 个角色**（右键桌宠 → **角色** 切换，选择自动记住）：
 
 | 洛琪希 · 魔法师 | 艾丽丝 · 短发 · 旅行装 | 艾丽丝 · 长发 · 连衣裙 |
 |:---:|:---:|:---:|
-| <img src="05-images/chibi.png" width="200"/> | <img src="05-images/eris/short-standing.png" width="200"/> | <img src="05-images/eris/long-standing.png" width="200"/> |
-| <img src="05-images/preview-idle.gif" width="200"/> | <img src="05-images/eris/short-idle.gif" width="200"/> | <img src="05-images/eris/long-idle.gif" width="200"/> |
-| <img src="05-images/preview-run.gif" width="200"/> | <img src="05-images/eris/short-run.gif" width="200"/> | <img src="05-images/eris/long-run.gif" width="200"/> |
-| <img src="05-images/preview-wave.gif" width="200"/> | <img src="05-images/eris/short-wave.gif" width="200"/> | <img src="05-images/eris/long-wave.gif" width="200"/> |
-| <img src="05-images/preview-look.gif" width="200"/> | <img src="05-images/eris/short-look.gif" width="200"/> | <img src="05-images/eris/long-look.gif" width="200"/> |
+| <img src="05-images/preview-idle.gif" width="180"/> | <img src="05-images/eris/short-idle.gif" width="180"/> | <img src="05-images/eris/long-idle.gif" width="180"/> |
 
-### 动作细节
+### 洛琪希 · 魔法师
 
-| 洛琪希 · 动作总表 | 艾丽丝（短发）· 动作总表 | 艾丽丝（长发）· 动作总表 |
+蓝发双辫的米格路德族魔术师。
+
+- **台词库**：934 条本地台词——打招呼、闲聊，按时段 / 星期 / 情绪自动切换；全部本地随机，零消耗
+- **菜单措辞**：「吩咐洛琪希」；Siri 口令：「洛琪希」
+- **素材工程**：人物绘图与序列帧动画 —— 易轩（JensenTong）
+
+| 立绘 | 动作总表（行走图分镜） | 16 向视线帧 |
 |:---:|:---:|:---:|
-| <img src="05-images/contact-sheet.png" width="300"/> | <img src="05-images/eris/short-contact-sheet.jpg" width="300"/> | <img src="05-images/eris/long-contact-sheet.jpg" width="300"/> |
+| <img src="05-images/chibi.png" width="180"/> | <img src="05-images/contact-sheet.png" width="360"/> | <img src="05-images/look-directions.png" width="320"/> |
 
-| 16 向视线帧（转头跟随鼠标） | 动画抽帧预览 |
+| 待机 | 奔跑 | 挥手 | 转头 |
+|:---:|:---:|:---:|:---:|
+| <img src="05-images/preview-idle.gif" width="150"/> | <img src="05-images/preview-run.gif" width="150"/> | <img src="05-images/preview-wave.gif" width="150"/> | <img src="05-images/preview-look.gif" width="150"/> |
+
+### 艾丽丝 · 短发 · 旅行装
+
+红发少女的旅行装束。
+
+- **语料**：374 条，由项目内 Markdown 语料导入（与长发款共享；闲聊 / 情境 / 互动 / 方向 / 系统事件）
+- **菜单措辞**：「拜托艾丽丝」
+- **素材工程**：AI 图像生成流程制作（母版 / 动作原图 / 提示词见仓库 `07-art-source/`）
+
+| 立绘 | 动作总表（行走图分镜） |
 |:---:|:---:|
-| <img src="05-images/look-directions.png" width="420"/> | <img src="05-images/motion-stills.png" width="380"/> |
+| <img src="05-images/eris/short-standing.png" width="200"/> | <img src="05-images/eris/short-contact-sheet.jpg" width="420"/> |
+
+| 待机 | 奔跑 | 挥手 | 转头 |
+|:---:|:---:|:---:|:---:|
+| <img src="05-images/eris/short-idle.gif" width="150"/> | <img src="05-images/eris/short-run.gif" width="150"/> | <img src="05-images/eris/short-wave.gif" width="150"/> | <img src="05-images/eris/short-look.gif" width="150"/> |
+
+### 艾丽丝 · 长发 · 连衣裙
+
+白色露肩上衣、黑色领结、深棕荷叶边裙。
+
+- **语料**：与短发款共用同一套 374 条
+- **菜单措辞**：「拜托艾丽丝」
+- **素材工程**：AI 图像生成流程制作（与短发款同一工程）
+
+| 立绘 | 动作总表（行走图分镜） |
+|:---:|:---:|
+| <img src="05-images/eris/long-standing.png" width="200"/> | <img src="05-images/eris/long-contact-sheet.jpg" width="420"/> |
+
+| 待机 | 奔跑 | 挥手 | 转头 |
+|:---:|:---:|:---:|:---:|
+| <img src="05-images/eris/long-idle.gif" width="150"/> | <img src="05-images/eris/long-run.gif" width="150"/> | <img src="05-images/eris/long-wave.gif" width="150"/> | <img src="05-images/eris/long-look.gif" width="150"/> |
+
+菜单和窗口随人物切换：洛琪希是「**吩咐洛琪希**」，艾丽丝是「**拜托艾丽丝**」；隐藏 / 显示、退出、设置、记录窗口与 AI 人设一起更新。长短发艾丽丝共享语料和 Claude 会话，历史记录保留当时的角色名称。
+
+艾丽丝语料由项目内 Markdown 导入；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](08-docs/characters.md)。
 
 菜单和窗口会随人物切换：洛琪希是「**吩咐洛琪希**」，艾丽丝是「**拜托艾丽丝**」。隐藏 / 显示、退出、设置、记录窗口与 AI 人设一起更新。长短发艾丽丝共享人物语料和 Claude 会话，历史记录保留当时的角色名称。
 
@@ -100,7 +157,7 @@ open ../RoxyPet.app
 
 > 运行要求：macOS 14+（Apple Silicon）；构建需要 Xcode Command Line Tools（`xcode-select --install`）。
 
-## 🔧 构建与发布：安装包是可复现的
+## 🔧 构建与发布
 
 Releases 里的 `RoxyPet-v2.0.dmg` **不是来路不明的二进制**——它完全由本仓库里可见的源码与素材、通过仓库内两个公开脚本构建而来：
 
@@ -137,7 +194,7 @@ cd RoxyPet-GitHub/03-scripts
 
 > 发布包的 SHA-256 校验值会随每次 Release 说明一同提供，便于校验下载完整性。
 
-## 🔌 API 配置（「聊天 / 想句话 / 透视魔法」需要）
+## 🔌 API 配置
 
 这三项功能需要一个 **Anthropic 兼容 API**，两种配置方式任选：
 
@@ -220,22 +277,26 @@ RoxyPet-GitHub/
 ├── CHANGELOG.md
 ├── .gitignore
 ├── 01-src/              # 源码
-│   ├── main.swift       # 主程序（窗口/动画/气泡/菜单/联动）
-│   ├── speech.swift     # 洛琪希台词库
+│   ├── main.swift       # 主程序（窗口 / 动画 / 气泡 / 菜单 / 联动）
+│   ├── speech.swift     # 洛琪希台词库（934 条）
 │   ├── characters.swift # 角色配置、语料与人设加载
 │   └── Info.plist
 ├── 02-assets/           # 素材
-│   ├── spritesheet.png  # 精灵图（8 列 × 11 行）
+│   ├── spritesheet.png  # 洛琪希精灵图（8 列 × 11 行）
+│   ├── characters/      # 艾丽丝两套图集与角色配置
+│   ├── speech/          # 艾丽丝 / 希露菲 JSON 语料
 │   ├── RoxyPet.icns     # 应用图标
-│   ├── pet.json
-│   ├── characters/      # 艾丽丝两款图集和角色配置
-│   └── speech/          # 艾丽丝 / 希露菲 JSON 语料
-├── 03-scripts/          # 构建
-│   ├── build.sh
-│   ├── build-and-run.command   # 双击即构建 + 运行
-│   └── make-release.sh         # 一键出安装包（构建 + 打 dmg）
-├── 04-integration/      # Claude Code 联动
-│   └── hook.sh
+│   └── pet.json
+├── 03-scripts/          # 构建与工具
+│   ├── build.sh                 # 编译 → 组装 → 签名，产出 RoxyPet.app
+│   ├── build-and-run.command    # 双击即构建 + 运行
+│   ├── make-release.sh          # 一键出安装包（构建 + 更新 06-dist + 打 dmg）
+│   ├── import-speech.py         # 语料 Markdown → JSON
+│   ├── pack-eris-atlas.py       # 艾丽丝图集打包
+│   └── render-character-previews.py  # 预览图 / 动图渲染
+├── 04-integration/      # Claude Code / Codex 联动
+│   ├── hook.sh
+│   └── codex-notify.sh
 ├── 05-images/           # README 配图（含动图预览）
 ├── 06-dist/             # 成品快照：构建好的 RoxyPet.app（与 Releases 的 dmg 同款）
 ├── 07-art-source/       # 艾丽丝素材可复现工程：母版 / 动作原图 / 提示词 / 独立帧
@@ -253,6 +314,9 @@ RoxyPet-GitHub/
 ## 💛 致谢
 
 - **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希的角色美术与序列帧动画**（Character Art & Sprite Animation）。
+- **洛琪希图书馆** —— 原作文本资料
+- **ChatGPT** —— 艾丽丝素材（AI 图像生成）与多角色功能的协作开发
+- **DeepSeek** —— 文本创作协助与 API 对话支持
 
 ## 🐾 作者与维护
 
@@ -260,5 +324,5 @@ RoxyPet-GitHub/
 
 ## ⚖️ 版权
 
-- 《无职转生》及其角色版权归 理不尽な孫の手 及原作相关权利方所有
-- 本项目为非商业粉丝作品；仓库内美术素材请勿商用；再分发本代码时请替换为你自己拥有权利的素材
+- 《无职转生 ～到了异世界就拿出真本事～》：原作 **理不尽な孫の手**、插画 **シロタカ**、动画制作 **Studio Bind**；相关版权归原作者及上述权利方所有
+- 本项目为**非商业粉丝作品**：仓库内美术素材请勿商用；再分发本代码时请替换为你自己拥有权利的素材
