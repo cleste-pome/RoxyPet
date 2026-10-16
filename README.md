@@ -299,7 +299,7 @@ RoxyPet-GitHub/
 ├── 03-scripts/          # 构建与工具
 │   ├── build.sh                 # 编译 → 组装 → 签名，产出 RoxyPet.app
 │   ├── build-and-run.command    # 双击即构建 + 运行
-│   ├── make-release.sh          # 一键出安装包（构建 + 更新 06-dist + 打 dmg）
+│   ├── make-release.sh          # 一键出安装包（构建 + 打 dmg）
 │   ├── import-speech.py         # 语料 Markdown → JSON
 │   ├── pack-eris-atlas.py       # 艾丽丝图集打包
 │   └── render-character-previews.py  # 预览图 / 动图渲染
@@ -307,12 +307,11 @@ RoxyPet-GitHub/
 │   ├── hook.sh
 │   └── codex-notify.sh
 ├── 05-images/           # README 配图（含动图预览）
-├── 06-dist/             # 成品快照：构建好的 RoxyPet.app（与 Releases 的 dmg 同款）
 ├── 07-art-source/       # 人物素材工程：roxy / eris-long / eris-short 三个并列
 └── 08-docs/             # 角色扩展 · 语料 · 素材制作记录
 ```
 
-根目录的**临时**构建产物（`RoxyPet.app`、`*.dmg`）由 `.gitignore` 排除、不入库；而 `06-dist/` 里保存着一份**跟版本走的成品快照**——构建好的 `RoxyPet.app`，与 Releases 里 dmg 内完全同款，`make-release.sh` 每次发布会自动更新它。日常下载安装包请走 Releases。
+根目录的构建产物（`RoxyPet.app`、`*.dmg`）由 `.gitignore` 排除、不入库——仓库本体是纯源码与素材，安装包一律走 Releases 的 dmg。
 
 ## 🔒 隐私
 

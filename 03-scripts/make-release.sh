@@ -10,14 +10,6 @@ DMG="$ROOT/RoxyPet-v$VER.dmg"
 # 第 1 步：构建 RoxyPet.app（内部会调用 build.sh）
 ./build.sh
 
-# 第 1.5 步：同步一份成品快照到 06-dist/（仓库内归档，随提交入库）
-echo ""
-echo "== 同步成品快照到 06-dist/ =="
-mkdir -p "$ROOT/06-dist"
-rm -rf "$ROOT/06-dist/RoxyPet.app"
-cp -R "$ROOT/RoxyPet.app" "$ROOT/06-dist/"
-echo "已更新: $ROOT/06-dist/RoxyPet.app"
-
 # 第 2 步：把 app 装进一个干净的"安装舞台"：app + Applications 快捷方式 + 说明
 echo ""
 echo "== 打包 dmg（RoxyPet-v$VER.dmg）=="
