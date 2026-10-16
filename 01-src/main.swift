@@ -2420,7 +2420,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             let guide = folder.appendingPathComponent("添加角色.txt")
             if !FileManager.default.fileExists(atPath: guide.path) {
-                let text = "每个角色放在独立子文件夹，包含 character.json 和透明 PNG 精灵图。精灵图使用 8 列 × 11 行，动作顺序与 RoxyPet 相同。可复制项目 02-assets/characters 中的角色文件夹作为模板，修改 id、characterID、name、appearance、actionVerb、persona 和图片。完成后，在角色菜单选择「重新载入角色与语料」。详细说明见仓库 07-docs/characters.md。"
+                let text = "每个角色放在独立子文件夹，包含 character.json 和透明 PNG 序列帧图。序列帧图使用 8 列 × 11 行，动作顺序与 RoxyPet 相同。可复制项目 02-assets/characters 中的角色文件夹作为模板，修改 id、characterID、name、appearance、actionVerb、persona 和图片。完成后，在角色菜单选择「重新载入角色与语料」。详细说明见仓库 07-docs/characters.md。"
                 try text.write(to: guide, atomically: true, encoding: .utf8)
             }
             NSWorkspace.shared.open(folder)

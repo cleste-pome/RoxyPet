@@ -72,7 +72,7 @@ RoxyPet-GitHub/
 │   ├── characters.swift # 角色配置、语料与人设加载
 │   └── Info.plist
 ├── 02-assets/           # 素材
-│   ├── spritesheet.png  # 洛琪希精灵图（8 列 × 11 行）
+│   ├── spritesheet.png  # 洛琪希序列帧图（8 列 × 11 行）
 │   ├── characters/      # 艾丽丝两套图集与角色配置
 │   ├── speech/          # 艾丽丝 / 希露菲 JSON 语料
 │   ├── RoxyPet.icns     # 应用图标
@@ -98,7 +98,7 @@ RoxyPet-GitHub/
 
 #### 洛琪希 · 魔法师
 
-蓝发双辫的米格路德族魔术师。
+蓝发双辫的**魔族**魔术师（米格路德族）。
 
 - **台词库**：934 条本地台词——打招呼、闲聊，按时段 / 星期 / 情绪自动切换；全部本地随机，零消耗
 - **菜单措辞**：「吩咐洛琪希」；Siri 口令：「洛琪希」
@@ -163,11 +163,11 @@ RoxyPet-GitHub/
 - 🫥 **一键隐身**：菜单栏常驻一个小图标（和后台 App 一样）；右键菜单或点图标即可「隐藏洛琪希 / 显示洛琪希」——隐身时她在后台安静待命，随时召回
 - 🔮 **透视魔法**（可选）：截屏交给视觉大模型，用洛琪希的口吻点评你的屏幕
 - 🗣 **Siri 唤醒**：配合「快捷指令」导入一条指令后，喊「嘿 Siri，洛琪希」即可召唤
-- 🪶 **原生轻量**：单个可执行文件 + 角色精灵图；无网络请求（本机外部功能除外，见「隐私」）
+- 🪶 **原生轻量**：单个可执行文件 + 角色序列帧图；无网络请求（本机外部功能除外，见「隐私」）
 
 ### 🎞 动作与分镜
 
-每位角色的所有动作——待机、奔跑、挥手、跳跃、转头看您……都画在各自的精灵图里（洛琪希：`02-assets/spritesheet.png`；艾丽丝：`02-assets/characters/eris-*/spritesheet.png`），逐帧切换就成了动画。
+每位角色的所有动作——待机、奔跑、挥手、跳跃、转头看您……都画在各自的序列帧图里（洛琪希：`02-assets/spritesheet.png`；艾丽丝：`02-assets/characters/eris-*/spritesheet.png`），逐帧切换就成了动画。
 
 | 行 | 动作 | 出现时机 |
 |:---:|---|---|
@@ -336,7 +336,7 @@ cd RoxyPet-GitHub/03-scripts
 ### 💛 致谢
 
 - **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希的角色美术与序列帧动画**（Character Art & Sprite Animation）。
-- **洛琪希图书馆** —— 原作文本资料（[pan.roxylib.com](https://pan.roxylib.com/)）
+- **[洛琪希图书馆](https://pan.roxylib.com/)** —— 原作文本资料
 - **[ChatGPT](https://chatgpt.com/)** —— 艾丽丝素材（AI 图像生成）与多角色功能的协作开发
 - **[DeepSeek](https://www.deepseek.com/)** —— 文本创作协助与 API 对话支持
 
