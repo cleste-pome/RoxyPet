@@ -13,10 +13,10 @@
     {
       "state": "waving",
       "frames": [
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/waving/frames/waving/00.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/waving/frames/waving/01.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/waving/frames/waving/02.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/waving/frames/waving/03.png"
+        "art-source-work/work/roxy/qa/rows/waving/frames/waving/00.png",
+        "art-source-work/work/roxy/qa/rows/waving/frames/waving/01.png",
+        "art-source-work/work/roxy/qa/rows/waving/frames/waving/02.png",
+        "art-source-work/work/roxy/qa/rows/waving/frames/waving/03.png"
       ],
       "method": "components"
     }

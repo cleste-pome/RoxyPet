@@ -37,21 +37,27 @@ def parse(source):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--source-dir', type=Path, default=ROOT.parent)
+    parser.add_argument('--source-dir', type=Path, default=None,
+                        help='语料原稿目录（默认：本仓库 07-docs/语料/，仓库即稿源）')
     args = parser.parse_args()
     out = ROOT / '02-assets/speech'
-    archive = ROOT / '07-docs/corpora'
+    archive = ROOT / '07-docs/语料'
+    source_dir = args.source_dir or archive
     out.mkdir(parents=True, exist_ok=True)
     archive.mkdir(parents=True, exist_ok=True)
-    for character, pattern in [('eris', '*艾*语料库.md'), ('sylphie', '*希露菲*语料库.md')]:
-        files = sorted(args.source_dir.glob(pattern))
+    for character, pattern, saved_name in [('roxy', '*洛琪希*语料库.md', '洛琪希语料库.md'),
+                                       ('eris', '*艾*语料库.md', '艾莉丝语料库.md'),
+                                       ('sylphie', '*希露菲*语料库.md', '希露菲语料库.md'),
+                                       ('aisha', '*爱夏*语料库.md', '爱夏语料库.md')]:
+        files = sorted(source_dir.glob(pattern))
         if not files:
-            saved = archive / (character + '.md')
+            saved = archive / saved_name
             files = [saved] if saved.exists() else []
         if len(files) != 1:
             raise SystemExit(f'Expected one {character} corpus, found {len(files)}')
         source = files[0].read_text()
         pools = parse(source)
         (out / (character + '.json')).write_text(json.dumps(pools, ensure_ascii=False, indent=2) + '\n')
-        (archive / (character + '.md')).write_text(source)
+        if files[0].resolve() != (archive / saved_name).resolve():
+            (archive / saved_name).write_text(source)
         print(f'{character}: {sum(len(v) for k,v in pools.items() if not k.startswith("hourly_"))} lines, {len(pools)} categories; copied unchanged from {files[0].name}')

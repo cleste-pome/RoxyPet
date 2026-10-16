@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "created_at": "2026-10-05T05:10:36.396631+00:00",
-  "run_dir": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy",
+  "run_dir": "art-source-work/work/roxy",
   "primary_generation_skill": "$imagegen",
   "jobs": [
     {
@@ -550,6 +550,6 @@
     }
   ],
   "created_pet_id": "pet_6ac4a117497081919665a28d694c45fc",
-  "final_atlas": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/outputs/roxy/spritesheet.png",
+  "final_atlas": "art-source-work/outputs/roxy/spritesheet.png",
   "final_quality_report": "qa/pet-quality.json"
 }

@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "input": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/decoded/base-transparent.png",
-  "output": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/outputs/roxy/roxy-chibi.png",
+  "input": "art-source-work/work/roxy/decoded/base-transparent.png",
+  "output": "art-source-work/outputs/roxy/roxy-chibi.png",
   "chroma_key": "#FF00FF",
   "algorithm": "edge-local-chroma-spill-suppression",
   "strength": 1,

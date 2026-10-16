@@ -13,12 +13,12 @@
     {
       "state": "running",
       "frames": [
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running/frames/running/00.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running/frames/running/01.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running/frames/running/02.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running/frames/running/03.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running/frames/running/04.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running/frames/running/05.png"
+        "art-source-work/work/roxy/qa/rows/running/frames/running/00.png",
+        "art-source-work/work/roxy/qa/rows/running/frames/running/01.png",
+        "art-source-work/work/roxy/qa/rows/running/frames/running/02.png",
+        "art-source-work/work/roxy/qa/rows/running/frames/running/03.png",
+        "art-source-work/work/roxy/qa/rows/running/frames/running/04.png",
+        "art-source-work/work/roxy/qa/rows/running/frames/running/05.png"
       ],
       "method": "components"
     }

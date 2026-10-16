@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "frames_root": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames",
+  "frames_root": "art-source-work/work/roxy/frames",
   "states": [
     "idle",
     "running-right",
@@ -26,7 +26,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/idle/00.png",
+          "file": "art-source-work/work/roxy/frames/idle/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12138,
@@ -41,7 +41,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/idle/01.png",
+          "file": "art-source-work/work/roxy/frames/idle/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12240,
@@ -56,7 +56,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/idle/02.png",
+          "file": "art-source-work/work/roxy/frames/idle/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12213,
@@ -71,7 +71,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/idle/03.png",
+          "file": "art-source-work/work/roxy/frames/idle/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12116,
@@ -86,7 +86,7 @@
         },
         {
           "index": 4,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/idle/04.png",
+          "file": "art-source-work/work/roxy/frames/idle/04.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12177,
@@ -101,7 +101,7 @@
         },
         {
           "index": 5,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/idle/05.png",
+          "file": "art-source-work/work/roxy/frames/idle/05.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12196,
@@ -127,7 +127,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-right/00.png",
+          "file": "art-source-work/work/roxy/frames/running-right/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12967,
@@ -142,7 +142,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-right/01.png",
+          "file": "art-source-work/work/roxy/frames/running-right/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11952,
@@ -157,7 +157,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-right/02.png",
+          "file": "art-source-work/work/roxy/frames/running-right/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11987,
@@ -172,7 +172,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-right/03.png",
+          "file": "art-source-work/work/roxy/frames/running-right/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11731,
@@ -187,7 +187,7 @@
         },
         {
           "index": 4,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-right/04.png",
+          "file": "art-source-work/work/roxy/frames/running-right/04.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12770,
@@ -202,7 +202,7 @@
         },
         {
           "index": 5,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-right/05.png",
+          "file": "art-source-work/work/roxy/frames/running-right/05.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12328,
@@ -217,7 +217,7 @@
         },
         {
           "index": 6,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-right/06.png",
+          "file": "art-source-work/work/roxy/frames/running-right/06.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11868,
@@ -232,7 +232,7 @@
         },
         {
           "index": 7,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-right/07.png",
+          "file": "art-source-work/work/roxy/frames/running-right/07.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11633,
@@ -258,7 +258,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-left/00.png",
+          "file": "art-source-work/work/roxy/frames/running-left/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12585,
@@ -273,7 +273,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-left/01.png",
+          "file": "art-source-work/work/roxy/frames/running-left/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11334,
@@ -288,7 +288,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-left/02.png",
+          "file": "art-source-work/work/roxy/frames/running-left/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11670,
@@ -303,7 +303,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-left/03.png",
+          "file": "art-source-work/work/roxy/frames/running-left/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11417,
@@ -318,7 +318,7 @@
         },
         {
           "index": 4,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-left/04.png",
+          "file": "art-source-work/work/roxy/frames/running-left/04.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12147,
@@ -333,7 +333,7 @@
         },
         {
           "index": 5,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-left/05.png",
+          "file": "art-source-work/work/roxy/frames/running-left/05.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11581,
@@ -348,7 +348,7 @@
         },
         {
           "index": 6,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-left/06.png",
+          "file": "art-source-work/work/roxy/frames/running-left/06.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11795,
@@ -363,7 +363,7 @@
         },
         {
           "index": 7,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running-left/07.png",
+          "file": "art-source-work/work/roxy/frames/running-left/07.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 10954,
@@ -389,7 +389,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waving/00.png",
+          "file": "art-source-work/work/roxy/frames/waving/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 13918,
@@ -404,7 +404,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waving/01.png",
+          "file": "art-source-work/work/roxy/frames/waving/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 13819,
@@ -419,7 +419,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waving/02.png",
+          "file": "art-source-work/work/roxy/frames/waving/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 14032,
@@ -434,7 +434,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waving/03.png",
+          "file": "art-source-work/work/roxy/frames/waving/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 13985,
@@ -460,7 +460,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/jumping/00.png",
+          "file": "art-source-work/work/roxy/frames/jumping/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 9843,
@@ -475,7 +475,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/jumping/01.png",
+          "file": "art-source-work/work/roxy/frames/jumping/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 10676,
@@ -490,7 +490,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/jumping/02.png",
+          "file": "art-source-work/work/roxy/frames/jumping/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 10747,
@@ -505,7 +505,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/jumping/03.png",
+          "file": "art-source-work/work/roxy/frames/jumping/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 10772,
@@ -520,7 +520,7 @@
         },
         {
           "index": 4,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/jumping/04.png",
+          "file": "art-source-work/work/roxy/frames/jumping/04.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 10301,
@@ -546,7 +546,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/failed/00.png",
+          "file": "art-source-work/work/roxy/frames/failed/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12952,
@@ -561,7 +561,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/failed/01.png",
+          "file": "art-source-work/work/roxy/frames/failed/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12111,
@@ -576,7 +576,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/failed/02.png",
+          "file": "art-source-work/work/roxy/frames/failed/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12013,
@@ -591,7 +591,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/failed/03.png",
+          "file": "art-source-work/work/roxy/frames/failed/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12124,
@@ -606,7 +606,7 @@
         },
         {
           "index": 4,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/failed/04.png",
+          "file": "art-source-work/work/roxy/frames/failed/04.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12415,
@@ -621,7 +621,7 @@
         },
         {
           "index": 5,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/failed/05.png",
+          "file": "art-source-work/work/roxy/frames/failed/05.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 13185,
@@ -636,7 +636,7 @@
         },
         {
           "index": 6,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/failed/06.png",
+          "file": "art-source-work/work/roxy/frames/failed/06.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12258,
@@ -651,7 +651,7 @@
         },
         {
           "index": 7,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/failed/07.png",
+          "file": "art-source-work/work/roxy/frames/failed/07.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12772,
@@ -677,7 +677,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waiting/00.png",
+          "file": "art-source-work/work/roxy/frames/waiting/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12455,
@@ -692,7 +692,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waiting/01.png",
+          "file": "art-source-work/work/roxy/frames/waiting/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12640,
@@ -707,7 +707,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waiting/02.png",
+          "file": "art-source-work/work/roxy/frames/waiting/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12523,
@@ -722,7 +722,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waiting/03.png",
+          "file": "art-source-work/work/roxy/frames/waiting/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12793,
@@ -737,7 +737,7 @@
         },
         {
           "index": 4,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waiting/04.png",
+          "file": "art-source-work/work/roxy/frames/waiting/04.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12510,
@@ -752,7 +752,7 @@
         },
         {
           "index": 5,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/waiting/05.png",
+          "file": "art-source-work/work/roxy/frames/waiting/05.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12316,
@@ -778,7 +778,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running/00.png",
+          "file": "art-source-work/work/roxy/frames/running/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12890,
@@ -793,7 +793,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running/01.png",
+          "file": "art-source-work/work/roxy/frames/running/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12732,
@@ -808,7 +808,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running/02.png",
+          "file": "art-source-work/work/roxy/frames/running/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12760,
@@ -823,7 +823,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running/03.png",
+          "file": "art-source-work/work/roxy/frames/running/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12720,
@@ -838,7 +838,7 @@
         },
         {
           "index": 4,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running/04.png",
+          "file": "art-source-work/work/roxy/frames/running/04.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12878,
@@ -853,7 +853,7 @@
         },
         {
           "index": 5,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/running/05.png",
+          "file": "art-source-work/work/roxy/frames/running/05.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12660,
@@ -879,7 +879,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/review/00.png",
+          "file": "art-source-work/work/roxy/frames/review/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12233,
@@ -894,7 +894,7 @@
         },
         {
           "index": 1,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/review/01.png",
+          "file": "art-source-work/work/roxy/frames/review/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 11552,
@@ -909,7 +909,7 @@
         },
         {
           "index": 2,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/review/02.png",
+          "file": "art-source-work/work/roxy/frames/review/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12183,
@@ -924,7 +924,7 @@
         },
         {
           "index": 3,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/review/03.png",
+          "file": "art-source-work/work/roxy/frames/review/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12161,
@@ -939,7 +939,7 @@
         },
         {
           "index": 4,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/review/04.png",
+          "file": "art-source-work/work/roxy/frames/review/04.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12024,
@@ -954,7 +954,7 @@
         },
         {
           "index": 5,
-          "file": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/frames/review/05.png",
+          "file": "art-source-work/work/roxy/frames/review/05.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 12277,

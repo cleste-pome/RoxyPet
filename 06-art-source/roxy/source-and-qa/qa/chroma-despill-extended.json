@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "input": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/final/spritesheet-extended-raw.png",
-  "output": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/outputs/roxy/spritesheet.png",
+  "input": "art-source-work/work/roxy/final/spritesheet-extended-raw.png",
+  "output": "art-source-work/outputs/roxy/spritesheet.png",
   "chroma_key": "#FF00FF",
   "algorithm": "edge-local-chroma-spill-suppression",
   "strength": 1,

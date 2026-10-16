@@ -13,14 +13,14 @@
     {
       "state": "running-right",
       "frames": [
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running-right/frames/running-right/00.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running-right/frames/running-right/01.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running-right/frames/running-right/02.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running-right/frames/running-right/03.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running-right/frames/running-right/04.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running-right/frames/running-right/05.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running-right/frames/running-right/06.png",
-        "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/work/roxy/qa/rows/running-right/frames/running-right/07.png"
+        "art-source-work/work/roxy/qa/rows/running-right/frames/running-right/00.png",
+        "art-source-work/work/roxy/qa/rows/running-right/frames/running-right/01.png",
+        "art-source-work/work/roxy/qa/rows/running-right/frames/running-right/02.png",
+        "art-source-work/work/roxy/qa/rows/running-right/frames/running-right/03.png",
+        "art-source-work/work/roxy/qa/rows/running-right/frames/running-right/04.png",
+        "art-source-work/work/roxy/qa/rows/running-right/frames/running-right/05.png",
+        "art-source-work/work/roxy/qa/rows/running-right/frames/running-right/06.png",
+        "art-source-work/work/roxy/qa/rows/running-right/frames/running-right/07.png"
       ],
       "method": "components"
     }

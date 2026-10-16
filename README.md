@@ -127,7 +127,7 @@ RoxyPet-GitHub/
 
 | 项目 | 说明 |
 |:---|:---|
-| **语料** | 374 条，由项目内 Markdown 语料导入（与长发款共享；闲聊 / 情境 / 互动 / 方向 / 系统事件） |
+| **语料** | 388 条，由 `07-docs/语料/艾莉丝语料库.md` 筛选转换生成（与长发款共享；闲聊 / 情境 / 互动 / 方向 / 系统事件） |
 | **菜单措辞** | 「拜托艾丽丝」 |
 | **素材工程** | AI 图像生成流程制作（母版 / 动作原图 / 提示词见仓库 `06-art-source/eris-short/`） |
 
@@ -147,7 +147,7 @@ RoxyPet-GitHub/
 
 | 项目 | 说明 |
 |:---|:---|
-| **语料** | 与短发款共用同一套 374 条 |
+| **语料** | 与短发款共用同一套 388 条 |
 | **菜单措辞** | 「拜托艾丽丝」 |
 | **素材工程** | AI 图像生成流程制作（与短发款同一工程，见仓库 `06-art-source/eris-long/`） |
 
@@ -163,7 +163,7 @@ RoxyPet-GitHub/
 
 菜单和窗口随人物切换：洛琪希是「**吩咐洛琪希**」，艾丽丝是「**拜托艾丽丝**」；隐藏 / 显示、退出、设置、记录窗口与 AI 人设一起更新。长短发艾丽丝共享语料和 Claude 会话，历史记录保留当时的角色名称。
 
-艾丽丝语料由项目内 Markdown 导入；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](07-docs/characters.md)。
+艾丽丝语料由项目内 Markdown 导入；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](07-docs/角色与语料扩展.md)。
 
 ---
 
@@ -354,13 +354,36 @@ cd RoxyPet-GitHub/03-scripts
 
 | 内容 | 落位 | 生成方式 |
 |---|---|---|
-| 序列帧图 + 角色配置 | `02-assets/characters/<角色ID>/`（如 `roxy/`、`eris-long/`） | 复制 `07-docs/character-template/` 后替换字段与图 |
-| 语料 JSON | `02-assets/speech/<人物ID>.json`（现有 roxy / eris / sylphie） | 文字原稿 → 导入（`import-speech.py` 或 `--export-speech`） |
-| 语料原稿 | `07-docs/corpora/<人物ID>.md` | 单独写作产出（见 [语料位置](07-docs/corpora/README.md)） |
+| 序列帧图 + 角色配置 | `02-assets/characters/<角色ID>/`（如 `roxy/`、`eris-long/`） | 复制 `07-docs/人物模板/` 后替换字段与图 |
+| 语料 JSON（成品） | `02-assets/speech/<人物ID>.json`（现有 roxy / eris / sylphie） | 由 md 原稿筛选转换生成——`03-scripts/import-speech.py`（`build.sh` 每次构建自动跑），**不要手改** |
+| 语料原稿（求全） | `07-docs/语料/<人物ID>.md` | 唯一稿源，**改台词只改这里**（见 [语料位置](07-docs/语料/语料位置.md)） |
 | 素材工程（母版 / 原图 / 提示词 / 帧） | `06-art-source/<装束ID>/` | 生成流程留档 |
 | 预览图（可选） | `05-images/<人物ID>/` | `03-scripts/render-character-previews.py` |
 
-运行时也可扩展：`~/.roxy-pet/characters/` 放角色文件夹、`~/.roxy-pet/speech/<人物ID>.json` 放语料，点「重新载入角色与语料」即刻生效。完整规范：[角色扩展说明](07-docs/characters.md)。
+### 📚 语料为什么有两种格式
+
+仓库里的语料同时有 **Markdown 原稿**和 **JSON 成品**。它们不是两份语料，而是「原稿 → 成品」的关系（类似源码 → 编译产物）：
+
+```text
+07-docs/语料/<人物>.md           ① 原稿：求全。台词、透视魔法提示词、菜单措辞、统计说明全写在一起
+        │  ② 筛选转换：03-scripts/import-speech.py（build.sh 每次构建都会自动跑）
+        ▼
+02-assets/speech/<人物>.json     ③ 成品：只装程序要说的台词，按固定分类键归位
+        │  build.sh 打包进 app
+        ▼
+Roxy.app/Contents/Resources/speech/<人物>.json   ④ 运行时读取（~/.roxy-pet/speech/ 可覆盖）
+```
+
+**转换时会筛掉什么**（完整规则见 [语料位置](07-docs/语料/语料位置.md)）：
+
+- 只收「标题末尾带 `（key）`」的段落里、代码块中的非空行——一个非空行就是一条台词；
+- 标题、空行、普通正文、透视魔法的系统提示词、右键菜单措辞、扩展说明，都不进 JSON（程序不读这些）；
+- 整点报时那张表会转成 `hourly_*` 键，其中不含 `{h}` 的行不收；
+- 必需分类（闲聊 / 问候 / 摸头 / 拖动 / 四方位 / AI 思考与失败）少一个，脚本直接报错，不会生成残缺的 JSON。
+
+**结论**：改台词只改 md 一处 → 跑 `python3 03-scripts/import-speech.py`（构建时自动跑）→ JSON 现生成。手改 JSON 是白改，下次一跑就被覆盖。
+
+运行时也可扩展：`~/.roxy-pet/characters/` 放角色文件夹、`~/.roxy-pet/speech/<人物ID>.json` 放语料，点「重新载入角色与语料」即刻生效。完整规范：[角色扩展说明](07-docs/角色与语料扩展.md)。
 
 ---
 

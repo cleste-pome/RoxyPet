@@ -10,10 +10,19 @@ APPNAME="Roxy.app"
 TMP="$(mktemp -d /tmp/roxy-build.XXXXXX)"
 trap 'rm -rf "$TMP"' EXIT
 
-echo "== 1/6 编译 =="
+echo "== 1/7 语料：从 07-docs/语料/*.md 生成 02-assets/speech/*.json =="
+if command -v python3 > /dev/null 2>&1; then
+  python3 "$ROOT/03-scripts/import-speech.py"
+  rm -rf "$ROOT/03-scripts/__pycache__"
+else
+  echo "缺 python3：无法从 md 生成语料 JSON，构建中止（请先装 Xcode Command Line Tools）" >&2
+  exit 1
+fi
+
+echo "== 2/7 编译 =="
 swiftc -O -module-cache-path "$TMP/module-cache" -swift-version 5 -target arm64-apple-macosx14.0 "$SRC/main.swift" "$SRC/speech.swift" "$SRC/characters.swift" -o "$TMP/Roxy"
 
-echo "== 2/6 组装 app bundle =="
+echo "== 3/7 组装 app bundle =="
 APP="$TMP/$APPNAME"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$TMP/Roxy" "$APP/Contents/MacOS/Roxy"
@@ -28,20 +37,20 @@ if [ -f "$ASSETS/Roxy.icns" ]; then
   cp "$ASSETS/Roxy.icns" "$APP/Contents/Resources/Roxy.icns"
 fi
 
-echo "== 3/6 清理扩展属性 =="
+echo "== 4/7 清理扩展属性 =="
 xattr -cr "$APP" 2>/dev/null || true
 
-echo "== 4/6 签名（有本机证书则用之，否则 ad-hoc）=="
+echo "== 5/7 签名（有本机证书则用之，否则 ad-hoc）=="
 if security find-certificate -c "RoxyPet Local Signing" > /dev/null 2>&1; then
   codesign --force --deep --sign "RoxyPet Local Signing" "$APP"
 else
   codesign --force --deep --sign - "$APP"
 fi
 
-echo "== 5/6 验证 =="
+echo "== 6/7 验证 =="
 codesign --verify "$APP" && echo "signature OK"
 
-echo "== 6/6 输出到仓库根目录 =="
+echo "== 7/7 输出到仓库根目录 =="
 rm -rf "$ROOT/$APPNAME"
 cp -R "$APP" "$ROOT/$APPNAME"
 echo "构建产物: $ROOT/$APPNAME"

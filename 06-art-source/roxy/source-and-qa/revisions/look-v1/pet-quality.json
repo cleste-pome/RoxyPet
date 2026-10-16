@@ -1,6 +1,6 @@
 {
   "ok": false,
-  "atlas": "/Users/jensen/Documents/Codex/2026-10-05/pets-plugin-work-pets-openai-curated-2/outputs/roxy/spritesheet.png",
+  "atlas": "art-source-work/outputs/roxy/spritesheet.png",
   "encoded_bytes": 2896169,
   "sha256": "7430fc29525f2b371357cdec3f56e0f7395e5251a735fc9a13c7ed9dfff53162",
   "jump": {
