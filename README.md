@@ -238,7 +238,7 @@ Releases 里的 `Roxy.dmg` **不是来路不明的二进制**——它完全由�
   Roxy.app
       │
       │  03-scripts/make-release.sh
-      │   把 App + Applications 快捷方式 + 安装说明 压成只读磁盘镜像
+      │   把 App + Applications 快捷方式 压成只读磁盘镜像（图标布局固定：app 在左、Applications 在右）
       ▼
   Roxy.dmg                          ← Releases 里供下载的安装包
 ```
