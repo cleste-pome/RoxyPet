@@ -2485,6 +2485,34 @@ final class PetController: NSObject, NSApplicationDelegate {
         setPetHidden(false)
         placeDefaultPosition()
     }
+    // 把当前内置语料导出为 JSON（就是 speech/<人物ID>.json 的生成方式）：
+    //   ./Roxy.app/Contents/MacOS/Roxy --export-speech > 02-assets/speech/roxy.json
+    func exportSpeechJSON() -> String {
+        loadSpeechExtras()
+        var out: [String: [String]] = [:]
+        out["greeting"] = GREETINGS
+        out["chat"] = CHAT_LINES
+        out["hover"] = HOVER_LINES
+        out["drag"] = DRAG_LINES
+        out["look_end"] = LOOK_END_LINES
+        out["lonely"] = LONELY_LINES
+        out["morning"] = MORNING_LINES
+        out["day"] = DAY_LINES
+        out["evening"] = EVENING_LINES
+        out["night"] = NIGHT_LINES
+        out["weekend"] = WEEKEND_LINES
+        out["workday"] = WORKDAY_LINES
+        out["battery20"] = BATTERY_20
+        out["battery10"] = BATTERY_10
+        out["battery_full"] = BATTERY_FULL
+        out["done"] = DONE_LINES
+        out["notice"] = NOTICE_LINES
+        out["ai_thinking"] = AI_THINKING
+        out["ai_fail"] = AI_FAIL
+        let data = try! JSONSerialization.data(withJSONObject: out, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+        return String(data: data, encoding: .utf8) ?? "{}"
+    }
+
     @objc private func quitApp() { NSApp.terminate(nil) }
 }
 
@@ -2493,6 +2521,10 @@ let app = NSApplication.shared
 let controller = PetController()
 if CommandLine.arguments.contains("--self-test") {
     controller.runCharacterChecks()
+    exit(0)
+}
+if CommandLine.arguments.contains("--export-speech") {
+    print(controller.exportSpeechJSON())
     exit(0)
 }
 app.delegate = controller

@@ -23,7 +23,7 @@
 
 | 洛琪希 · 魔法师 | 艾丽丝 · 短发 · 旅行装 | 艾丽丝 · 长发 · 连衣裙 |
 |:---:|:---:|:---:|
-| <img src="05-images/preview-idle.gif" width="180"/> | <img src="05-images/eris/short-idle.gif" width="180"/> | <img src="05-images/eris/long-idle.gif" width="180"/> |
+| <img src="05-images/roxy/preview-idle.gif" width="180"/> | <img src="05-images/eris/short-idle.gif" width="180"/> | <img src="05-images/eris/long-idle.gif" width="180"/> |
 
 ---
 
@@ -67,13 +67,15 @@ RoxyPet-GitHub/
 ├── .gitignore
 ├── 01-src/              # 源码
 │   ├── main.swift       # 主程序（窗口 / 动画 / 气泡 / 菜单 / 联动）
-│   ├── speech.swift     # 洛琪希台词库（934 条）
+│   ├── speech.swift     # 洛琪希台词库（934 条内置池；`--export-speech` 导出 roxy.json）
 │   ├── characters.swift # 角色配置、语料与人设加载
 │   └── Info.plist
 ├── 02-assets/           # 素材
-│   ├── spritesheet.png  # 洛琪希序列帧图（8 列 × 11 行）
-│   ├── characters/      # 艾丽丝两套图集与角色配置
-│   ├── speech/          # 艾丽丝 / 希露菲 JSON 语料
+│   ├── characters/      # 每个角色一个文件夹
+│   │   ├── roxy/        # 洛琪希：序列帧图（8 列 × 11 行）+ character.json
+│   │   ├── eris-long/   # 艾丽丝 · 长发：图集 + character.json
+│   │   └── eris-short/  # 艾丽丝 · 短发：图集 + character.json
+│   ├── speech/          # 语料 JSON：roxy / eris / sylphie
 │   ├── Roxy.icns        # 应用图标
 │   └── pet.json
 ├── 03-scripts/          # 构建与工具
@@ -86,7 +88,10 @@ RoxyPet-GitHub/
 ├── 04-integration/      # Claude Code / Codex 联动
 │   ├── hook.sh
 │   └── codex-notify.sh
-├── 05-images/           # README 配图（含动图预览）
+├── 05-images/           # README 配图
+│   ├── icon.png         # 应用图标
+│   ├── roxy/            # 洛琪希：立绘 / 总表 / 视线 / 抽帧 / 动图
+│   └── eris/            # 艾丽丝：立绘 / 总表 / 动图
 ├── 06-art-source/       # 人物素材工程：roxy / eris-long / eris-short 三个并列
 └── 07-docs/             # 角色扩展 · 语料 · 素材制作记录
 ```
@@ -107,11 +112,11 @@ RoxyPet-GitHub/
 
 | 立绘 | 动作总表（行走图分镜） | 16 向视线帧 |
 |:---:|:---:|:---:|
-| <img src="05-images/chibi.png" width="180"/> | <img src="05-images/contact-sheet.png" width="360"/> | <img src="05-images/look-directions.png" width="320"/> |
+| <img src="05-images/roxy/chibi.png" width="180"/> | <img src="05-images/roxy/contact-sheet.png" width="360"/> | <img src="05-images/roxy/look-directions.png" width="320"/> |
 
 | 待机 | 奔跑 | 挥手 | 转头 |
 |:---:|:---:|:---:|:---:|
-| <img src="05-images/preview-idle.gif" width="150"/> | <img src="05-images/preview-run.gif" width="150"/> | <img src="05-images/preview-wave.gif" width="150"/> | <img src="05-images/preview-look.gif" width="150"/> |
+| <img src="05-images/roxy/preview-idle.gif" width="150"/> | <img src="05-images/roxy/preview-run.gif" width="150"/> | <img src="05-images/roxy/preview-wave.gif" width="150"/> | <img src="05-images/roxy/preview-look.gif" width="150"/> |
 
 ---
 
@@ -180,7 +185,7 @@ RoxyPet-GitHub/
 
 ### 🎞 动作与分镜
 
-每位角色的所有动作——待机、奔跑、挥手、跳跃、转头看您……都画在各自的序列帧图里（洛琪希：`02-assets/spritesheet.png`；艾丽丝：`02-assets/characters/eris-*/spritesheet.png`），逐帧切换就成了动画。
+每位角色的所有动作——待机、奔跑、挥手、跳跃、转头看您……都画在各自的序列帧图里（洛琪希：`02-assets/characters/roxy/spritesheet.png`；艾丽丝：`02-assets/characters/eris-*/spritesheet.png`），逐帧切换就成了动画。
 
 | 行 | 动作 | 出现时机 |
 |:---:|---|---|
@@ -348,11 +353,11 @@ cd RoxyPet-GitHub/03-scripts
 
 | 内容 | 落位 | 生成方式 |
 |---|---|---|
-| 序列帧图 + 角色配置 | `02-assets/characters/<装束ID>/` | 复制 `07-docs/character-template/` 后替换字段与图 |
-| 语料 JSON | `02-assets/speech/<人物ID>.json` | `03-scripts/import-speech.py` 从语料原稿导入 |
-| 语料原稿 | `07-docs/corpora/<人物ID>.md` | 单独写作产出 |
+| 序列帧图 + 角色配置 | `02-assets/characters/<角色ID>/`（如 `roxy/`、`eris-long/`） | 复制 `07-docs/character-template/` 后替换字段与图 |
+| 语料 JSON | `02-assets/speech/<人物ID>.json`（现有 roxy / eris / sylphie） | 文字原稿 → 导入（`import-speech.py` 或 `--export-speech`） |
+| 语料原稿 | `07-docs/corpora/<人物ID>.md` | 单独写作产出（见 [语料位置](07-docs/corpora/README.md)） |
 | 素材工程（母版 / 原图 / 提示词 / 帧） | `06-art-source/<装束ID>/` | 生成流程留档 |
-| 预览图（可选） | `05-images/<装束ID>/` | `03-scripts/render-character-previews.py` |
+| 预览图（可选） | `05-images/<人物ID>/` | `03-scripts/render-character-previews.py` |
 
 运行时也可扩展：`~/.roxy-pet/characters/` 放角色文件夹、`~/.roxy-pet/speech/<人物ID>.json` 放语料，点「重新载入角色与语料」即刻生效。完整规范：[角色扩展说明](07-docs/characters.md)。
 

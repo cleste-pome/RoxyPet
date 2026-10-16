@@ -47,7 +47,7 @@ for path in ['/System/Library/Fonts/PingFang.ttc', '/System/Library/Fonts/STHeit
 font=font or ImageFont.load_default()
 small=ImageFont.truetype(font.path,18) if hasattr(font,'path') else font
 for i,(name,detail,path) in enumerate([
-    ('洛琪希','魔法师',ROOT/'02-assets/spritesheet.png'),
+    ('洛琪希','魔法师',ROOT/'02-assets/characters/roxy/spritesheet.png'),
     ('艾丽丝','短发 · 旅行装',ROOT/'02-assets/characters/eris-short/spritesheet.png'),
     ('艾丽丝','长发 · 连衣裙',ROOT/'02-assets/characters/eris-long/spritesheet.png')]):
     sheet=Image.open(path).convert('RGBA')

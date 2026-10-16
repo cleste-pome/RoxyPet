@@ -34,6 +34,7 @@ struct PetCharacter: Codable {
     static func loadCatalog() -> [PetCharacter] {
         var roxy = Self.roxy
         roxy.atlasURL = Bundle.main.url(forResource: "spritesheet", withExtension: "png")
+        roxy.speech = loadSpeech(characterID: roxy.characterID)
         var result = [roxy]
         var directories: [URL] = []
         for root in [Bundle.main.resourceURL?.appendingPathComponent("characters"), customDirectory].compactMap({ $0 }) {
@@ -50,14 +51,7 @@ struct PetCharacter: Codable {
             profile.atlasURL = directory.appendingPathComponent(profile.atlas)
             guard FileManager.default.fileExists(atPath: profile.atlasURL!.path) else { continue }
             // Shared corpus is loaded independently of a costume. Local files override bundled keys.
-            for root in [Bundle.main.resourceURL?.appendingPathComponent("speech"),
-                         FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".roxy-pet/speech")].compactMap({ $0 }) {
-                let url = root.appendingPathComponent(profile.characterID + ".json")
-                if let data = try? Data(contentsOf: url),
-                   let lines = try? JSONDecoder().decode([String: [String]].self, from: data) {
-                    profile.speech.merge(lines) { _, new in new }
-                }
-            }
+            profile.speech.merge(loadSpeech(characterID: profile.characterID)) { _, new in new }
             result.append(profile)
         }
         return result
@@ -67,15 +61,29 @@ struct PetCharacter: Codable {
         !id.isEmpty && id.range(of: "^[a-z0-9][a-z0-9_-]*$", options: .regularExpression) != nil
     }
 
+    /// 读取某个人物的语料文件：bundle 的 speech/ 与 ~/.roxy-pet/speech/（后者覆盖前者）。
+    static func loadSpeech(characterID: String) -> [String: [String]] {
+        var merged: [String: [String]] = [:]
+        for root in [Bundle.main.resourceURL?.appendingPathComponent("speech"),
+                     FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".roxy-pet/speech")].compactMap({ $0 }) {
+            let url = root.appendingPathComponent(characterID + ".json")
+            if let data = try? Data(contentsOf: url),
+               let lines = try? JSONDecoder().decode([String: [String]].self, from: data) {
+                merged.merge(lines) { _, new in new }
+            }
+        }
+        return merged
+    }
+
     func systemPrompt(owner: String, extra: String) -> String {
         "【身份】\(persona) 你如今在用户的 Mac 桌面上陪伴用户。当前外观：\(appearance)。始终保持角色口吻，称呼对方为「\(owner)」。不使用 emoji；不编造看不见的屏幕内容或任务结果。\n\(extra)"
     }
 
     func lines(_ key: String, roxy fallback: [String]) -> [String] {
-        if isRoxy { return fallback }
+        // 语料文件（speech/<人物ID>.json）优先；洛琪希回落到内置池，其他人缺语料则保持安静，不借用别人的台词。
         if let values = speech[key]?.filter({ !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }), !values.isEmpty { return values }
-        // An incomplete custom profile must never inherit another character's identity.
-        return [] // Corpus supplied separately; never fabricate or borrow Roxy lines.
+        if isRoxy { return fallback }
+        return []
     }
 }
 

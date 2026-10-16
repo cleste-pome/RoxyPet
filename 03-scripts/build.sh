@@ -18,7 +18,7 @@ APP="$TMP/$APPNAME"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$TMP/Roxy" "$APP/Contents/MacOS/Roxy"
 cp "$SRC/Info.plist" "$APP/Contents/Info.plist"
-cp "$ASSETS/spritesheet.png" "$APP/Contents/Resources/spritesheet.png"
+cp "$ASSETS/characters/roxy/spritesheet.png" "$APP/Contents/Resources/spritesheet.png"
 cp -R "$ASSETS/characters" "$APP/Contents/Resources/characters"
 if [ -d "$ASSETS/speech" ]; then
   cp -R "$ASSETS/speech" "$APP/Contents/Resources/speech"
