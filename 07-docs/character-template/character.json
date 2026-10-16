@@ -1,0 +1,12 @@
+{
+  "id": "<装束ID：如 sylphie-default>",
+  "characterID": "<人物ID：如 sylphie；同一人物的多套装束共用>",
+  "name": "<界面显示名：如 希露菲>",
+  "appearance": "<装束名：如 日常装>",
+  "actionVerb": "<菜单动词：如 请，菜单显示「请希露菲」>",
+  "historyTitle": "对话记录",
+  "screenTitle": "一起看看屏幕",
+  "persona": "<该角色的身份与说话风格（AI 人设提示词）>",
+  "atlas": "spritesheet.png",
+  "speech": {}
+}

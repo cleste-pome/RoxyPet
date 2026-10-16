@@ -2,6 +2,20 @@
 
 右键桌宠或点击菜单栏图标 →「角色」，可选择洛琪希、短发艾丽丝、长发艾丽丝。长发穿裙装，短发穿旅行装。切换后记住选择，无需重启；进行 AI 回复或任务时暂停切换，避免结果串到其他人物。
 
+## 落位速查：新增角色放哪里
+
+新增一位角色（或装束）时，各就各位即可；可直接复制的模板在 `07-docs/character-template/`。
+
+| 内容 | 放哪里 | 生成方式 |
+|---|---|---|
+| 序列帧图 + 角色配置 | `02-assets/characters/<装束ID>/`（`spritesheet.png` + `character.json`） | 生成原图后由打包脚本输出 |
+| 语料 JSON | `02-assets/speech/<人物ID>.json` | `03-scripts/import-speech.py` 从语料原稿导入 |
+| 语料原稿 | `07-docs/corpora/<人物ID>.md` | 单独写作产出 |
+| 素材工程（母版 / 动作原图 / 提示词 / 独立帧） | `06-art-source/<装束ID>/` | 生成流程留档 |
+| 预览图（可选） | `05-images/<装束ID>/` | `03-scripts/render-character-previews.py` |
+
+流程：① 复制模板、替换图集与字段 → ② 语料原稿放进 `07-docs/corpora/` → ③ 运行 `import-speech.py` → ④ 运行 `build.sh` → ⑤ 自检与预览渲染。文件夹一律英文命名；中文只出现在注释与文档里。
+
 ## 添加人物或装束
 
 菜单「角色 → 添加其他角色…」打开 `~/.roxy-pet/characters/`。复制项目 `02-assets/characters/eris-short/` 为模板，使用独立子文件夹，并修改 `character.json` 和 `spritesheet.png`。点击「重新载入角色与语料」即可读取。

@@ -321,7 +321,7 @@ cd RoxyPet-GitHub/03-scripts
 
 - **台词**：改 `01-src/speech.swift`（每个池子都是纯字符串数组），运行时追加可放 `~/.roxy-pet/speech.json`
 - **手感参数**（`01-src/main.swift` 顶部）：`WINDOW_SCALE` 显示大小、`LOOK_WINDOW_SECONDS` 跟随秒数、`HEAD_CENTER_Y_RATIO` 视角基准、`CHIME_QUIET_FROM/TO` 报时静音时段
-- **换角色**：右键 →「角色」即可切换；添加角色使用独立文件夹中的 `character.json` + `spritesheet.png`，详见 [角色扩展说明](07-docs/characters.md)。无需替换洛琪希原图。
+- **换角色**：右键 →「角色」即可切换；添加角色使用独立文件夹中的 `character.json` + `spritesheet.png`，详见 [角色扩展说明](07-docs/characters.md)（新角色模板：`07-docs/character-template/`）。无需替换洛琪希原图。
 
 ---
 
