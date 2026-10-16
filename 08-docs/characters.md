@@ -34,7 +34,7 @@
 
 ## 语料来源与接入
 
-本次不另行创作语料。`docs/corpora/eris.md` 与 `docs/corpora/sylphie.md` 是项目文件夹中 Claude Code 产出的语料快照；导入器保留每条原文，只转换分类键。艾丽丝界面名按用户要求显示为「艾丽丝」，源文件中的「艾莉丝」标题不改写。
+本次不另行创作语料。`08-docs/corpora/eris.md` 与 `08-docs/corpora/sylphie.md` 是项目文件夹中 Claude Code 产出的语料快照；导入器保留每条原文，只转换分类键。艾丽丝界面名按用户要求显示为「艾丽丝」，源文件中的「艾莉丝」标题不改写。
 
 ```sh
 python3 03-scripts/import-speech.py

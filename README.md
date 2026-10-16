@@ -17,35 +17,31 @@
 
 ---
 
-## 🖼 预览
+## 🖼 角色与预览
 
-| 立绘 | 动作总表（行走图分镜） |
-|:---:|:---:|
-| <img src="05-images/chibi.png" width="260"/> | <img src="05-images/contact-sheet.png" width="560"/> |
+可选角色（右键桌宠 → **角色**，选择会自动记住）：
 
-**动态预览**（真·动图，打开仓库就能看见她在动）：
+| 洛琪希 · 魔法师 | 艾丽丝 · 短发 · 旅行装 | 艾丽丝 · 长发 · 连衣裙 |
+|:---:|:---:|:---:|
+| <img src="05-images/chibi.png" width="200"/> | <img src="05-images/eris/short-standing.png" width="200"/> | <img src="05-images/eris/long-standing.png" width="200"/> |
+| <img src="05-images/preview-idle.gif" width="200"/> | <img src="05-images/eris/short-idle.gif" width="200"/> | <img src="05-images/eris/long-idle.gif" width="200"/> |
+| <img src="05-images/preview-run.gif" width="200"/> | <img src="05-images/eris/short-run.gif" width="200"/> | <img src="05-images/eris/long-run.gif" width="200"/> |
+| <img src="05-images/preview-wave.gif" width="200"/> | <img src="05-images/eris/short-wave.gif" width="200"/> | <img src="05-images/eris/long-wave.gif" width="200"/> |
+| <img src="05-images/preview-look.gif" width="200"/> | <img src="05-images/eris/short-look.gif" width="200"/> | <img src="05-images/eris/long-look.gif" width="200"/> |
 
-| 待机 | 奔跑 | 挥手 | 转头 |
-|:---:|:---:|:---:|:---:|
-| <img src="05-images/preview-idle.gif" width="150"/> | <img src="05-images/preview-run.gif" width="150"/> | <img src="05-images/preview-wave.gif" width="150"/> | <img src="05-images/preview-look.gif" width="150"/> |
+### 动作细节
+
+| 洛琪希 · 动作总表 | 艾丽丝（短发）· 动作总表 | 艾丽丝（长发）· 动作总表 |
+|:---:|:---:|:---:|
+| <img src="05-images/contact-sheet.png" width="300"/> | <img src="05-images/eris/short-contact-sheet.jpg" width="300"/> | <img src="05-images/eris/long-contact-sheet.jpg" width="300"/> |
 
 | 16 向视线帧（转头跟随鼠标） | 动画抽帧预览 |
 |:---:|:---:|
 | <img src="05-images/look-directions.png" width="420"/> | <img src="05-images/motion-stills.png" width="380"/> |
 
-### 新增：艾丽丝，两种装束
-
-右键桌宠 → **角色**，选择「洛琪希 · 魔法师」「艾丽丝 · 短发 · 旅行装」或「艾丽丝 · 长发 · 连衣裙」。选择会自动记住，下次启动继续使用。
-
-| 短发 · 旅行装 | 长发 · 连衣裙 |
-|:---:|:---:|
-| <img src="05-images/eris/short-idle.gif" width="180"/> | <img src="05-images/eris/long-idle.gif" width="180"/> |
-| <img src="05-images/eris/short-run.gif" width="180"/> | <img src="05-images/eris/long-run.gif" width="180"/> |
-| <img src="05-images/eris/short-look.gif" width="180"/> | <img src="05-images/eris/long-look.gif" width="180"/> |
-
 菜单和窗口会随人物切换：洛琪希是「**吩咐洛琪希**」，艾丽丝是「**拜托艾丽丝**」。隐藏 / 显示、退出、设置、记录窗口与 AI 人设一起更新。长短发艾丽丝共享人物语料和 Claude 会话，历史记录保留当时的角色名称。
 
-艾丽丝语料直接导入项目文件夹里另行制作的 Markdown 文件；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](docs/characters.md)。
+艾丽丝语料直接导入项目文件夹里另行制作的 Markdown 文件；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](08-docs/characters.md)。
 
 ## ✨ 功能
 
@@ -213,7 +209,7 @@ cd RoxyPet-GitHub/03-scripts
 
 - **台词**：改 `01-src/speech.swift`（每个池子都是纯字符串数组），运行时追加可放 `~/.roxy-pet/speech.json`
 - **手感参数**（`01-src/main.swift` 顶部）：`WINDOW_SCALE` 显示大小、`LOOK_WINDOW_SECONDS` 跟随秒数、`HEAD_CENTER_Y_RATIO` 视角基准、`CHIME_QUIET_FROM/TO` 报时静音时段
-- **换角色**：右键 →「角色」即可切换；添加角色使用独立文件夹中的 `character.json` + `spritesheet.png`，详见 [角色扩展说明](docs/characters.md)。无需替换洛琪希原图。
+- **换角色**：右键 →「角色」即可切换；添加角色使用独立文件夹中的 `character.json` + `spritesheet.png`，详见 [角色扩展说明](08-docs/characters.md)。无需替换洛琪希原图。
 
 ## 📁 目录结构
 
@@ -243,7 +239,7 @@ RoxyPet-GitHub/
 ├── 05-images/           # README 配图（含动图预览）
 ├── 06-dist/             # 成品快照：构建好的 RoxyPet.app（与 Releases 的 dmg 同款）
 ├── 07-art-source/       # 艾丽丝素材可复现工程：母版 / 动作原图 / 提示词 / 独立帧
-└── docs/                # 角色扩展 · 语料 · 素材制作记录
+└── 08-docs/             # 角色扩展 · 语料 · 素材制作记录
 ```
 
 根目录的**临时**构建产物（`RoxyPet.app`、`*.dmg`）由 `.gitignore` 排除、不入库；而 `06-dist/` 里保存着一份**跟版本走的成品快照**——构建好的 `RoxyPet.app`，与 Releases 里 dmg 内完全同款，`make-release.sh` 每次发布会自动更新它。日常下载安装包请走 Releases。

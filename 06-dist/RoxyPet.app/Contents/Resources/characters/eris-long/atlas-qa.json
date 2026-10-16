@@ -1,0 +1,1443 @@
+{
+  "cell": [
+    384,
+    416
+  ],
+  "atlas": [
+    3072,
+    4576
+  ],
+  "states": [
+    {
+      "name": "idle",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            136,
+            6,
+            481,
+            511
+          ],
+          "output_bbox": [
+            57,
+            10,
+            326,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            608,
+            6,
+            953,
+            511
+          ],
+          "output_bbox": [
+            57,
+            10,
+            326,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            1079,
+            6,
+            1423,
+            511
+          ],
+          "output_bbox": [
+            58,
+            10,
+            326,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            136,
+            514,
+            481,
+            1019
+          ],
+          "output_bbox": [
+            57,
+            10,
+            326,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            608,
+            514,
+            953,
+            1019
+          ],
+          "output_bbox": [
+            57,
+            10,
+            326,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            1078,
+            514,
+            1426,
+            1019
+          ],
+          "output_bbox": [
+            56,
+            10,
+            328,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "running-right",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            35,
+            8,
+            397,
+            516
+          ],
+          "output_bbox": [
+            51,
+            10,
+            332,
+            404
+          ],
+          "scale": 0.7755905511811023,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            404,
+            8,
+            731,
+            512
+          ],
+          "output_bbox": [
+            65,
+            13,
+            319,
+            404
+          ],
+          "scale": 0.7755905511811023,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            768,
+            11,
+            1100,
+            512
+          ],
+          "output_bbox": [
+            63,
+            15,
+            320,
+            404
+          ],
+          "scale": 0.7755905511811023,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1149,
+            8,
+            1502,
+            483
+          ],
+          "output_bbox": [
+            55,
+            36,
+            329,
+            404
+          ],
+          "scale": 0.7755905511811023,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            15,
+            511,
+            392,
+            1008
+          ],
+          "output_bbox": [
+            46,
+            19,
+            338,
+            404
+          ],
+          "scale": 0.7755905511811023,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            404,
+            511,
+            747,
+            1013
+          ],
+          "output_bbox": [
+            59,
+            15,
+            325,
+            404
+          ],
+          "scale": 0.7755905511811023,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            777,
+            511,
+            1111,
+            1015
+          ],
+          "output_bbox": [
+            62,
+            13,
+            321,
+            404
+          ],
+          "scale": 0.7755905511811023,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1164,
+            509,
+            1520,
+            982
+          ],
+          "output_bbox": [
+            54,
+            37,
+            330,
+            404
+          ],
+          "scale": 0.7755905511811023,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "running-left",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            33,
+            11,
+            431,
+            495
+          ],
+          "output_bbox": [
+            30,
+            11,
+            353,
+            404
+          ],
+          "scale": 0.8123711340206186,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            450,
+            11,
+            801,
+            496
+          ],
+          "output_bbox": [
+            49,
+            10,
+            334,
+            404
+          ],
+          "scale": 0.8123711340206186,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            824,
+            11,
+            1172,
+            495
+          ],
+          "output_bbox": [
+            50,
+            11,
+            333,
+            404
+          ],
+          "scale": 0.8123711340206186,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1186,
+            11,
+            1521,
+            495
+          ],
+          "output_bbox": [
+            56,
+            11,
+            328,
+            404
+          ],
+          "scale": 0.8123711340206186,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            42,
+            512,
+            432,
+            990
+          ],
+          "output_bbox": [
+            33,
+            16,
+            350,
+            404
+          ],
+          "scale": 0.8123711340206186,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            436,
+            512,
+            792,
+            987
+          ],
+          "output_bbox": [
+            47,
+            18,
+            336,
+            404
+          ],
+          "scale": 0.8123711340206186,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            820,
+            512,
+            1173,
+            990
+          ],
+          "output_bbox": [
+            48,
+            16,
+            335,
+            404
+          ],
+          "scale": 0.8123711340206186,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1192,
+            512,
+            1525,
+            989
+          ],
+          "output_bbox": [
+            56,
+            16,
+            327,
+            404
+          ],
+          "scale": 0.8123711340206186,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "waving",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            292,
+            4,
+            642,
+            513
+          ],
+          "output_bbox": [
+            56,
+            10,
+            327,
+            404
+          ],
+          "scale": 0.7740667976424361,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            924,
+            5,
+            1280,
+            513
+          ],
+          "output_bbox": [
+            54,
+            11,
+            330,
+            404
+          ],
+          "scale": 0.7740667976424361,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            290,
+            514,
+            649,
+            1021
+          ],
+          "output_bbox": [
+            53,
+            12,
+            331,
+            404
+          ],
+          "scale": 0.7740667976424361,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            929,
+            514,
+            1286,
+            1022
+          ],
+          "output_bbox": [
+            54,
+            11,
+            330,
+            404
+          ],
+          "scale": 0.7740667976424361,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "jumping",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            110,
+            49,
+            511,
+            504
+          ],
+          "output_bbox": [
+            49,
+            80,
+            335,
+            404
+          ],
+          "scale": 0.7129094412331407,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            577,
+            14,
+            990,
+            533
+          ],
+          "output_bbox": [
+            45,
+            10,
+            339,
+            380
+          ],
+          "scale": 0.7129094412331407,
+          "baseline": 380,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            1065,
+            10,
+            1489,
+            493
+          ],
+          "output_bbox": [
+            41,
+            20,
+            343,
+            364
+          ],
+          "scale": 0.7129094412331407,
+          "baseline": 364,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            76,
+            526,
+            539,
+            1001
+          ],
+          "output_bbox": [
+            27,
+            45,
+            357,
+            384
+          ],
+          "scale": 0.7129094412331407,
+          "baseline": 384,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            598,
+            562,
+            1017,
+            1000
+          ],
+          "output_bbox": [
+            42,
+            92,
+            341,
+            404
+          ],
+          "scale": 0.7129094412331407,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            1099,
+            516,
+            1478,
+            1012
+          ],
+          "output_bbox": [
+            57,
+            50,
+            327,
+            404
+          ],
+          "scale": 0.7129094412331407,
+          "baseline": 404,
+          "runtime": false
+        }
+      ]
+    },
+    {
+      "name": "failed",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            23,
+            8,
+            361,
+            507
+          ],
+          "output_bbox": [
+            59,
+            12,
+            325,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            410,
+            9,
+            746,
+            508
+          ],
+          "output_bbox": [
+            60,
+            12,
+            324,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            795,
+            12,
+            1131,
+            508
+          ],
+          "output_bbox": [
+            60,
+            14,
+            324,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1179,
+            12,
+            1515,
+            508
+          ],
+          "output_bbox": [
+            60,
+            14,
+            324,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            23,
+            521,
+            361,
+            1013
+          ],
+          "output_bbox": [
+            59,
+            17,
+            325,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            410,
+            515,
+            745,
+            1014
+          ],
+          "output_bbox": [
+            60,
+            12,
+            323,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            793,
+            513,
+            1130,
+            1014
+          ],
+          "output_bbox": [
+            59,
+            10,
+            324,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1179,
+            513,
+            1515,
+            1014
+          ],
+          "output_bbox": [
+            60,
+            10,
+            324,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "waiting",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            144,
+            9,
+            487,
+            505
+          ],
+          "output_bbox": [
+            56,
+            12,
+            327,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            604,
+            9,
+            938,
+            505
+          ],
+          "output_bbox": [
+            60,
+            12,
+            324,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            1065,
+            8,
+            1417,
+            505
+          ],
+          "output_bbox": [
+            53,
+            12,
+            331,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            138,
+            519,
+            479,
+            1018
+          ],
+          "output_bbox": [
+            57,
+            10,
+            326,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            605,
+            521,
+            937,
+            1018
+          ],
+          "output_bbox": [
+            61,
+            12,
+            323,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            1063,
+            519,
+            1411,
+            1018
+          ],
+          "output_bbox": [
+            54,
+            10,
+            329,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "running",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            104,
+            6,
+            465,
+            510
+          ],
+          "output_bbox": [
+            51,
+            11,
+            333,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            592,
+            6,
+            953,
+            511
+          ],
+          "output_bbox": [
+            51,
+            10,
+            333,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            1090,
+            7,
+            1444,
+            510
+          ],
+          "output_bbox": [
+            54,
+            12,
+            330,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            110,
+            513,
+            469,
+            1015
+          ],
+          "output_bbox": [
+            52,
+            12,
+            332,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            590,
+            513,
+            955,
+            1015
+          ],
+          "output_bbox": [
+            49,
+            12,
+            334,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            1089,
+            516,
+            1447,
+            1015
+          ],
+          "output_bbox": [
+            52,
+            15,
+            331,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "review",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            76,
+            5,
+            436,
+            509
+          ],
+          "output_bbox": [
+            51,
+            11,
+            332,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            591,
+            7,
+            959,
+            509
+          ],
+          "output_bbox": [
+            48,
+            12,
+            335,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            1089,
+            9,
+            1461,
+            509
+          ],
+          "output_bbox": [
+            47,
+            14,
+            337,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            74,
+            513,
+            440,
+            1016
+          ],
+          "output_bbox": [
+            49,
+            12,
+            335,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            588,
+            514,
+            964,
+            1016
+          ],
+          "output_bbox": [
+            45,
+            12,
+            338,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            1097,
+            511,
+            1464,
+            1016
+          ],
+          "output_bbox": [
+            49,
+            10,
+            335,
+            404
+          ],
+          "scale": 0.7801980198019802,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "look-row-9",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            38,
+            8,
+            369,
+            500
+          ],
+          "output_bbox": [
+            61,
+            16,
+            322,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            405,
+            12,
+            748,
+            500
+          ],
+          "output_bbox": [
+            56,
+            19,
+            327,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            784,
+            12,
+            1119,
+            500
+          ],
+          "output_bbox": [
+            59,
+            19,
+            324,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1167,
+            8,
+            1497,
+            500
+          ],
+          "output_bbox": [
+            61,
+            16,
+            322,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            36,
+            514,
+            367,
+            1013
+          ],
+          "output_bbox": [
+            61,
+            10,
+            322,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            411,
+            515,
+            741,
+            1013
+          ],
+          "output_bbox": [
+            61,
+            11,
+            322,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            787,
+            518,
+            1118,
+            1013
+          ],
+          "output_bbox": [
+            61,
+            13,
+            322,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1169,
+            518,
+            1497,
+            1013
+          ],
+          "output_bbox": [
+            62,
+            13,
+            321,
+            404
+          ],
+          "scale": 0.7895791583166333,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    },
+    {
+      "name": "look-row-10",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            56,
+            10,
+            397,
+            510
+          ],
+          "output_bbox": [
+            58,
+            11,
+            326,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            431,
+            9,
+            766,
+            510
+          ],
+          "output_bbox": [
+            60,
+            10,
+            323,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            810,
+            10,
+            1146,
+            510
+          ],
+          "output_bbox": [
+            60,
+            11,
+            324,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1194,
+            10,
+            1523,
+            510
+          ],
+          "output_bbox": [
+            62,
+            11,
+            321,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            59,
+            524,
+            401,
+            1016
+          ],
+          "output_bbox": [
+            57,
+            17,
+            326,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            429,
+            521,
+            770,
+            1016
+          ],
+          "output_bbox": [
+            58,
+            15,
+            326,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            803,
+            523,
+            1151,
+            1016
+          ],
+          "output_bbox": [
+            55,
+            16,
+            329,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1187,
+            522,
+            1525,
+            1016
+          ],
+          "output_bbox": [
+            59,
+            16,
+            325,
+            404
+          ],
+          "scale": 0.7864271457085829,
+          "baseline": 404,
+          "runtime": true
+        }
+      ]
+    }
+  ]
+}
