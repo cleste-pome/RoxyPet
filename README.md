@@ -1,4 +1,4 @@
-# RoxyPet · 洛琪希桌宠
+# RoxyMac · 洛琪希桌宠
 
 <p align="center">
   <img src="05-images/icon.png" width="160" alt="RoxyPet App Icon"/>
