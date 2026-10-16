@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  一只住在 macOS 桌面上的洛琪希 —— 《无职转生》的蓝发魔术师。<br/>
+  住在 macOS 桌面上的《无职转生》伙伴：洛琪希与艾丽丝。<br/>
   原生 <b>Swift + AppKit</b> 手写，无 Electron、无第三方运行时依赖，不修改任何其他 App。
 </p>
 
@@ -33,24 +33,36 @@
 |:---:|:---:|
 | <img src="05-images/look-directions.png" width="420"/> | <img src="05-images/motion-stills.png" width="380"/> |
 
+### 新增：艾丽丝，两种装束
+
+右键桌宠 → **角色**，选择「洛琪希 · 魔法师」「艾丽丝 · 短发 · 旅行装」或「艾丽丝 · 长发 · 连衣裙」。选择会自动记住，下次启动继续使用。
+
+| 短发 · 旅行装 | 长发 · 连衣裙 |
+|:---:|:---:|
+| <img src="05-images/eris/short-idle.gif" width="180"/> | <img src="05-images/eris/long-idle.gif" width="180"/> |
+| <img src="05-images/eris/short-run.gif" width="180"/> | <img src="05-images/eris/long-run.gif" width="180"/> |
+| <img src="05-images/eris/short-look.gif" width="180"/> | <img src="05-images/eris/long-look.gif" width="180"/> |
+
+菜单和窗口会随人物切换：洛琪希是「**吩咐洛琪希**」，艾丽丝是「**拜托艾丽丝**」。隐藏 / 显示、退出、设置、记录窗口与 AI 人设一起更新。长短发艾丽丝共享人物语料和 Claude 会话，历史记录保留当时的角色名称。
+
+艾丽丝语料直接导入项目文件夹里另行制作的 Markdown 文件；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](docs/characters.md)。
+
 ## ✨ 功能
 
 - 🐾 **桌面互动**：鼠标放到她身上 → 跳一下 / 挥一下手（交替）；移开后 → 转头 / 转眼跟随你的鼠标（16 个方向实时切换）
 - 🎭 **拖动**：按住拖动，她会朝拖动方向奔跑（左拖向左跑、右拖向右跑）
-- 💬 **934 条台词库**：打招呼、闲聊、按时段/星期/情绪自动切换；全部本地随机，零消耗
+- 💬 **洛琪希 934 条台词库**：打招呼、闲聊、按时段/星期/情绪自动切换；全部本地随机，零消耗
 - ⏰ **硬件联动**：整点报时（深夜自动静音）、电池低电量提醒、电量充满庆祝
 - 🤝 **Claude Code 联动**（可选）：你发消息 → 她跑动"工作"；回答完毕 → 挥手报告，气泡里带回复摘要，点气泡跳回对应终端窗口
 - 📮 **吩咐洛琪希**：闲聊直接走 API 当场回答（又快又省）；需要动手的任务勾选后交给本机 Claude Code 执行。对话**全程留档**（聊天气泡 + Markdown 渲染，永久保存可翻查），结果自动进剪贴板
 - 🫥 **一键隐身**：菜单栏常驻一个小图标（和后台 App 一样）；右键菜单或点图标即可「隐藏洛琪希 / 显示洛琪希」——隐身时她在后台安静待命，随时召回
 - 🔮 **透视魔法**（可选）：截屏交给视觉大模型，用洛琪希的口吻点评你的屏幕
 - 🗣 **Siri 唤醒**：配合「快捷指令」导入一条指令后，喊「嘿 Siri，洛琪希」即可召唤
-- 🪶 **原生轻量**：单个可执行文件 + 一张精灵图；无网络请求（本机外部功能除外，见「隐私」）
+- 🪶 **原生轻量**：单个可执行文件 + 角色精灵图；无网络请求（本机外部功能除外，见「隐私」）
 
 ## 🎞 动作与分镜
 
-> 洛琪希的人物绘图与动画效果均由 **易轩（JensenTong）** 制作。
-
-她的所有动作——待机、奔跑、挥手、跳跃、转头看您……都画在同一张图里（`02-assets/spritesheet.png`），逐帧切换就成了动画。
+每位角色的所有动作——待机、奔跑、挥手、跳跃、转头看您……都画在各自的精灵图里（洛琪希：`02-assets/spritesheet.png`；艾丽丝：`02-assets/characters/eris-*/spritesheet.png`），逐帧切换就成了动画。
 
 | 行 | 动作 | 出现时机 |
 |:---:|---|---|
@@ -201,7 +213,7 @@ cd RoxyPet-GitHub/03-scripts
 
 - **台词**：改 `01-src/speech.swift`（每个池子都是纯字符串数组），运行时追加可放 `~/.roxy-pet/speech.json`
 - **手感参数**（`01-src/main.swift` 顶部）：`WINDOW_SCALE` 显示大小、`LOOK_WINDOW_SECONDS` 跟随秒数、`HEAD_CENTER_Y_RATIO` 视角基准、`CHIME_QUIET_FROM/TO` 报时静音时段
-- **换角色**：替换 `02-assets/spritesheet.png` 即可（保持 8 列 × 11 行规格）
+- **换角色**：右键 →「角色」即可切换；添加角色使用独立文件夹中的 `character.json` + `spritesheet.png`，详见 [角色扩展说明](docs/characters.md)。无需替换洛琪希原图。
 
 ## 📁 目录结构
 
@@ -213,20 +225,25 @@ RoxyPet-GitHub/
 ├── .gitignore
 ├── 01-src/              # 源码
 │   ├── main.swift       # 主程序（窗口/动画/气泡/菜单/联动）
-│   ├── speech.swift     # 934 条台词库
+│   ├── speech.swift     # 洛琪希台词库
+│   ├── characters.swift # 角色配置、语料与人设加载
 │   └── Info.plist
 ├── 02-assets/           # 素材
 │   ├── spritesheet.png  # 精灵图（8 列 × 11 行）
 │   ├── RoxyPet.icns     # 应用图标
-│   └── pet.json
+│   ├── pet.json
+│   ├── characters/      # 艾丽丝两款图集和角色配置
+│   └── speech/          # 艾丽丝 / 希露菲 JSON 语料
 ├── 03-scripts/          # 构建
 │   ├── build.sh
 │   ├── build-and-run.command   # 双击即构建 + 运行
 │   └── make-release.sh         # 一键出安装包（构建 + 打 dmg）
 ├── 04-integration/      # Claude Code 联动
 │   └── hook.sh
-├── 05-images/           # README 配图（含 4 张动图预览）
-└── 06-dist/             # 成品快照：构建好的 RoxyPet.app（与 Releases 的 dmg 同款）
+├── 05-images/           # README 配图（含动图预览）
+├── 06-dist/             # 成品快照：构建好的 RoxyPet.app（与 Releases 的 dmg 同款）
+├── 07-art-source/       # 艾丽丝素材可复现工程：母版 / 动作原图 / 提示词 / 独立帧
+└── docs/                # 角色扩展 · 语料 · 素材制作记录
 ```
 
 根目录的**临时**构建产物（`RoxyPet.app`、`*.dmg`）由 `.gitignore` 排除、不入库；而 `06-dist/` 里保存着一份**跟版本走的成品快照**——构建好的 `RoxyPet.app`，与 Releases 里 dmg 内完全同款，`make-release.sh` 每次发布会自动更新它。日常下载安装包请走 Releases。
@@ -237,11 +254,12 @@ RoxyPet-GitHub/
 - 纯聊天直连你**自己配置**的 API；勾选「让她动手做」时调用本机 `claude` CLI（跳过权限确认执行）；「透视魔法 / 想句话」同样读取 `~/.claude/settings.json` 中的端点与凭据
 - 所有任务与历史记录只写入本机 `~/.roxy-pet/`，不上传任何地方
 
-## 💛 致谢
-
-- **[易轩（JensenTong）](https://github.com/Emulation174)** —— 角色美术与序列帧动画（Character Art & Sprite Animation）
-
 ## ⚖️ 版权
 
 - 《无职转生》及其角色版权归 理不尽な孫の手 及原作相关权利方所有
 - 本项目为非商业粉丝作品；仓库内美术素材请勿商用；再分发本代码时请替换为你自己拥有权利的素材
+
+## 💛 致谢
+
+- **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希的角色美术与序列帧动画**（Character Art & Sprite Animation）。
+- **项目发起与维护（Author & Maintainer）**：[cleste-pome](https://github.com/cleste-pome)

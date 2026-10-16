@@ -1,5 +1,5 @@
 # 根目录的临时构建产物不入库（正式成品快照保存在 06-dist/）
-/RoxyPet.app/
+/RoxyPet*.app/
 *.dmg
 
 # macOS 杂物

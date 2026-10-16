@@ -188,6 +188,14 @@ final class PetView: NSView {
 
 // ============ 控制器 ============
 final class PetController: NSObject, NSApplicationDelegate {
+    private var characters = PetCharacter.loadCatalog()
+    private var character = PetCharacter.roxy
+    private var characterName: String { character.name }
+
+    private func lines(_ key: String, _ fallback: [String]) -> [String] {
+        character.lines(key, roxy: fallback)
+    }
+
     var window: NSWindow?
     var petView: PetView?
 
@@ -254,7 +262,9 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var battCharging = true
     private var battWarnStep = 0              // 0=未警告, 1=已警告20%, 2=已警告10%
     private var battFullWarned = false
-    private var aiBusy = false
+    private var aiBusy = false {
+        didSet { statusItem?.menu = makeMenu(forStatusBar: true) }
+    }
     private var petHidden = false
     private var ownerTitle = UserDefaults.standard.string(forKey: "roxyOwnerTitle") ?? ""
     private var ocWatchRunning = false
@@ -273,6 +283,8 @@ final class PetController: NSObject, NSApplicationDelegate {
         let t: Double
         let role: String   // "user" / "roxy"
         let text: String
+        var characterID: String? = nil
+        var characterName: String? = nil
     }
     private var taskHistory: [TaskRecord] = []
     private var historyWindow: NSWindow?
@@ -291,7 +303,8 @@ final class PetController: NSObject, NSApplicationDelegate {
         // 防断裂：上次若有一条"用户消息"没等到回答（App 中途退出/重启），补一条说明
         if let last = taskHistory.last, last.role == "user" {
             taskHistory.append(TaskRecord(t: Date().timeIntervalSince1970, role: "roxy",
-                                          text: "（上次的吩咐在途中被打断了，抱歉……可以再吩咐我一次，我马上办。）"))
+                                          text: "（上次的请求在途中被打断了，可以再发一次。）",
+                                          characterID: last.characterID, characterName: last.characterName))
             saveTaskHistory()
         }
     }
@@ -302,17 +315,17 @@ final class PetController: NSObject, NSApplicationDelegate {
         }
     }
     private func appendHistory(role: String, text: String) {
-        taskHistory.append(TaskRecord(t: Date().timeIntervalSince1970, role: role, text: text))
+        taskHistory.append(TaskRecord(t: Date().timeIntervalSince1970, role: role, text: text, characterID: character.characterID, characterName: character.name))
         saveTaskHistory()
         refreshHistoryWindow()
     }
     private func historyFullText() -> String {
-        guard !taskHistory.isEmpty else { return "（还没有吩咐过事情哦。\n\n在菜单里选「吩咐洛琪希做事」，把任务交给我吧。）" }
+        guard !taskHistory.isEmpty else { return "（还没有记录哦。\n\n在菜单里选「\(character.actionTitle)」，把任务交给我吧。）" }
         let df = DateFormatter()
         df.dateFormat = "M月d日 HH:mm"
         var parts: [String] = []
         for r in taskHistory.reversed() {
-            let who = (r.role == "user") ? "你" : "洛琪希"
+            let who = (r.role == "user") ? "你" : (r.characterName ?? "洛琪希")
             parts.append("▸ " + df.string(from: Date(timeIntervalSince1970: r.t)) + "　" + who + "：\n" + r.text)
         }
         return parts.joined(separator: "\n\n────────────────────\n\n")
@@ -403,11 +416,11 @@ final class PetController: NSObject, NSApplicationDelegate {
         df.dateFormat = "M月d日 HH:mm"
         var rows = ""
         if taskHistory.isEmpty {
-            rows = "<div class='empty'>还没有吩咐过事情哦～<br>在菜单里选「吩咐洛琪希做事」，把任务交给我吧。</div>"
+            rows = "<div class='empty'>还没有记录哦～<br>在菜单里选「\(character.actionTitle)」，把任务交给我吧。</div>"
         } else {
             for r in taskHistory {
                 let isUser = (r.role == "user")
-                let who = isUser ? "你" : "洛琪希"
+                let who = htmlEscape(isUser ? "你" : (r.characterName ?? "洛琪希"))
                 let cls = isUser ? "me" : "roxy"
                 let time = df.string(from: Date(timeIntervalSince1970: r.t))
                 let body = isUser ? "<p>\(htmlEscape(r.text))</p>" : mdToHTML(r.text)
@@ -453,7 +466,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         if historyWindow == nil {
             let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 560, height: 540),
                              styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
-            w.title = "洛琪希 · 吩咐记录"
+            w.title = "\(characterName) · \(character.historyTitle)"
             w.isReleasedWhenClosed = false
             let web = WKWebView(frame: NSRect(x: 0, y: 0, width: 560, height: 540))
             web.autoresizingMask = [.width, .height]
@@ -483,7 +496,10 @@ final class PetController: NSObject, NSApplicationDelegate {
     // ---------- 启动 ----------
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        guard loadAtlas() else {
+        let savedID = UserDefaults.standard.string(forKey: "selectedCharacter") ?? "roxy"
+        character = characters.first(where: { $0.id == savedID }) ?? characters[0]
+        if !loadAtlas() { character = characters[0] }
+        guard !frames.isEmpty || loadAtlas() else {
             NSLog("RoxyPet: failed to load spritesheet")
             NSApp.terminate(nil)
             return
@@ -519,11 +535,18 @@ final class PetController: NSObject, NSApplicationDelegate {
     }
 
     private func loadAtlas() -> Bool {
-        guard let path = Bundle.main.path(forResource: "spritesheet", ofType: "png"),
-              let img = NSImage(contentsOfFile: path),
+        guard let url = character.atlasURL,
+              let img = NSImage(contentsOf: url),
               let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil),
               let space = CGColorSpace(name: CGColorSpace.sRGB) else { return false }
 
+        // Build locally so a malformed replacement cannot corrupt the current pet.
+        var newFrames: [[NSImage]] = []
+        var newMasks: [[[UInt8]]] = []
+        guard cg.width >= COLS * 32, cg.height >= ROWS * 32,
+              abs(Double(cg.width) / Double(cg.height) - Double(COLS * CELL_W) / Double(ROWS * CELL_H)) < 0.02,
+              [.premultipliedLast, .premultipliedFirst, .last, .first].contains(cg.alphaInfo)
+        else { return false }
         for row in 0..<ROWS {
             var rowFrames: [NSImage] = []
             var rowMasks: [[UInt8]] = []
@@ -537,7 +560,13 @@ final class PetController: NSObject, NSApplicationDelegate {
                 ctx.draw(cg, in: CGRect(x: 0, y: 0,
                                         width: CGFloat(COLS * CELL_W),
                                         height: CGFloat(ROWS * CELL_H)))
-                guard let cell = ctx.makeImage() else { return false }
+                // Keep source-resolution pixels for Retina displays. The separate 192x208
+                // context below is only for hit testing, never the displayed image.
+                let sourceW = CGFloat(cg.width) / CGFloat(COLS)
+                let sourceH = CGFloat(cg.height) / CGFloat(ROWS)
+                guard let cell = cg.cropping(to: CGRect(x: CGFloat(col) * sourceW,
+                                                        y: CGFloat(row) * sourceH,
+                                                        width: sourceW, height: sourceH)) else { return false }
                 rowFrames.append(NSImage(cgImage: cell, size: NSSize(width: CELL_W, height: CELL_H)))
 
                 let buf = ctx.data!.assumingMemoryBound(to: UInt8.self)
@@ -549,14 +578,17 @@ final class PetController: NSObject, NSApplicationDelegate {
                 }
                 rowMasks.append(mask)
             }
-            frames.append(rowFrames)
-            masks.append(rowMasks)
+            newFrames.append(rowFrames)
+            newMasks.append(rowMasks)
         }
         // 悬停/点击判定用"站姿轮廓"：行 0（idle）全部帧的并集，避免动画帧变化导致判定抖动
         var hm = [UInt8](repeating: 0, count: CELL_W * CELL_H)
-        for m in masks[0] {
+        for m in newMasks[0] {
             for i in 0..<(CELL_W * CELL_H) { hm[i] = max(hm[i], m[i]) }
         }
+        guard hm.contains(where: { $0 > 32 }) else { return false }
+        frames = newFrames
+        masks = newMasks
         hoverMask = hm
         return true
     }
@@ -597,6 +629,7 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     // ---------- 说话（气泡）----------
     func speak(_ text: String, seconds: Double? = nil, fullText: String? = nil, resumeSid: String? = nil, resumeTty: String? = nil, resumeTerm: String? = nil) {
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         let text = resolvedTitle(text)
         guard window != nil, !petHidden, !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         bubbleCopyText = fullText ?? text
@@ -745,7 +778,7 @@ final class PetController: NSObject, NSApplicationDelegate {
     }
 
     private func openResumeTerminal(sid: String) {
-        let path = NSTemporaryDirectory() + "洛琪希接续会话.command"
+        let path = NSTemporaryDirectory() + "RoxyPet接续会话.command"
         let script = "#!/bin/bash\ncd \"$HOME\"\nexec claude --resume \(sid)\n"
         do {
             try script.write(toFile: path, atomically: true, encoding: .utf8)
@@ -811,7 +844,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         if lastTick == 0 { lastTick = now }
         let dt = min(now - lastTick, 0.25)
         lastTick = now
-        guard let win = window else { return }
+        guard window != nil else { return }
 
         pollClaudeState(dt: dt)
         pollSchedules(now: now, dt: dt)
@@ -841,7 +874,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         if lookUntil > 0 && now >= lookUntil {
             lookUntil = 0
             if !hovering && !dragging && Double.random(in: 0..<1) < 0.2 {
-                speak(randomOf(LOOK_END_LINES))
+                speak(randomOf(lines("look_end", LOOK_END_LINES)))
             }
         }
 
@@ -851,7 +884,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             let my = NSEvent.mouseLocation.y
             if !dragMoved && hypot(mx - dragStartPoint.x, my - dragStartPoint.y) > CLICK_MAX_MOVE {
                 dragMoved = true
-                if Double.random(in: 0..<1) < 0.12 { speak(randomOf(DRAG_LINES)) }
+                if Double.random(in: 0..<1) < 0.12 { speak(randomOf(lines("drag", DRAG_LINES))) }
             }
             let d = mx - dragPrevX
             if d > 0.3 { dragRight = true }
@@ -989,7 +1022,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         // 打招呼
         if !greeted && now - startTime > GREET_DELAY {
             greeted = true
-            speak(randomOf(GREETINGS))
+            speak(randomOf(lines("greeting", GREETINGS)))
             triggerWave()
         }
         // 整点报时
@@ -998,7 +1031,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             lastChimeHour = h
             let quiet = h >= CHIME_QUIET_FROM || h < CHIME_QUIET_TO
             if !quiet {
-                speak(hourlyLine(h))
+                speak(characterHourlyLine(h))
                 triggerJump()
             }
         }
@@ -1016,6 +1049,21 @@ final class PetController: NSObject, NSApplicationDelegate {
             batteryAcc = 0
             pollBattery()
         }
+    }
+
+    private func characterHourlyLine(_ hour: Int) -> String {
+        if character.isRoxy { return hourlyLine(hour) }
+        let key: String
+        switch hour {
+        case 7...11: key = "hourly_morning"
+        case 12: key = "hourly_noon"
+        case 13...17: key = "hourly_day"
+        case 18...22: key = "hourly_evening"
+        default: key = "hourly_default"
+        }
+        let template = randomOf(lines(key, []))
+        let h12 = hour % 12 == 0 ? 12 : hour % 12
+        return template.isEmpty ? "现在是\(hour)点。" : template.replacingOccurrences(of: "{h}", with: String(h12))
     }
 
     private func pollBattery() {
@@ -1045,7 +1093,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             battWarnStep = 0
             if level >= 100 && !battFullWarned {
                 battFullWarned = true
-                speak(randomOf(BATTERY_FULL))
+                speak(randomOf(lines("battery_full", BATTERY_FULL)))
                 triggerWave()
             }
             if level < 95 { battFullWarned = false }
@@ -1053,11 +1101,11 @@ final class PetController: NSObject, NSApplicationDelegate {
             battFullWarned = false
             if level <= 10 && battWarnStep < 2 {
                 battWarnStep = 2
-                speak(randomOf(BATTERY_10))
+                speak(randomOf(lines("battery10", BATTERY_10)))
                 triggerJump()
             } else if level <= 20 && battWarnStep < 1 {
                 battWarnStep = 1
-                speak(randomOf(BATTERY_20))
+                speak(randomOf(lines("battery20", BATTERY_20)))
                 triggerJump()
             }
         }
@@ -1138,7 +1186,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                 ocWatchRunning = true
             } else if ocWatchRunning {
                 ocWatchRunning = false
-                if !aiBusy { triggerWave(); speak(randomOf(DONE_LINES)) }
+                if !aiBusy { triggerWave(); speak(randomOf(lines("done", DONE_LINES))) }
             }
         }
 
@@ -1147,7 +1195,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         if noticeTS > lastOnceTS {
             lastOnceTS = noticeTS
             triggerWave()
-            speak(randomOf(NOTICE_LINES))
+            speak(randomOf(lines("notice", NOTICE_LINES)))
         } else if doneTS > lastOnceTS {
             lastOnceTS = doneTS
             if !aiBusy {
@@ -1173,7 +1221,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                     return
                 }
             }
-            speak(randomOf(DONE_LINES))
+            speak(randomOf(lines("done", DONE_LINES)))
             return
         }
         let rp = base + "last_reply"
@@ -1199,7 +1247,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                 return
             }
         }
-        speak(randomOf(DONE_LINES))
+        speak(randomOf(lines("done", DONE_LINES)))
     }
 
     // ---------- 本地台词路由（情境/情绪；零 token，纯逻辑判断）----------
@@ -1212,7 +1260,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             mood = .shy
             moodUntil = now + 180
         }
-        if Double.random(in: 0..<1) < 0.15 { speak(randomOf(HOVER_LINES)) }
+        if Double.random(in: 0..<1) < 0.15 { speak(randomOf(lines("hover", HOVER_LINES))) }
     }
 
     // 转头跟随时，小概率冲当前方位说一句（16 档方向归并为 8 个方位池）
@@ -1224,7 +1272,8 @@ final class PetController: NSObject, NSApplicationDelegate {
         guard DIR_LINES.indices.contains(slot), !DIR_LINES[slot].isEmpty else { return }
         lastDirSpokenSlot = slot
         lastDirSpokeAt = now
-        speak(randomOf(DIR_LINES[slot]))
+        let keys = ["up", "up_right", "right", "down_right", "down", "down_left", "left", "up_left"]
+        speak(randomOf(lines(keys[slot], DIR_LINES[slot])))
     }
 
     private func pickChatLine() -> String {
@@ -1232,18 +1281,18 @@ final class PetController: NSObject, NSApplicationDelegate {
         let h = comps.hour ?? 12
         let wd = comps.weekday ?? 2
         var pool: [String] = []
-        if h >= 23 || h < 5 { pool += NIGHT_LINES }
-        else if h >= 5 && h < 11 { pool += MORNING_LINES }
-        else if h >= 17 { pool += EVENING_LINES }
-        else { pool += DAY_LINES }
-        if wd == 1 || wd == 7 { pool += WEEKEND_LINES } else { pool += WORKDAY_LINES }
-        pool += CHAT_LINES
+        if h >= 23 || h < 5 { pool += lines("night", NIGHT_LINES) }
+        else if h >= 5 && h < 11 { pool += lines("morning", MORNING_LINES) }
+        else if h >= 17 { pool += lines("evening", EVENING_LINES) }
+        else { pool += lines("day", DAY_LINES) }
+        if wd == 1 || wd == 7 { pool += lines("weekend", WEEKEND_LINES) } else { pool += lines("workday", WORKDAY_LINES) }
+        pool += lines("chat", CHAT_LINES)
         switch mood {
-        case .shy: pool += HOVER_LINES
-        case .lonely: pool += LONELY_LINES
+        case .shy: pool += lines("hover", HOVER_LINES)
+        case .lonely: pool += lines("lonely", LONELY_LINES)
         case .calm: break
         }
-        return pool.randomElement() ?? randomOf(CHAT_LINES)
+        return pool.randomElement() ?? randomOf(lines("chat", CHAT_LINES))
     }
 
     // ---------- 台词扩展：内置批次（speech.swift）+ 用户自定义（~/.roxy-pet/speech.json）----------
@@ -1302,8 +1351,8 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     private func speakLocalLine() {
         setPetHidden(false)
-        let pool = CHAT_LINES.filter { $0 != lastSpokenLine }
-        let line = pool.randomElement() ?? randomOf(CHAT_LINES)
+        let pool = lines("chat", CHAT_LINES).filter { $0 != lastSpokenLine }
+        let line = pool.randomElement() ?? randomOf(lines("chat", CHAT_LINES))
         lastSpokenLine = line
         speak(line)
     }
@@ -1316,7 +1365,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             return
         }
         guard PetController.hasAPIConfig() else {
-            speak("唔……「透视魔法」得先连上「那边的世界」——帮我配置一下 API 好吗？")
+            speak("看屏幕前需要先配置 API。")
             promptForAPISettings()
             return
         }
@@ -1325,9 +1374,10 @@ final class PetController: NSObject, NSApplicationDelegate {
             if !requestScreenPermission() { return }
         }
         aiBusy = true
-        speak("嗯……让我用透视魔法看一眼。", seconds: 8)
+        speak(character.isRoxy ? "嗯……让我用透视魔法看一眼。" : "让我看看。", seconds: 8)
+        let systemPrompt = characterPersonaSystem("你正在看用户授权提供的屏幕截图。用 1~2 句中文评论可见内容（40 字以内），只输出台词。")
         DispatchQueue.global().async { [weak self] in
-            let result = PetController.screenPeek()
+            let result = PetController.screenPeek(systemPrompt: systemPrompt)
             DispatchQueue.main.async {
                 self?.aiBusy = false
                 self?.speak(result)
@@ -1340,11 +1390,11 @@ final class PetController: NSObject, NSApplicationDelegate {
         var checkFailed = false
         while true {
             let alert = NSAlert()
-            alert.messageText = "洛琪希需要「屏幕录制」权限"
+            alert.messageText = "\(characterName)需要「屏幕录制」权限"
             if checkFailed {
                 alert.informativeText = "还没检测到授权——如果刚刚勾选，可能需要重启我才能识别。可以点「帮我重启再看」，或回到「打开设置」再确认一下勾选。"
             } else {
-                alert.informativeText = "macOS 要求应用截屏前必须先获得授权。\n\n请点「打开设置」→ 在「屏幕录制」里勾选「洛琪希桌宠」（如有多条旧记录，请先移除旧条目）→ 回来点「检查并继续」。"
+                alert.informativeText = "macOS 要求应用截屏前必须先获得授权。\n\n请点「打开设置」→ 在「屏幕录制」里勾选「RoxyPet」（如有多条旧记录，请先移除旧条目）→ 回来点「检查并继续」。"
             }
             alert.addButton(withTitle: "打开设置")
             alert.addButton(withTitle: checkFailed ? "帮我重启再看" : "检查并继续")
@@ -1382,7 +1432,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { NSApp.terminate(nil) }
     }
 
-    private static func screenPeek() -> String {
+    private static func screenPeek(systemPrompt: String) -> String {
         let shot = "/tmp/roxy-view.png"
         let small = "/tmp/roxy-view-small.png"
         try? FileManager.default.removeItem(atPath: shot)
@@ -1412,13 +1462,13 @@ final class PetController: NSObject, NSApplicationDelegate {
         }
         dbg("peek: screenshot \(data.count) bytes, sending to API")
         let b64 = data.base64EncodedString()
-        let sys = "你扮演《无职转生》的洛琪希·米格路迪亚：穿越到现实世界、当用户桌宠的米格路德族水圣级魔术师。你正用「透视魔法」看到用户的电脑屏幕。请用她礼貌、认真、偶尔好奇或害羞的口吻，用 1~2 句中文评论屏幕上的内容（40 字以内）；可以自然联系故乡的人、事、物（如希露菲、魔大陆、魔法大学，或把屏幕上的东西比作魔导书、魔术阵）；称呼屏幕主人为「\(promptTitle())」；只输出台词本身，不要引号、不要 emoji、不要解释。"
+        let sys = systemPrompt
         let userText = "这是用户的屏幕截图。请按人设评论。"
         // 主路径：接入的 API（Anthropic 兼容、支持视觉）
         if let t = askVisionAPI(system: sys, userText: userText, imageB64: b64) { return t }
         // 备选：本地 LM Studio（若在运行且有视觉模型）
         if let t = askLMStudio(system: sys, userText: userText, imageB64: b64) { return t }
-        return "唔……透视魔法一时连不上呢。稍后再试一次好吗？"
+        return "暂时连接不上，稍后再试一次吧。"
     }
 
     // 主路径：走已接入的 API（从 ~/.claude/settings.json 读取端点与凭证）
@@ -1632,14 +1682,14 @@ final class PetController: NSObject, NSApplicationDelegate {
             return
         }
         let alert = NSAlert()
-        alert.messageText = "吩咐洛琪希"
+        alert.messageText = character.actionTitle
         alert.informativeText = "聊天直接输入即可（她当场回答，又快又省）；需要动手做的事，请勾选下方选项，交给 Claude Code 执行。"
-        alert.addButton(withTitle: "交给洛琪希")
+        alert.addButton(withTitle: "交给\(characterName)")
         alert.addButton(withTitle: "查看记录")
         alert.addButton(withTitle: "取消")
         let box = NSView(frame: NSRect(x: 0, y: 0, width: 340, height: 54))
         let input = NSTextField(frame: NSRect(x: 0, y: 30, width: 340, height: 24))
-        input.placeholderString = "在这里输入想说的话，或想让洛琪希做的事…"
+        input.placeholderString = "在这里输入想说的话，或想让\(characterName)做的事…"
         let ccCheck = NSButton(checkboxWithTitle: "让她动手做（交给 Claude Code 执行）", target: nil, action: nil)
         ccCheck.frame = NSRect(x: 0, y: 4, width: 340, height: 20)
         box.addSubview(input)
@@ -1655,13 +1705,9 @@ final class PetController: NSObject, NSApplicationDelegate {
         runClaudeTask(text, ccMode: ccCheck.state == .on)
     }
 
-    /// 洛琪希人设系统提示词（对话与任务共用，称呼跟随用户设置）
-    private func roxyPersonaSystem(_ extra: String) -> String {
-        let title = ownerTitle.isEmpty ? "您" : ownerTitle
-        return """
-        【身份】你是《无职转生》中的洛琪希·米格路迪亚——穿越到现实世界、当用户桌面宠物的米格路德族水圣级魔术师；认真、温柔、礼貌、容易害羞、带一点教学口吻。始终用洛琪希的口吻说话，称呼对方为「\(title)」，不用网络用语、不用 emoji。
-        \(extra)
-        """
+    /// 当前角色人设系统提示词（对话与任务共用，称呼跟随用户设置）
+    private func characterPersonaSystem(_ extra: String) -> String {
+        character.systemPrompt(owner: ownerTitle.isEmpty ? (character.isRoxy ? "您" : "你") : ownerTitle, extra: extra)
     }
 
     @objc private func pickHarness(_ sender: NSMenuItem) {
@@ -1719,10 +1765,10 @@ final class PetController: NSObject, NSApplicationDelegate {
         s.replacingOccurrences(of: "\u{001B}\\[[0-9;]*[A-Za-z]", with: "", options: .regularExpression)
     }
 
-    private static func runOpencode(prompt: String) -> String? {
+    private static func runOpencode(prompt: String, continueRoxy: Bool) -> String? {
         guard let bin = harnessPaths["opencode"] else { return nil }
         let d = UserDefaults.standard
-        let started = d.bool(forKey: "roxyOpencodeStarted")
+        let started = continueRoxy && d.bool(forKey: "roxyOpencodeStarted")
         let p = Process()
         p.executableURL = URL(fileURLWithPath: bin)
         p.arguments = started ? ["run", "--auto", "--continue", prompt] : ["run", "--auto", prompt]
@@ -1742,7 +1788,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
             .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix(">") }
             .joined(separator: "\n")
-        if !started && !cleaned.isEmpty { d.set(true, forKey: "roxyOpencodeStarted") }
+        if continueRoxy && !started && !cleaned.isEmpty { d.set(true, forKey: "roxyOpencodeStarted") }
         return cleaned.isEmpty ? nil : cleaned
     }
 
@@ -1750,7 +1796,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         let harness = PetController.currentHarness()
         let chatMode = !ccMode || harness == "chat"
         if chatMode && !PetController.hasAPIConfig() {
-            speak("唔……我还没连上「那边的世界」呢。先帮我配置一下 API，再吩咐我一次就好哦。")
+            speak("唔……我还没连上「那边的世界」呢。先帮我配置一下 API，再找我一次就好哦。")
             promptForAPISettings()
             return
         }
@@ -1759,14 +1805,14 @@ final class PetController: NSObject, NSApplicationDelegate {
         appendHistory(role: "user", text: text)
         if chatMode {
             // 纯对话：直连配置好的 API 当场回答，不惊动 Claude Code
-            let sys = roxyPersonaSystem("这是主人发来的一段话，请自然地回应（1~5 句，可用 Markdown 排版），像平时聊天一样。")
+            let sys = characterPersonaSystem("这是主人发来的一段话，请自然地回应（1~5 句，可用 Markdown 排版），像平时聊天一样。")
             DispatchQueue.global().async { [weak self] in
                 let r = PetController.askTextAPI(system: sys, userText: text)
                 DispatchQueue.main.async { self?.deliverTaskResult(r, sid: nil) }
             }
             return
         }
-        let fullPrompt = roxyPersonaSystem("任务请照常执行、事实照常核实，但**最终回答要用洛琪希的口吻来写**，保留全部结论与细节的准确性，可以用 Markdown 排版。\n\n【任务】\(text)")
+        let fullPrompt = characterPersonaSystem("任务请照常执行、事实照常核实，但**最终回答要用\(characterName)的口吻来写**，保留全部结论与细节的准确性，可以用 Markdown 排版。\n\n【任务】\(text)")
         if harness == "codex" {
             DispatchQueue.global().async { [weak self] in
                 let r = PetController.runCodex(prompt: fullPrompt)
@@ -1775,14 +1821,15 @@ final class PetController: NSObject, NSApplicationDelegate {
             return
         }
         if harness == "opencode" {
+            let continueRoxy = character.isRoxy
             DispatchQueue.global().async { [weak self] in
-                let r = PetController.runOpencode(prompt: fullPrompt)
+                let r = PetController.runOpencode(prompt: fullPrompt, continueRoxy: continueRoxy)
                 DispatchQueue.main.async { self?.deliverTaskResult(r, sid: nil) }
             }
             return
         }
         let d = UserDefaults.standard
-        let key = "roxySessionId"
+        let key = character.isRoxy ? "roxySessionId" : "petSessionId." + character.characterID
         let sid: String
         let isFirst: Bool
         if let s = d.string(forKey: key) {
@@ -1809,7 +1856,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             let summary = line.count > 110 ? String(line.prefix(110)) + "…（点击气泡可复制全文 / 接续会话）" : line
             speak(summary, seconds: 25, fullText: line, resumeSid: sid)
         } else {
-            let fail = randomOf(AI_FAIL)
+            let fail = randomOf(lines("ai_fail", AI_FAIL))
             appendHistory(role: "roxy", text: "（\(fail)）")
             speak(fail)
         }
@@ -1825,19 +1872,11 @@ final class PetController: NSObject, NSApplicationDelegate {
             return
         }
         aiBusy = true
-        speak(randomOf(AI_THINKING), seconds: 8)
+        speak(randomOf(lines("ai_thinking", AI_THINKING)), seconds: 8)
         let df = DateFormatter()
         df.dateFormat = "HH:mm"
         let timeStr = df.string(from: Date())
-        let prompt = """
-        你现在扮演《无职转生》里的洛琪希·米格路迪亚：蓝发双辫的米格路德族、水圣级魔术师、当过许多年家庭教师；认真、温柔、礼貌、容易害羞，说话轻声带教学式口吻。她如今穿越到了现实世界，当用户 Mac 桌面上的桌宠。
-        请用她的口吻对主人说一句简短的问候或闲话（10~40 字），要求：
-        1. 多用《无职转生》世界观元素：自然地提到故乡的人物（希露菲、艾莉丝、保罗、基列奴、瑞杰路德、札诺巴等）、地名（魔大陆、拉诺亚魔法大学、布耶纳村、米里斯等）、事物（魔杖、魔导书、咏唱、魔力、冒险者公会等），与现实桌面上的见闻对比或联想；
-        2. 口吻贴合原作：礼貌、温柔、认真，偶尔害羞或小自豪；不傲娇、不毒舌、不用网络用语；
-        3. 称呼对话对象为「\(ownerTitle.isEmpty ? "您" : ownerTitle)」；
-        4. 现在是 \(timeStr)。
-        只输出台词本身，不要引号、不要解释、不要 emoji。
-        """
+        let prompt = characterPersonaSystem("请用角色口吻说一句简短问候或闲话（10~40 字）。现在是 \(timeStr)。只输出台词本身，不要引号或解释。")
         DispatchQueue.global().async { [weak self] in
             var result = PetController.askTextAPI(system: prompt, userText: "请说一句。")
             if let r = result, let first = r.split(separator: "\n").first { result = String(first) }
@@ -1846,7 +1885,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                 if let line = result, !line.isEmpty {
                     self?.speak(line)
                 } else {
-                    self?.speak(randomOf(AI_FAIL))
+                    self?.speak(randomOf(self?.lines("ai_fail", AI_FAIL) ?? []))
                 }
             }
         }
@@ -1975,7 +2014,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         }
         let alert = NSAlert()
         alert.messageText = "API 设置"
-        alert.informativeText = "「聊天 / 想句话 / 透视魔法」需要一个 Anthropic 兼容的 API。\n当前生效：\(detected)\n三项都留空则自动沿用 ~/.claude/settings.json 里的 Claude Code 配置。"
+        alert.informativeText = "「聊天 / 想句话 / 看屏幕」需要一个 Anthropic 兼容的 API。\n当前生效：\(detected)\n三项都留空则自动沿用 ~/.claude/settings.json 里的 Claude Code 配置。"
         alert.addButton(withTitle: "保存")
         alert.addButton(withTitle: "取消")
         let box = NSView(frame: NSRect(x: 0, y: 0, width: 400, height: 112))
@@ -2007,7 +2046,7 @@ final class PetController: NSObject, NSApplicationDelegate {
     private func promptForTitle(firstRun: Bool) {
         setPetHidden(false)
         let alert = NSAlert()
-        alert.messageText = firstRun ? "初次见面，我是洛琪希" : "称呼设置"
+        alert.messageText = firstRun ? "初次见面，我是\(characterName)" : "称呼设置"
         alert.informativeText = "平时我该怎么称呼您呢？（留空则用「您」）"
         alert.addButton(withTitle: "就这么叫")
         alert.addButton(withTitle: firstRun ? "先用「您」" : "取消")
@@ -2051,7 +2090,7 @@ final class PetController: NSObject, NSApplicationDelegate {
     private func buildSettingsWindow() {
         let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 500, height: 540),
                          styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        w.title = "洛琪希 · 设置"
+        w.title = "\(characterName) · 设置"
         w.isReleasedWhenClosed = false
 
         let fTitle = NSTextField(string: "")
@@ -2173,7 +2212,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             }
             swStatusLabel?.stringValue = line
         } else {
-            swStatusLabel?.stringValue = "尚未配置 API——聊天 / 想句话 / 透视魔法需要它"
+            swStatusLabel?.stringValue = "尚未配置 API——聊天 / 想句话 / 看屏幕需要它"
         }
     }
 
@@ -2241,7 +2280,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             let img = NSImage(named: NSImage.applicationIconName)
             img?.size = NSSize(width: 18, height: 18)
             btn.image = img
-            btn.toolTip = "洛琪希桌宠"
+            btn.toolTip = "\(character.menuTitle) · RoxyPet"
         }
         item.menu = makeMenu(forStatusBar: true)
         statusItem = item
@@ -2258,12 +2297,35 @@ final class PetController: NSObject, NSApplicationDelegate {
         } else {
             window?.orderFrontRegardless()
         }
-        statusVisibilityItem?.title = hidden ? "显示洛琪希" : "隐藏洛琪希"
+        statusVisibilityItem?.title = hidden ? "显示\(characterName)" : "隐藏\(characterName)"
     }
 
     private func makeMenu(forStatusBar: Bool) -> NSMenu {
         let menu = NSMenu()
-        let viz = NSMenuItem(title: petHidden ? "显示洛琪希" : "隐藏洛琪希", action: #selector(togglePetVisibility), keyEquivalent: "")
+        let picker = NSMenuItem(title: "角色 · \(character.menuTitle)", action: nil, keyEquivalent: "")
+        let choices = NSMenu()
+        choices.autoenablesItems = false
+        for profile in characters {
+            let item = NSMenuItem(title: profile.menuTitle, action: #selector(selectCharacter(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = profile.id
+            item.state = profile.id == character.id ? .on : .off
+            item.isEnabled = !aiBusy
+            choices.addItem(item)
+        }
+        choices.addItem(.separator())
+        let add = NSMenuItem(title: "添加其他角色…", action: #selector(openCharactersFolder), keyEquivalent: "")
+        add.target = self
+        choices.addItem(add)
+        let reload = NSMenuItem(title: "重新载入角色与语料", action: #selector(reloadCharacters), keyEquivalent: "")
+        reload.target = self
+        reload.isEnabled = !aiBusy
+        choices.addItem(reload)
+        if aiBusy { choices.addItem(NSMenuItem(title: "回复完成后可切换角色", action: nil, keyEquivalent: "")) }
+        picker.submenu = choices
+        menu.addItem(picker)
+        menu.addItem(.separator())
+        let viz = NSMenuItem(title: petHidden ? "显示\(characterName)" : "隐藏\(characterName)", action: #selector(togglePetVisibility), keyEquivalent: "")
         viz.target = self
         if forStatusBar {
             menu.addItem(viz)
@@ -2277,14 +2339,14 @@ final class PetController: NSObject, NSApplicationDelegate {
         ai.target = self
         menu.addItem(ai)
         menu.addItem(.separator())
-        let task = NSMenuItem(title: "吩咐洛琪希…（聊天 / 做事）", action: #selector(askClaudeCode), keyEquivalent: "")
+        let task = NSMenuItem(title: "\(character.actionTitle)…（聊天 / 做事）", action: #selector(askClaudeCode), keyEquivalent: "")
         task.target = self
         menu.addItem(task)
-        let look = NSMenuItem(title: "看看屏幕（透视魔法）", action: #selector(lookAtScreen), keyEquivalent: "")
+        let look = NSMenuItem(title: character.screenTitle, action: #selector(lookAtScreen), keyEquivalent: "")
         look.target = self
         menu.addItem(look)
         menu.addItem(.separator())
-        let hist = NSMenuItem(title: "查看吩咐记录", action: #selector(showTaskHistory), keyEquivalent: "")
+        let hist = NSMenuItem(title: "查看\(character.historyTitle)", action: #selector(showTaskHistory), keyEquivalent: "")
         hist.target = self
         menu.addItem(hist)
         let reset = NSMenuItem(title: "回到屏幕右下角", action: #selector(resetPosition), keyEquivalent: "")
@@ -2294,7 +2356,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         if !forStatusBar {
             menu.addItem(viz)
         }
-        let quit = NSMenuItem(title: "退出洛琪希", action: #selector(quitApp), keyEquivalent: "")
+        let quit = NSMenuItem(title: "退出\(characterName)", action: #selector(quitApp), keyEquivalent: "")
         quit.target = self
         menu.addItem(quit)
         menu.addItem(.separator())
@@ -2302,6 +2364,115 @@ final class PetController: NSObject, NSApplicationDelegate {
         openSet.target = self
         menu.addItem(openSet)
         return menu
+    }
+
+    @objc private func selectCharacter(_ sender: NSMenuItem) {
+        guard !aiBusy, let id = sender.representedObject as? String,
+              let next = characters.first(where: { $0.id == id }), next.id != character.id else { return }
+        switchCharacter(to: next)
+    }
+
+    @discardableResult private func switchCharacter(to next: PetCharacter, announce: Bool = true, persist: Bool = true) -> Bool {
+        let previous = character
+        character = next
+        guard loadAtlas() else {
+            character = previous
+            if announce { speak("角色图片无法读取，请检查素材文件。") }
+            return false
+        }
+        if persist { UserDefaults.standard.set(character.id, forKey: "selectedCharacter") }
+        currentRow = -1; currentCol = -1
+        animKey = ""; animElapsed = 0
+        onceKind = ""; onceRepeatsLeft = 0; pendingOnce = ""; pendingOnceRepeats = nil
+        dragging = false; dragMoved = false; wasHovering = false
+        lookUntil = 0; lastLookDir = -1
+        blinkAt = 0; blinkUntil = 0; blinkDoubleAt = 0; glanceAt = 0; glanceUntil = 0
+        lastClickAction = nil; lastSpokenLine = ""; lastDirSpokenSlot = -1
+        mood = .calm; moodUntil = 0; petStreak = 0; lastPetAt = 0
+        bubbleVisible = false; bubbleWindow?.orderOut(nil)
+        show(row: 0, col: 0)
+        statusItem?.button?.toolTip = "\(character.menuTitle) · RoxyPet"
+        statusItem?.menu = makeMenu(forStatusBar: true)
+        settingsWindow?.title = "\(characterName) · 设置"
+        historyWindow?.title = "\(characterName) · \(character.historyTitle)"
+        refreshHistoryWindow()
+        if announce {
+            greeted = true
+            lastInteractAt = CACurrentMediaTime()
+            setPetHidden(false)
+            let greeting = randomOf(lines("greeting", GREETINGS))
+            speak(greeting.isEmpty ? character.menuTitle : greeting)
+            triggerWaveOnce()
+        }
+        return true
+    }
+
+    @objc private func reloadCharacters() {
+        guard !aiBusy else { return }
+        characters = PetCharacter.loadCatalog()
+        let next = characters.first(where: { $0.id == character.id }) ?? characters[0]
+        switchCharacter(to: next)
+    }
+
+    @objc private func openCharactersFolder() {
+        let folder = PetCharacter.customDirectory
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let guide = folder.appendingPathComponent("添加角色.txt")
+            if !FileManager.default.fileExists(atPath: guide.path) {
+                let text = "每个角色放在独立子文件夹，包含 character.json 和透明 PNG 精灵图。精灵图使用 8 列 × 11 行，动作顺序与 RoxyPet 相同。可复制项目 02-assets/characters 中的角色文件夹作为模板，修改 id、characterID、name、appearance、actionVerb、persona 和图片。完成后，在角色菜单选择「重新载入角色与语料」。详细说明见仓库 docs/characters.md。"
+                try text.write(to: guide, atomically: true, encoding: .utf8)
+            }
+            NSWorkspace.shared.open(folder)
+        } catch { speak("角色文件夹暂时无法打开。") }
+    }
+
+    /// Offline integration checks against the packaged resources. No preferences, files or network changed.
+    func runCharacterChecks() {
+        precondition(Set(characters.map(\.id)).isSuperset(of: ["roxy", "eris-short", "eris-long"]))
+        loadSpeechExtras()
+        for _ in 0..<3 {
+            for profile in characters {
+                precondition(switchCharacter(to: profile, announce: false, persist: false), "Atlas failed: \(profile.id)")
+                precondition(frames.count == 11 && masks.count == 11 && frames.allSatisfy { $0.count == 8 })
+                precondition(currentImage != nil && currentRow == 0 && currentCol == 0)
+                if profile.id == "eris-short" || profile.id == "eris-long" {
+                    let bitmap = frames[0][0].cgImage(forProposedRect: nil, context: nil, hints: nil)!
+                    precondition(bitmap.width == 384 && bitmap.height == 416, "Retina pixels lost: \(profile.id)")
+                }
+                let usedColumns = [6, 8, 8, 4, 5, 8, 6, 6, 6, 8, 8]
+                for row in 0..<11 { for col in 0..<usedColumns[row] {
+                    precondition(masks[row][col].filter { $0 > 64 }.count > 500, "Empty required frame \(profile.id) \(row)/\(col)")
+                } }
+                for status in [true, false] {
+                    let menu = makeMenu(forStatusBar: status)
+                    precondition(menu.items.contains { $0.title == "\(profile.actionTitle)…（聊天 / 做事）" })
+                    precondition(menu.items.contains { $0.title == "退出\(profile.name)" })
+                    precondition(menu.items.contains { $0.title == "查看\(profile.historyTitle)" })
+                    let picker = menu.items.first!.submenu!
+                    precondition(picker.items.filter { $0.state == .on }.count == 1)
+                    precondition(picker.items.first { $0.state == .on }?.representedObject as? String == profile.id)
+                }
+                precondition(!lines("chat", CHAT_LINES).isEmpty)
+                precondition(!lines("greeting", GREETINGS).isEmpty)
+                if !profile.isRoxy {
+                    precondition(lines("chat", CHAT_LINES) == profile.speech["chat"])
+                    precondition(!characterPersonaSystem("测试").contains("你是《无职转生》的洛琪希"))
+                    precondition(!characterHourlyLine(13).contains("{h}"))
+                }
+            }
+        }
+        let originalID = character.id
+        var broken = character
+        broken.atlasURL = URL(fileURLWithPath: "/nonexistent-eris-atlas.png")
+        precondition(!switchCharacter(to: broken, announce: false, persist: false))
+        precondition(character.id == originalID && frames.count == 11)
+        let oldJSON = Data("[{\"t\":0,\"role\":\"roxy\",\"text\":\"原有记录\"}]".utf8)
+        taskHistory = try! JSONDecoder().decode([TaskRecord].self, from: oldJSON)
+        taskHistory.append(TaskRecord(t: 1, role: "roxy", text: "新记录", characterID: "eris", characterName: "艾丽丝"))
+        let html = historyHTML()
+        precondition(html.contains("洛琪希") && html.contains("艾丽丝"))
+        print("PASS: three characters, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history.")
     }
 
     // ---------- 右键菜单 ----------
@@ -2320,5 +2491,9 @@ final class PetController: NSObject, NSApplicationDelegate {
 // ---------- 入口 ----------
 let app = NSApplication.shared
 let controller = PetController()
+if CommandLine.arguments.contains("--self-test") {
+    controller.runCharacterChecks()
+    exit(0)
+}
 app.delegate = controller
 app.run()

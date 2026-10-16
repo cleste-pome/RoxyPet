@@ -11,7 +11,7 @@ TMP="$(mktemp -d /tmp/roxy-build.XXXXXX)"
 trap 'rm -rf "$TMP"' EXIT
 
 echo "== 1/6 编译 =="
-swiftc -O -swift-version 5 -target arm64-apple-macosx14.0 "$SRC/main.swift" "$SRC/speech.swift" -o "$TMP/RoxyPet"
+swiftc -O -module-cache-path "$TMP/module-cache" -swift-version 5 -target arm64-apple-macosx14.0 "$SRC/main.swift" "$SRC/speech.swift" "$SRC/characters.swift" -o "$TMP/RoxyPet"
 
 echo "== 2/6 组装 app bundle =="
 APP="$TMP/$APPNAME"
@@ -19,6 +19,10 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$TMP/RoxyPet" "$APP/Contents/MacOS/RoxyPet"
 cp "$SRC/Info.plist" "$APP/Contents/Info.plist"
 cp "$ASSETS/spritesheet.png" "$APP/Contents/Resources/spritesheet.png"
+cp -R "$ASSETS/characters" "$APP/Contents/Resources/characters"
+if [ -d "$ASSETS/speech" ]; then
+  cp -R "$ASSETS/speech" "$APP/Contents/Resources/speech"
+fi
 if [ -f "$ASSETS/RoxyPet.icns" ]; then
   cp "$ASSETS/RoxyPet.icns" "$APP/Contents/Resources/RoxyPet.icns"
 fi
