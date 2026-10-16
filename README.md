@@ -342,7 +342,7 @@ cd RoxyPet-GitHub/03-scripts
 
 ### 🐾 作者与维护
 
-项目由 **[cleste-pome](https://github.com/cleste-pome)** 发起、开发与维护。
+项目由 **[Cleste](https://github.com/cleste-pome)** 发起、开发与维护。
 
 ### ⚖️ 版权
 
