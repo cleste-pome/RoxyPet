@@ -496,8 +496,8 @@ final class PetController: NSObject, NSApplicationDelegate {
     // ---------- 启动 ----------
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        let savedID = UserDefaults.standard.string(forKey: "selectedCharacter") ?? "roxy"
-        character = characters.first(where: { $0.id == savedID }) ?? characters[0]
+        // 每次启动都从洛琪希开始；「角色」菜单可在本次运行里随时切换
+        character = characters.first(where: { $0.isRoxy }) ?? characters[0]
         if !loadAtlas() { character = characters[0] }
         guard !frames.isEmpty || loadAtlas() else {
             NSLog("Roxy: failed to load spritesheet")
@@ -2380,7 +2380,6 @@ final class PetController: NSObject, NSApplicationDelegate {
             if announce { speak("角色图片无法读取，请检查素材文件。") }
             return false
         }
-        if persist { UserDefaults.standard.set(character.id, forKey: "selectedCharacter") }
         currentRow = -1; currentCol = -1
         animKey = ""; animElapsed = 0
         onceKind = ""; onceRepeatsLeft = 0; pendingOnce = ""; pendingOnceRepeats = nil
