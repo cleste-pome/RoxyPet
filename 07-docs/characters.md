@@ -34,7 +34,7 @@
 
 ## 语料来源与接入
 
-本次不另行创作语料。`08-docs/corpora/eris.md` 与 `08-docs/corpora/sylphie.md` 是项目文件夹中 Claude Code 产出的语料快照；导入器保留每条原文，只转换分类键。艾丽丝界面名按用户要求显示为「艾丽丝」，源文件中的「艾莉丝」标题不改写。
+本次不另行创作语料。`07-docs/corpora/eris.md` 与 `07-docs/corpora/sylphie.md` 是项目文件夹中 Claude Code 产出的语料快照；导入器保留每条原文，只转换分类键。艾丽丝界面名按用户要求显示为「艾丽丝」，源文件中的「艾莉丝」标题不改写。
 
 ```sh
 python3 03-scripts/import-speech.py
@@ -53,8 +53,8 @@ JSON 为「分类名 → 字符串数组」。支持 chat、greeting、hover、d
 艾丽丝图片由内置 image_gen 按用户设定图生成；原图和最终提示词记录见 [素材制作记录](eris-art-generation.md)。将生成原图重新组装为高清图集（Python 需要 Pillow、numpy）：
 
 ```sh
-python3 03-scripts/pack-eris-atlas.py 07-art-source/eris-short/sources 02-assets/characters/eris-short
-python3 03-scripts/pack-eris-atlas.py 07-art-source/eris-long/sources 02-assets/characters/eris-long
+python3 03-scripts/pack-eris-atlas.py 06-art-source/eris-short/sources 02-assets/characters/eris-short
+python3 03-scripts/pack-eris-atlas.py 06-art-source/eris-long/sources 02-assets/characters/eris-long
 python3 03-scripts/pack-eris-atlas.py --self-test
 python3 03-scripts/render-character-previews.py
 bash 03-scripts/build.sh

@@ -29,25 +29,63 @@
 
 ## 📖 目录
 
-1. [角色介绍](#-角色介绍)
-   - [洛琪希 · 魔法师](#洛琪希--魔法师)
-   - [艾丽丝 · 短发 · 旅行装](#艾丽丝--短发--旅行装)
-   - [艾丽丝 · 长发 · 连衣裙](#艾丽丝--长发--连衣裙)
-2. [功能](#-功能)
-3. [动作与分镜](#-动作与分镜)
-4. [快速开始](#-快速开始)
-5. [构建与发布](#-构建与发布)
-6. [API 配置](#-api-配置)
-7. [使用](#-使用)
-8. [与 Claude Code 联动](#-与-claude-code-联动可选)
-   - [任务执行器（可切换）](#任务执行器可切换)
-   - [状态联动（可多选）](#状态联动可多选)
-9. [自定义](#-自定义)
-10. [目录结构](#-目录结构)
+1. [目录结构](#-目录结构)
+2. [角色介绍](#-角色介绍)
+   - 2.1 [洛琪希 · 魔法师](#洛琪希--魔法师)
+   - 2.2 [艾丽丝 · 短发 · 旅行装](#艾丽丝--短发--旅行装)
+   - 2.3 [艾丽丝 · 长发 · 连衣裙](#艾丽丝--长发--连衣裙)
+3. [功能](#-功能)
+4. [动作与分镜](#-动作与分镜)
+5. [快速开始](#-快速开始)
+6. [构建与发布](#-构建与发布)
+7. [API 配置](#-api-配置)
+8. [使用](#-使用)
+9. [与 Claude Code 联动](#-与-claude-code-联动可选)
+   - 9.1 [任务执行器（可切换）](#任务执行器可切换)
+   - 9.2 [状态联动（可多选）](#状态联动可多选)
+10. [自定义](#-自定义)
 11. [隐私](#-隐私)
 12. [致谢](#-致谢)
 13. [作者与维护](#-作者与维护)
 14. [版权](#%EF%B8%8F-%E7%89%88%E6%9D%83)
+
+---
+
+## 📁 目录结构
+
+```
+RoxyPet-GitHub/
+├── README.md
+├── LICENSE              # 代码 MIT；素材附粉丝使用说明
+├── CHANGELOG.md
+├── .gitignore
+├── 01-src/              # 源码
+│   ├── main.swift       # 主程序（窗口 / 动画 / 气泡 / 菜单 / 联动）
+│   ├── speech.swift     # 洛琪希台词库（934 条）
+│   ├── characters.swift # 角色配置、语料与人设加载
+│   └── Info.plist
+├── 02-assets/           # 素材
+│   ├── spritesheet.png  # 洛琪希精灵图（8 列 × 11 行）
+│   ├── characters/      # 艾丽丝两套图集与角色配置
+│   ├── speech/          # 艾丽丝 / 希露菲 JSON 语料
+│   ├── RoxyPet.icns     # 应用图标
+│   └── pet.json
+├── 03-scripts/          # 构建与工具
+│   ├── build.sh                 # 编译 → 组装 → 签名，产出 RoxyPet.app
+│   ├── build-and-run.command    # 双击即构建 + 运行
+│   ├── make-release.sh          # 一键出安装包（构建 + 打 dmg）
+│   ├── import-speech.py         # 语料 Markdown → JSON
+│   ├── pack-eris-atlas.py       # 艾丽丝图集打包
+│   └── render-character-previews.py  # 预览图 / 动图渲染
+├── 04-integration/      # Claude Code / Codex 联动
+│   ├── hook.sh
+│   └── codex-notify.sh
+├── 05-images/           # README 配图（含动图预览）
+├── 06-art-source/       # 人物素材工程：roxy / eris-long / eris-short 三个并列
+└── 07-docs/             # 角色扩展 · 语料 · 素材制作记录
+```
+
+根目录的构建产物（`RoxyPet.app`、`*.dmg`）由 `.gitignore` 排除、不入库——仓库本体是纯源码与素材，安装包一律走 Releases 的 dmg。
 
 ---
 
@@ -59,7 +97,7 @@
 
 - **台词库**：934 条本地台词——打招呼、闲聊，按时段 / 星期 / 情绪自动切换；全部本地随机，零消耗
 - **菜单措辞**：「吩咐洛琪希」；Siri 口令：「洛琪希」
-- **素材工程**：人物绘图与序列帧动画 —— 易轩（JensenTong）；源文件在 `07-art-source/roxy/`
+- **素材工程**：人物绘图与序列帧动画 —— 易轩（JensenTong）；源文件在 `06-art-source/roxy/`
 
 | 立绘 | 动作总表（行走图分镜） | 16 向视线帧 |
 |:---:|:---:|:---:|
@@ -75,7 +113,7 @@
 
 - **语料**：374 条，由项目内 Markdown 语料导入（与长发款共享；闲聊 / 情境 / 互动 / 方向 / 系统事件）
 - **菜单措辞**：「拜托艾丽丝」
-- **素材工程**：AI 图像生成流程制作（母版 / 动作原图 / 提示词见仓库 `07-art-source/eris-short/`）
+- **素材工程**：AI 图像生成流程制作（母版 / 动作原图 / 提示词见仓库 `06-art-source/eris-short/`）
 
 | 立绘 | 动作总表（行走图分镜） |
 |:---:|:---:|
@@ -91,7 +129,7 @@
 
 - **语料**：与短发款共用同一套 374 条
 - **菜单措辞**：「拜托艾丽丝」
-- **素材工程**：AI 图像生成流程制作（与短发款同一工程，见仓库 `07-art-source/eris-long/`）
+- **素材工程**：AI 图像生成流程制作（与短发款同一工程，见仓库 `06-art-source/eris-long/`）
 
 | 立绘 | 动作总表（行走图分镜） |
 |:---:|:---:|
@@ -103,11 +141,7 @@
 
 菜单和窗口随人物切换：洛琪希是「**吩咐洛琪希**」，艾丽丝是「**拜托艾丽丝**」；隐藏 / 显示、退出、设置、记录窗口与 AI 人设一起更新。长短发艾丽丝共享语料和 Claude 会话，历史记录保留当时的角色名称。
 
-艾丽丝语料由项目内 Markdown 导入；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](08-docs/characters.md)。
-
-菜单和窗口会随人物切换：洛琪希是「**吩咐洛琪希**」，艾丽丝是「**拜托艾丽丝**」。隐藏 / 显示、退出、设置、记录窗口与 AI 人设一起更新。长短发艾丽丝共享人物语料和 Claude 会话，历史记录保留当时的角色名称。
-
-艾丽丝语料直接导入项目文件夹里另行制作的 Markdown 文件；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](08-docs/characters.md)。
+艾丽丝语料由项目内 Markdown 导入；希露菲语料已预留，待有模型后可接入。[添加角色与语料说明](07-docs/characters.md)。
 
 ## ✨ 功能
 
@@ -270,43 +304,7 @@ cd RoxyPet-GitHub/03-scripts
 
 - **台词**：改 `01-src/speech.swift`（每个池子都是纯字符串数组），运行时追加可放 `~/.roxy-pet/speech.json`
 - **手感参数**（`01-src/main.swift` 顶部）：`WINDOW_SCALE` 显示大小、`LOOK_WINDOW_SECONDS` 跟随秒数、`HEAD_CENTER_Y_RATIO` 视角基准、`CHIME_QUIET_FROM/TO` 报时静音时段
-- **换角色**：右键 →「角色」即可切换；添加角色使用独立文件夹中的 `character.json` + `spritesheet.png`，详见 [角色扩展说明](08-docs/characters.md)。无需替换洛琪希原图。
-
-## 📁 目录结构
-
-```
-RoxyPet-GitHub/
-├── README.md
-├── LICENSE              # 代码 MIT；素材附粉丝使用说明
-├── CHANGELOG.md
-├── .gitignore
-├── 01-src/              # 源码
-│   ├── main.swift       # 主程序（窗口 / 动画 / 气泡 / 菜单 / 联动）
-│   ├── speech.swift     # 洛琪希台词库（934 条）
-│   ├── characters.swift # 角色配置、语料与人设加载
-│   └── Info.plist
-├── 02-assets/           # 素材
-│   ├── spritesheet.png  # 洛琪希精灵图（8 列 × 11 行）
-│   ├── characters/      # 艾丽丝两套图集与角色配置
-│   ├── speech/          # 艾丽丝 / 希露菲 JSON 语料
-│   ├── RoxyPet.icns     # 应用图标
-│   └── pet.json
-├── 03-scripts/          # 构建与工具
-│   ├── build.sh                 # 编译 → 组装 → 签名，产出 RoxyPet.app
-│   ├── build-and-run.command    # 双击即构建 + 运行
-│   ├── make-release.sh          # 一键出安装包（构建 + 打 dmg）
-│   ├── import-speech.py         # 语料 Markdown → JSON
-│   ├── pack-eris-atlas.py       # 艾丽丝图集打包
-│   └── render-character-previews.py  # 预览图 / 动图渲染
-├── 04-integration/      # Claude Code / Codex 联动
-│   ├── hook.sh
-│   └── codex-notify.sh
-├── 05-images/           # README 配图（含动图预览）
-├── 07-art-source/       # 人物素材工程：roxy / eris-long / eris-short 三个并列
-└── 08-docs/             # 角色扩展 · 语料 · 素材制作记录
-```
-
-根目录的构建产物（`RoxyPet.app`、`*.dmg`）由 `.gitignore` 排除、不入库——仓库本体是纯源码与素材，安装包一律走 Releases 的 dmg。
+- **换角色**：右键 →「角色」即可切换；添加角色使用独立文件夹中的 `character.json` + `spritesheet.png`，详见 [角色扩展说明](07-docs/characters.md)。无需替换洛琪希原图。
 
 ## 🔒 隐私
 

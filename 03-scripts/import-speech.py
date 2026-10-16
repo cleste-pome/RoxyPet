@@ -40,7 +40,7 @@ if __name__ == '__main__':
     parser.add_argument('--source-dir', type=Path, default=ROOT.parent)
     args = parser.parse_args()
     out = ROOT / '02-assets/speech'
-    archive = ROOT / '08-docs/corpora'
+    archive = ROOT / '07-docs/corpora'
     out.mkdir(parents=True, exist_ok=True)
     archive.mkdir(parents=True, exist_ok=True)
     for character, pattern in [('eris', '*艾*语料库.md'), ('sylphie', '*希露菲*语料库.md')]:
