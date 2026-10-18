@@ -52,7 +52,7 @@
    - 4.4 [语料为什么有两种格式](#44-语料为什么有两种格式)
 5. [声明与致谢](#5-声明与致谢)
    - 5.1 [隐私](#51-隐私)
-   - 5.2 [致谢](#52-致谢)
+   - 5.2 [致谢与工具](#52-致谢与工具)
    - 5.3 [作者与维护](#53-作者与维护)
    - 5.4 [版权](#54-版权)
 
@@ -454,7 +454,7 @@ Roxy.app/Contents/Resources/speech/<人物>.json   ④ 运行时读取（~/.roxy
 
 ---
 
-### 5.2 致谢
+### 5.2 致谢与工具
 
 - **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希「魔术师版本」**的角色美术与序列帧动画
 - **[《无职转生》](https://ncode.syosetu.com/n9669bk/)原作者 理不尽な孫の手、角色原案 シロタカ** —— 角色设定与故事世界的来源
@@ -465,6 +465,8 @@ Roxy.app/Contents/Resources/speech/<人物>.json   ④ 运行时读取（~/.roxy
 - **[Pillow](https://python-pillow.org/)、[NumPy](https://numpy.org/)** —— 图集打包与预览渲染
 - **[Xcode Command Line Tools](https://developer.apple.com/xcode/)** —— `swiftc` 编译
 - **[Python 3](https://www.python.org/)** —— 语料转换与素材脚本
+
+这套东西能跑起来，靠的是开源社区一级一级搭好的台阶。人家愿意把东西摊开给人用，我们也照这个规矩来——源码、语料、美术工程全放在仓库里，想改、想学、想接着往下做，随时拿去。
 
 ---
 
