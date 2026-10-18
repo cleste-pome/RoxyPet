@@ -457,9 +457,13 @@ Roxy.app/Contents/Resources/speech/<人物>.json   ④ 运行时读取（~/.roxy
 ### 5.2 致谢
 
 - **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希「魔术师版本」**的角色美术与序列帧动画
+- **[《无职转生》](https://ncode.syosetu.com/n9669bk/)原作者 理不尽な孫の手、角色原案 シロタカ** —— 角色设定与故事世界的来源
 - **[洛琪希图书馆](https://pan.roxylib.com/)** —— 原作文本资料
-- **[ChatGPT](https://chatgpt.com/)** —— 艾丽丝素材（AI 图像生成）与多角色功能的协作开发
+- **[ChatGPT](https://chatgpt.com/)** —— 艾丽丝、希露菲素材（AI 图像生成）与多角色功能的协作开发
 - **[DeepSeek](https://www.deepseek.com/)** —— 文本创作协助与 API 对话支持
+- **[Pillow](https://python-pillow.org/)、[NumPy](https://numpy.org/)** —— 图集打包与预览渲染
+- **[Xcode Command Line Tools](https://developer.apple.com/xcode/)** —— `swiftc` 编译
+- **[Python 3](https://www.python.org/)** —— 语料转换与素材脚本
 
 ---
 
