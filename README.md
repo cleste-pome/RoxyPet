@@ -461,6 +461,7 @@ Roxy.app/Contents/Resources/speech/<人物>.json   ④ 运行时读取（~/.roxy
 - **[洛琪希图书馆](https://pan.roxylib.com/)** —— 原作文本资料
 - **[ChatGPT](https://chatgpt.com/)** —— 艾丽丝、希露菲素材（AI 图像生成）与多角色功能的协作开发
 - **[DeepSeek](https://www.deepseek.com/)** —— 文本创作协助与 API 对话支持
+- **[Claude Code](https://www.anthropic.com/claude-code)** —— 代码开发、语料与文档协作
 - **[Pillow](https://python-pillow.org/)、[NumPy](https://numpy.org/)** —— 图集打包与预览渲染
 - **[Xcode Command Line Tools](https://developer.apple.com/xcode/)** —— `swiftc` 编译
 - **[Python 3](https://www.python.org/)** —— 语料转换与素材脚本
