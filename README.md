@@ -35,6 +35,7 @@
    - 1.3 [艾丽丝 · 短发](#-艾丽丝--短发--旅行装)
    - 1.4 [艾丽丝 · 长发](#-艾丽丝--长发--连衣裙)
    - 1.5 [希露菲 · 白发 · 日常装](#希露菲--白发--日常装)
+   - 1.6 [希露菲 · Q版](#希露菲--q版)
 2. [功能与动作](#-功能与动作)
    - 2.1 [功能](#-功能)
    - 2.2 [动作与分镜](#-动作与分镜)
@@ -172,7 +173,23 @@ RoxyPet-GitHub/
 |:---:|:---:|:---:|:---:|
 | <img src="05-images/sylphie/idle.gif" width="150"/> | <img src="05-images/sylphie/run.gif" width="150"/> | <img src="05-images/sylphie/wave.gif" width="150"/> | <img src="05-images/sylphie/look.gif" width="150"/> |
 
-[默认版全帧](05-images/sylphie/contact-sheet.jpg) · [Q版全帧](05-images/sylphie-chibi/contact-sheet.jpg) · [默认版工程](06-art-source/sylphie/) · [Q版工程](06-art-source/sylphie-chibi/) · [制作记录](07-docs/素材制作/希露菲素材制作记录.md)
+[默认版全帧](05-images/sylphie/contact-sheet.jpg) · [默认版工程](06-art-source/sylphie/) · [制作记录](07-docs/素材制作/希露菲素材制作记录.md)
+
+---
+
+### 希露菲 · Q版
+
+Q版比例，同一套无披肩日常装。菜单中与日常装并列，同为「拜托希露菲」，与日常装共享 `sylphie.json` 语料和人物会话。
+
+| 立绘 | 动作总表（行走图分镜） |
+|:---:|:---:|
+| <img src="05-images/sylphie-chibi/standing.png" width="200"/> | <img src="05-images/sylphie-chibi/contact-sheet.jpg" width="420"/> |
+
+| 待机 | 奔跑 | 挥手 | 转头 |
+|:---:|:---:|:---:|:---:|
+| <img src="05-images/sylphie-chibi/idle.gif" width="150"/> | <img src="05-images/sylphie-chibi/run.gif" width="150"/> | <img src="05-images/sylphie-chibi/wave.gif" width="150"/> | <img src="05-images/sylphie-chibi/look.gif" width="150"/> |
+
+[Q版全帧](05-images/sylphie-chibi/contact-sheet.jpg) · [Q版工程](06-art-source/sylphie-chibi/) · [制作记录](07-docs/素材制作/希露菲素材制作记录.md)
 
 ---
 
