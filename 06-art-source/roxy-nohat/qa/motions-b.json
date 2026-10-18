@@ -80,7 +80,7 @@
       ],
       "source": "sources/jumping.png",
       "prompt": "prompts/jumping.md",
-      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-d52becbe-e0d8-4741-9681-a7c354fdb7bf.png",
+      "generated_original": "generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-d52becbe-e0d8-4741-9681-a7c354fdb7bf.png",
       "sha256": "92f569e970122f63d818c151e35457ee29a5fec41690505fe562d2500d45a0fd",
       "visual_review": {
         "pass": true,
@@ -193,7 +193,7 @@
       ],
       "source": "sources/failed.png",
       "prompt": "prompts/failed.md",
-      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-64cec2bf-2c7a-4b05-a4f6-7a9b0d47bc92.png",
+      "generated_original": "generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-64cec2bf-2c7a-4b05-a4f6-7a9b0d47bc92.png",
       "sha256": "7377c37e520498fd8e62bf39efcbe9c37a02ce0960939b6335a129b47bf57d77",
       "visual_review": {
         "pass": true,
@@ -286,7 +286,7 @@
       ],
       "source": "sources/waiting.png",
       "prompt": "prompts/waiting.md",
-      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-c8117ae3-14bd-49e7-84d2-52ddf87f912b.png",
+      "generated_original": "generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-c8117ae3-14bd-49e7-84d2-52ddf87f912b.png",
       "sha256": "0523d722ec307231f0eed4cc93502280f42a61961fa459bb0138b5c7aae93779",
       "visual_review": {
         "pass": true,
@@ -379,7 +379,7 @@
       ],
       "source": "sources/running.png",
       "prompt": "prompts/running.md",
-      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-49fbeb67-aed5-4c9e-a7d6-8fc537d12b2c.png",
+      "generated_original": "generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-49fbeb67-aed5-4c9e-a7d6-8fc537d12b2c.png",
       "sha256": "ba2b6218380f743fcb563576e379b6ba4078c2bd3c81ecceb9622dcb297534c9",
       "visual_review": {
         "pass": true,
@@ -472,7 +472,7 @@
       ],
       "source": "sources/review.png",
       "prompt": "prompts/review.md",
-      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-15bab4ec-32f3-4acd-b828-9ce305dd0962.png",
+      "generated_original": "generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-15bab4ec-32f3-4acd-b828-9ce305dd0962.png",
       "sha256": "6b0b7d566500a7a7f2155ca2040857e19fe34f40804328d19a9673d54aad103a",
       "visual_review": {
         "pass": true,

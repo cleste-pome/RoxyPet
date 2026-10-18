@@ -20,7 +20,7 @@
       "source": "sources/idle.png",
       "prompt": "prompts/idle.md",
       "selected_revision": 2,
-      "original_generated_file": "/Users/cleste/.codex/generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-33ff43d7-d101-44f5-bcab-89a8203c3657.png",
+      "original_generated_file": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-33ff43d7-d101-44f5-bcab-89a8203c3657.png",
       "size": [
         1448,
         1086
@@ -127,7 +127,7 @@
       "source": "sources/running-right.png",
       "prompt": "prompts/running-right.md",
       "selected_revision": 2,
-      "original_generated_file": "/Users/cleste/.codex/generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-aa2e865a-4ece-450d-9706-ac1791b6c87c.png",
+      "original_generated_file": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-aa2e865a-4ece-450d-9706-ac1791b6c87c.png",
       "size": [
         1448,
         1086
@@ -262,7 +262,7 @@
       "source": "sources/running-left.png",
       "prompt": "prompts/running-left.md",
       "selected_revision": 3,
-      "original_generated_file": "/Users/cleste/.codex/generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-b80fcb78-ceb0-464d-bf40-b1ba424f0289.png",
+      "original_generated_file": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-b80fcb78-ceb0-464d-bf40-b1ba424f0289.png",
       "size": [
         1448,
         1086
@@ -397,7 +397,7 @@
       "source": "sources/waving.png",
       "prompt": "prompts/waving.md",
       "selected_revision": 2,
-      "original_generated_file": "/Users/cleste/.codex/generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-23aa3ca5-76cc-4e26-86a6-e425380b3e24.png",
+      "original_generated_file": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-23aa3ca5-76cc-4e26-86a6-e425380b3e24.png",
       "size": [
         1448,
         1086
