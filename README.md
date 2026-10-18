@@ -466,7 +466,7 @@ Roxy.app/Contents/Resources/speech/<人物>.json   ④ 运行时读取（~/.roxy
 - **[Xcode Command Line Tools](https://developer.apple.com/xcode/)** —— `swiftc` 编译
 - **[Python 3](https://www.python.org/)** —— 语料转换与素材脚本
 
-这个项目从编译到图像处理，用的都是开源社区多年积累下来的工具。仓库里的源码、语料和美术工程因此也全部公开：可以学习、修改，也可以在此基础上继续开发。
+这个项目从编译到图像处理，用的都是开源社区多年积累下来的工具。感谢开源精神，我也想为社区贡献一份力量——仓库里的源码、语料和美术工程全部公开：可以学习、修改，也可以在此基础上继续开发。
 
 ---
 
