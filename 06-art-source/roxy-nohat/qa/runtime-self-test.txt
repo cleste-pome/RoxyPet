@@ -1,0 +1,1 @@
+PASS: 6 appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history.

@@ -1,0 +1,144 @@
+{
+  "source": "user-approved master",
+  "generator": "built-in image_gen",
+  "checks": [
+    {
+      "state": "look-row-9",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "count": 8,
+      "source_bboxes": [
+        [
+          60,
+          7,
+          359,
+          535
+        ],
+        [
+          407,
+          7,
+          711,
+          535
+        ],
+        [
+          768,
+          8,
+          1072,
+          535
+        ],
+        [
+          1131,
+          8,
+          1431,
+          535
+        ],
+        [
+          51,
+          544,
+          363,
+          1076
+        ],
+        [
+          406,
+          547,
+          718,
+          1076
+        ],
+        [
+          767,
+          549,
+          1077,
+          1076
+        ],
+        [
+          1129,
+          551,
+          1435,
+          1076
+        ]
+      ],
+      "directions": [
+        0.0,
+        22.5,
+        45.0,
+        67.5,
+        90.0,
+        112.5,
+        135.0,
+        157.5
+      ],
+      "visual_review": "All 8 complete standing figures, frontal body, consistent costume, gaze follows correct right/left half; exact angular bins assigned by runtime order."
+    },
+    {
+      "state": "look-row-10",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "count": 8,
+      "source_bboxes": [
+        [
+          37,
+          6,
+          348,
+          542
+        ],
+        [
+          399,
+          6,
+          708,
+          542
+        ],
+        [
+          752,
+          6,
+          1063,
+          542
+        ],
+        [
+          1105,
+          5,
+          1416,
+          542
+        ],
+        [
+          40,
+          546,
+          356,
+          1080
+        ],
+        [
+          395,
+          546,
+          710,
+          1080
+        ],
+        [
+          750,
+          545,
+          1063,
+          1080
+        ],
+        [
+          1104,
+          546,
+          1417,
+          1080
+        ]
+      ],
+      "directions": [
+        180.0,
+        202.5,
+        225.0,
+        247.5,
+        270.0,
+        292.5,
+        315.0,
+        337.5
+      ],
+      "visual_review": "All 8 complete standing figures, frontal body, consistent costume, gaze follows correct right/left half; exact angular bins assigned by runtime order."
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "stage": "production_complete",
+  "date": "2026-10-18",
+  "generator": "built-in image_gen",
+  "selected": "user-upload",
+  "runtime_registered": true,
+  "storyboards_created": true,
+  "proposed_character_id": "roxy-nohat",
+  "shared_character_id": "roxy",
+  "candidates": [
+    {
+      "option": "A",
+      "direction": "compact-chibi",
+      "file": "A-compact-chibi-v2.png",
+      "size": [
+        1205,
+        1306
+      ],
+      "mode": "RGBA",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "fully_transparent_fraction": 0.692,
+      "visible_bounds": [
+        0,
+        18,
+        1177,
+        1290
+      ],
+      "purpose": "appearance preview; final atlas normalization after user selection"
+    },
+    {
+      "option": "B",
+      "direction": "balanced-chibi",
+      "file": "B-balanced-chibi.png",
+      "size": [
+        1024,
+        1535
+      ],
+      "mode": "RGBA",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "fully_transparent_fraction": 0.6337,
+      "visible_bounds": [
+        0,
+        17,
+        1021,
+        1519
+      ],
+      "purpose": "appearance preview; final atlas normalization after user selection"
+    },
+    {
+      "option": "C",
+      "direction": "anime-petite",
+      "file": "C-anime-petite-v2.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha_range": [
+        0,
+        254
+      ],
+      "fully_transparent_fraction": 0.6877,
+      "visible_bounds": [
+        33,
+        21,
+        1008,
+        1513
+      ],
+      "purpose": "appearance preview; final atlas normalization after user selection"
+    }
+  ],
+  "approved_master": "../../sources/master.png"
+}

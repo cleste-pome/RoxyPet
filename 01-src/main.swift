@@ -2483,7 +2483,10 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     /// Offline integration checks against the packaged resources. No preferences, files or network changed.
     func runCharacterChecks() {
-        precondition(Set(characters.map(\.id)).isSuperset(of: ["roxy", "eris-short", "eris-long", "sylphie-adult", "sylphie-chibi"]))
+        precondition(Set(characters.map(\.id)).isSuperset(of: ["roxy", "roxy-nohat", "eris-short", "eris-long", "sylphie-adult", "sylphie-chibi"]))
+        let roxyBase = characters.first { $0.id == "roxy" }!
+        let roxyNohat = characters.first { $0.id == "roxy-nohat" }!
+        precondition(roxyNohat.isRoxy && roxyNohat.characterID == roxyBase.characterID && roxyNohat.speech == roxyBase.speech && roxyNohat.persona == roxyBase.persona, "Roxy appearances share one identity, corpus and persona")
         let sylphieLooks = characters.filter { $0.characterID == "sylphie" }
         precondition(sylphieLooks.first?.id == "sylphie-adult", "Sylphie defaults to the approved daily outfit")
         precondition(sylphieLooks.first?.speech == sylphieLooks.last?.speech, "Sylphie appearances share one corpus")
@@ -2493,7 +2496,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                 precondition(switchCharacter(to: profile, announce: false, persist: false), "Atlas failed: \(profile.id)")
                 precondition(frames.count == 11 && masks.count == 11 && frames.allSatisfy { $0.count == 8 })
                 precondition(currentImage != nil && currentRow == 0 && currentCol == 0)
-                if ["eris-short", "eris-long", "sylphie-adult", "sylphie-chibi"].contains(profile.id) {
+                if ["roxy-nohat", "eris-short", "eris-long", "sylphie-adult", "sylphie-chibi"].contains(profile.id) {
                     let bitmap = frames[0][0].cgImage(forProposedRect: nil, context: nil, hints: nil)!
                     precondition(bitmap.width == 384 && bitmap.height == 416, "Retina pixels lost: \(profile.id)")
                 }
@@ -2547,7 +2550,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         taskHistory.append(TaskRecord(t: 2, role: "roxy", text: "希露菲记录", characterID: "sylphie", characterName: "希露菲"))
         let html = historyHTML()
         precondition(html.contains("洛琪希") && html.contains("艾丽丝") && html.contains("希露菲"))
-        print("PASS: five appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history.")
+        print("PASS: \(characters.count) appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history.")
     }
 
     // ---------- 右键菜单 ----------

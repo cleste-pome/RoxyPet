@@ -1,0 +1,475 @@
+{
+  "generator": "built-in image_gen",
+  "master": "sources/master.png",
+  "generation_uses_master": true,
+  "sheet_layout": "two rows per state",
+  "validator": "03-scripts/pack-eris-atlas.py::split_sheet",
+  "alpha_threshold": 16,
+  "manual_review": {
+    "identity": "slender approved anime proportions, blue eyes, curled ahoge, long twin braids and black ribbons, white/blue/black/gold outfit retained",
+    "excluded_accessories": "no hat, cloak or staff in any frame",
+    "complete_body": "ahoge, hair tips, hands, legs and boots complete after running-left edge repair",
+    "directions": "all eight right-run frames face right; all eight left-run frames face left",
+    "idle_blink": "frame 4 both eyes fully closed; final frame eyes open",
+    "waving": "anatomical right hand waves; front-facing; arm lowered in frame 4",
+    "layout_note": "generated margins are tighter than requested 8%; split_sheet assigns whole connected components and runtime packing adds transparent padding"
+  },
+  "states": [
+    {
+      "state": "idle",
+      "source": "sources/idle.png",
+      "prompt": "prompts/idle.md",
+      "selected_revision": 2,
+      "original_generated_file": "/Users/cleste/.codex/generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-33ff43d7-d101-44f5-bcab-89a8203c3657.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "sha256": "9bbe977c667f66dc7dd939857cd01fecc94b9b597a64d645befe3e308334aef1",
+      "frame_count": 6,
+      "split_pass": true,
+      "whole_alpha_coverage_pass": true,
+      "visible_alpha_on_canvas_edges": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            179,
+            36,
+            464,
+            536
+          ],
+          "size": [
+            285,
+            500
+          ],
+          "alpha_pixels": 55934
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            590,
+            36,
+            870,
+            536
+          ],
+          "size": [
+            280,
+            500
+          ],
+          "alpha_pixels": 56052
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            1000,
+            35,
+            1282,
+            536
+          ],
+          "size": [
+            282,
+            501
+          ],
+          "alpha_pixels": 55972
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            179,
+            558,
+            464,
+            1054
+          ],
+          "size": [
+            285,
+            496
+          ],
+          "alpha_pixels": 55357
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            588,
+            557,
+            870,
+            1054
+          ],
+          "size": [
+            282,
+            497
+          ],
+          "alpha_pixels": 55747
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            1000,
+            557,
+            1284,
+            1054
+          ],
+          "size": [
+            284,
+            497
+          ],
+          "alpha_pixels": 55578
+        }
+      ]
+    },
+    {
+      "state": "running-right",
+      "source": "sources/running-right.png",
+      "prompt": "prompts/running-right.md",
+      "selected_revision": 2,
+      "original_generated_file": "/Users/cleste/.codex/generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-aa2e865a-4ece-450d-9706-ac1791b6c87c.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "sha256": "4d5eb4ce279dee7d26fa1fa3d4954744136a99bae9053bf98eb151266a31e67c",
+      "frame_count": 8,
+      "split_pass": true,
+      "whole_alpha_coverage_pass": true,
+      "visible_alpha_on_canvas_edges": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            31,
+            83,
+            377,
+            519
+          ],
+          "size": [
+            346,
+            436
+          ],
+          "alpha_pixels": 48416
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            391,
+            85,
+            673,
+            523
+          ],
+          "size": [
+            282,
+            438
+          ],
+          "alpha_pixels": 44411
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            753,
+            84,
+            1035,
+            524
+          ],
+          "size": [
+            282,
+            440
+          ],
+          "alpha_pixels": 43758
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1114,
+            83,
+            1399,
+            519
+          ],
+          "size": [
+            285,
+            436
+          ],
+          "alpha_pixels": 46129
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            33,
+            610,
+            396,
+            1042
+          ],
+          "size": [
+            363,
+            432
+          ],
+          "alpha_pixels": 50107
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            393,
+            610,
+            677,
+            1047
+          ],
+          "size": [
+            284,
+            437
+          ],
+          "alpha_pixels": 45303
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            749,
+            609,
+            1032,
+            1048
+          ],
+          "size": [
+            283,
+            439
+          ],
+          "alpha_pixels": 43912
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1112,
+            606,
+            1402,
+            1051
+          ],
+          "size": [
+            290,
+            445
+          ],
+          "alpha_pixels": 48124
+        }
+      ]
+    },
+    {
+      "state": "running-left",
+      "source": "sources/running-left.png",
+      "prompt": "prompts/running-left.md",
+      "selected_revision": 3,
+      "original_generated_file": "/Users/cleste/.codex/generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-b80fcb78-ceb0-464d-bf40-b1ba424f0289.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "sha256": "3426464b4dd41479e71fce761c52a81e9e3df2196d9175a1a414a1a0f9ae2593",
+      "frame_count": 8,
+      "split_pass": true,
+      "whole_alpha_coverage_pass": true,
+      "visible_alpha_on_canvas_edges": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            19,
+            77,
+            389,
+            544
+          ],
+          "size": [
+            370,
+            467
+          ],
+          "alpha_pixels": 61023
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            435,
+            82,
+            735,
+            538
+          ],
+          "size": [
+            300,
+            456
+          ],
+          "alpha_pixels": 52894
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            797,
+            81,
+            1098,
+            542
+          ],
+          "size": [
+            301,
+            461
+          ],
+          "alpha_pixels": 53885
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1139,
+            79,
+            1435,
+            542
+          ],
+          "size": [
+            296,
+            463
+          ],
+          "alpha_pixels": 58214
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            19,
+            590,
+            394,
+            1045
+          ],
+          "size": [
+            375,
+            455
+          ],
+          "alpha_pixels": 60622
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            449,
+            590,
+            754,
+            1040
+          ],
+          "size": [
+            305,
+            450
+          ],
+          "alpha_pixels": 53910
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            808,
+            589,
+            1109,
+            1045
+          ],
+          "size": [
+            301,
+            456
+          ],
+          "alpha_pixels": 55207
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1141,
+            590,
+            1433,
+            1050
+          ],
+          "size": [
+            292,
+            460
+          ],
+          "alpha_pixels": 59903
+        }
+      ]
+    },
+    {
+      "state": "waving",
+      "source": "sources/waving.png",
+      "prompt": "prompts/waving.md",
+      "selected_revision": 2,
+      "original_generated_file": "/Users/cleste/.codex/generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-23aa3ca5-76cc-4e26-86a6-e425380b3e24.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "sha256": "ba7b4e9535960a442ca68748cff09b622c3549d140adf9240892e2c7ff1e8f57",
+      "frame_count": 4,
+      "split_pass": true,
+      "whole_alpha_coverage_pass": true,
+      "visible_alpha_on_canvas_edges": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            329,
+            56,
+            603,
+            552
+          ],
+          "size": [
+            274,
+            496
+          ],
+          "alpha_pixels": 57487
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            880,
+            55,
+            1146,
+            552
+          ],
+          "size": [
+            266,
+            497
+          ],
+          "alpha_pixels": 56353
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            332,
+            570,
+            605,
+            1060
+          ],
+          "size": [
+            273,
+            490
+          ],
+          "alpha_pixels": 56911
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            871,
+            570,
+            1146,
+            1060
+          ],
+          "size": [
+            275,
+            490
+          ],
+          "alpha_pixels": 57203
+        }
+      ]
+    }
+  ]
+}

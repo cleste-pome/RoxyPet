@@ -13,6 +13,10 @@ ANIMATIONS = {
     'run-left': ([(2,c) for c in range(8)], [120]*8),
     'wave': ([(3,c) for c in [0,1,2,3,2,1,0]], [140]*6+[600]),
     'jump': ([(4,c) for c in range(5)], [140]*4+[500]),
+    'failed': ([(5,c) for c in range(8)], [180]*7+[600]),
+    'waiting': ([(6,c) for c in range(6)], [220]*5+[600]),
+    'work': ([(7,c) for c in range(6)], [120]*5+[1220]),
+    'review': ([(8,c) for c in range(6)], [200]*5+[600]),
     'look': ([(9+d//8,d%8) for d in range(16)], [220]*16),
 }
 
@@ -41,7 +45,7 @@ def render(character_id, output):
         images[0].save(output/f'{name}.gif',save_all=True,append_images=images[1:],
                        duration=durations,loop=0)
     composite(sheet,(1536,2288)).save(output/'contact-sheet.jpg',quality=94)
-    identities = ['roxy', 'eris-short', 'eris-long', 'sylphie-adult', 'sylphie-chibi']
+    identities = ['roxy', 'roxy-nohat', 'eris-short', 'eris-long', 'sylphie-adult', 'sylphie-chibi']
     identities = [i for i in identities if (ROOT/'02-assets/characters'/i/'spritesheet.png').exists()]
     if character_id not in identities: identities.append(character_id)
     canvas = Image.new('RGB',(330*len(identities),440),BG)
@@ -62,7 +66,7 @@ def render(character_id, output):
         draw.text((i*330+165,365),info['name'],font=font,fill='#302a2a',anchor='mm')
         draw.text((i*330+165,402),info['appearance'],font=font,fill='#746a65',anchor='mm')
     canvas.save(output/'comparison.png')
-    print(f'Rendered {profile["name"]}: six animations, contact sheet, Retina comparison')
+    print(f'Rendered {profile["name"]}: {len(ANIMATIONS)} animations, contact sheet, Retina comparison')
 
 
 if __name__=='__main__':

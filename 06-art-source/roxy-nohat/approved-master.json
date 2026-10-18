@@ -1,0 +1,14 @@
+{
+  "status": "approved",
+  "date": "2026-10-18",
+  "approved_source": "user-upload",
+  "source_filename": "codex-clipboard-cfc01514-63bc-4c3e-8e78-754582f2777c.png",
+  "master": "sources/master.png",
+  "sha256": "8f6dd80d6af5ed9b57bc17c07bfbad992a567482d79f577c6240ad75f294746c",
+  "size": [
+    1024,
+    1536
+  ],
+  "mode": "RGBA",
+  "instruction": "Use this exact uploaded portrait as identity, costume and proportions master. Continue storyboards and atlas production for existing RoxyPet interface."
+}

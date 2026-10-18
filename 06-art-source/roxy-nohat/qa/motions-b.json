@@ -1,0 +1,495 @@
+{
+  "tool": "built-in image_gen",
+  "identity_reference": "sources/master.png",
+  "states": [
+    {
+      "name": "jumping",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "expected_frames": 6,
+      "alpha_min": 0,
+      "alpha_max": 254,
+      "transparent_fraction": 0.6980730692545573,
+      "near_transparent_fraction": 0.7552356719970703,
+      "split_pass": true,
+      "frame_bboxes": [
+        [
+          112,
+          39,
+          445,
+          496
+        ],
+        [
+          590,
+          12,
+          966,
+          504
+        ],
+        [
+          1068,
+          11,
+          1491,
+          414
+        ],
+        [
+          76,
+          527,
+          478,
+          985
+        ],
+        [
+          568,
+          585,
+          978,
+          1000
+        ],
+        [
+          1119,
+          514,
+          1446,
+          1008
+        ]
+      ],
+      "frame_sizes": [
+        [
+          333,
+          457
+        ],
+        [
+          376,
+          492
+        ],
+        [
+          423,
+          403
+        ],
+        [
+          402,
+          458
+        ],
+        [
+          410,
+          415
+        ],
+        [
+          327,
+          494
+        ]
+      ],
+      "source": "sources/jumping.png",
+      "prompt": "prompts/jumping.md",
+      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-d52becbe-e0d8-4741-9681-a7c354fdb7bf.png",
+      "sha256": "92f569e970122f63d818c151e35457ee29a5fec41690505fe562d2500d45a0fd",
+      "visual_review": {
+        "pass": true,
+        "full_body_and_boots": true,
+        "hat_free": true,
+        "twin_braids_and_ribbons": true,
+        "costume_consistent": true,
+        "no_props_or_effects": true,
+        "action_correct": true,
+        "transparent_background_on_light_composite": true
+      },
+      "canvas_edge_clearance_min_px": 11,
+      "runtime_frames": 5
+    },
+    {
+      "name": "failed",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "expected_frames": 8,
+      "alpha_min": 0,
+      "alpha_max": 254,
+      "transparent_fraction": 0.6376851399739584,
+      "near_transparent_fraction": 0.7147439320882162,
+      "split_pass": true,
+      "frame_bboxes": [
+        [
+          84,
+          12,
+          361,
+          509
+        ],
+        [
+          445,
+          12,
+          723,
+          509
+        ],
+        [
+          812,
+          15,
+          1082,
+          510
+        ],
+        [
+          1170,
+          14,
+          1449,
+          509
+        ],
+        [
+          89,
+          521,
+          361,
+          1012
+        ],
+        [
+          445,
+          514,
+          721,
+          1012
+        ],
+        [
+          806,
+          514,
+          1092,
+          1012
+        ],
+        [
+          1176,
+          512,
+          1456,
+          1012
+        ]
+      ],
+      "frame_sizes": [
+        [
+          277,
+          497
+        ],
+        [
+          278,
+          497
+        ],
+        [
+          270,
+          495
+        ],
+        [
+          279,
+          495
+        ],
+        [
+          272,
+          491
+        ],
+        [
+          276,
+          498
+        ],
+        [
+          286,
+          498
+        ],
+        [
+          280,
+          500
+        ]
+      ],
+      "source": "sources/failed.png",
+      "prompt": "prompts/failed.md",
+      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-64cec2bf-2c7a-4b05-a4f6-7a9b0d47bc92.png",
+      "sha256": "7377c37e520498fd8e62bf39efcbe9c37a02ce0960939b6335a129b47bf57d77",
+      "visual_review": {
+        "pass": true,
+        "full_body_and_boots": true,
+        "hat_free": true,
+        "twin_braids_and_ribbons": true,
+        "costume_consistent": true,
+        "no_props_or_effects": true,
+        "action_correct": true,
+        "transparent_background_on_light_composite": true
+      },
+      "canvas_edge_clearance_min_px": 12,
+      "runtime_frames": 8
+    },
+    {
+      "name": "waiting",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "expected_frames": 6,
+      "alpha_min": 0,
+      "alpha_max": 254,
+      "transparent_fraction": 0.7127793629964193,
+      "near_transparent_fraction": 0.7841224670410156,
+      "split_pass": true,
+      "frame_bboxes": [
+        [
+          156,
+          8,
+          432,
+          507
+        ],
+        [
+          627,
+          9,
+          907,
+          510
+        ],
+        [
+          1097,
+          9,
+          1376,
+          510
+        ],
+        [
+          141,
+          515,
+          427,
+          1015
+        ],
+        [
+          628,
+          517,
+          910,
+          1014
+        ],
+        [
+          1104,
+          516,
+          1385,
+          1015
+        ]
+      ],
+      "frame_sizes": [
+        [
+          276,
+          499
+        ],
+        [
+          280,
+          501
+        ],
+        [
+          279,
+          501
+        ],
+        [
+          286,
+          500
+        ],
+        [
+          282,
+          497
+        ],
+        [
+          281,
+          499
+        ]
+      ],
+      "source": "sources/waiting.png",
+      "prompt": "prompts/waiting.md",
+      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-c8117ae3-14bd-49e7-84d2-52ddf87f912b.png",
+      "sha256": "0523d722ec307231f0eed4cc93502280f42a61961fa459bb0138b5c7aae93779",
+      "visual_review": {
+        "pass": true,
+        "full_body_and_boots": true,
+        "hat_free": true,
+        "twin_braids_and_ribbons": true,
+        "costume_consistent": true,
+        "no_props_or_effects": true,
+        "action_correct": true,
+        "transparent_background_on_light_composite": true
+      },
+      "canvas_edge_clearance_min_px": 8,
+      "runtime_frames": 6
+    },
+    {
+      "name": "running",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "expected_frames": 6,
+      "alpha_min": 0,
+      "alpha_max": 254,
+      "transparent_fraction": 0.7055880228678385,
+      "near_transparent_fraction": 0.7815373738606771,
+      "split_pass": true,
+      "frame_bboxes": [
+        [
+          217,
+          6,
+          509,
+          515
+        ],
+        [
+          635,
+          6,
+          916,
+          515
+        ],
+        [
+          1072,
+          6,
+          1350,
+          515
+        ],
+        [
+          220,
+          518,
+          507,
+          1020
+        ],
+        [
+          627,
+          518,
+          923,
+          1020
+        ],
+        [
+          1069,
+          518,
+          1362,
+          1019
+        ]
+      ],
+      "frame_sizes": [
+        [
+          292,
+          509
+        ],
+        [
+          281,
+          509
+        ],
+        [
+          278,
+          509
+        ],
+        [
+          287,
+          502
+        ],
+        [
+          296,
+          502
+        ],
+        [
+          293,
+          501
+        ]
+      ],
+      "source": "sources/running.png",
+      "prompt": "prompts/running.md",
+      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-49fbeb67-aed5-4c9e-a7d6-8fc537d12b2c.png",
+      "sha256": "ba2b6218380f743fcb563576e379b6ba4078c2bd3c81ecceb9622dcb297534c9",
+      "visual_review": {
+        "pass": true,
+        "full_body_and_boots": true,
+        "hat_free": true,
+        "twin_braids_and_ribbons": true,
+        "costume_consistent": true,
+        "no_props_or_effects": true,
+        "action_correct": true,
+        "transparent_background_on_light_composite": true
+      },
+      "canvas_edge_clearance_min_px": 4,
+      "runtime_frames": 6
+    },
+    {
+      "name": "review",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "expected_frames": 6,
+      "alpha_min": 0,
+      "alpha_max": 254,
+      "transparent_fraction": 0.7359504699707031,
+      "near_transparent_fraction": 0.7918046315511068,
+      "split_pass": true,
+      "frame_bboxes": [
+        [
+          151,
+          8,
+          435,
+          502
+        ],
+        [
+          630,
+          9,
+          908,
+          502
+        ],
+        [
+          1108,
+          9,
+          1393,
+          502
+        ],
+        [
+          147,
+          520,
+          437,
+          1015
+        ],
+        [
+          627,
+          520,
+          913,
+          1015
+        ],
+        [
+          1107,
+          520,
+          1396,
+          1015
+        ]
+      ],
+      "frame_sizes": [
+        [
+          284,
+          494
+        ],
+        [
+          278,
+          493
+        ],
+        [
+          285,
+          493
+        ],
+        [
+          290,
+          495
+        ],
+        [
+          286,
+          495
+        ],
+        [
+          289,
+          495
+        ]
+      ],
+      "source": "sources/review.png",
+      "prompt": "prompts/review.md",
+      "generated_original": "/Users/cleste/.codex/generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-15bab4ec-32f3-4acd-b828-9ce305dd0962.png",
+      "sha256": "6b0b7d566500a7a7f2155ca2040857e19fe34f40804328d19a9673d54aad103a",
+      "visual_review": {
+        "pass": true,
+        "full_body_and_boots": true,
+        "hat_free": true,
+        "twin_braids_and_ribbons": true,
+        "costume_consistent": true,
+        "no_props_or_effects": true,
+        "action_correct": true,
+        "transparent_background_on_light_composite": true
+      },
+      "canvas_edge_clearance_min_px": 8,
+      "runtime_frames": 6
+    }
+  ],
+  "reference_sha256": "8f6dd80d6af5ed9b57bc17c07bfbad992a567482d79f577c6240ad75f294746c",
+  "final_version": "First generated stable sheets; no padding revision generated.",
+  "qa_method": "Read-only split_sheet from 03-scripts/pack-eris-atlas.py; actual alpha inspected and visual review of light-background QA composites.",
+  "padding_note": "Requested source padding 8%; generated sheets have smaller vertical gaps but all figures are complete and separable. Parent accepted this because final atlas packer adds margins."
+}

@@ -19,11 +19,15 @@
 
 ## 🖼 角色与预览
 
-目前可选 **3 位人物、5 套形象**（右键桌宠 → **角色** 随时切换；每次启动都从洛琪希开始）：
+目前可选 **3 位人物、6 套形象**（右键桌宠 → **角色** 随时切换；每次启动都从洛琪希开始）：
 
-| 洛琪希 | 艾丽丝 · 短发 | 艾丽丝 · 长发 | 希露菲 · 日常装 | 希露菲 · Q版 |
-|:---:|:---:|:---:|:---:|:---:|
-| <img src="05-images/roxy/preview-idle.gif" width="160"/> | <img src="05-images/eris/short-idle.gif" width="160"/> | <img src="05-images/eris/long-idle.gif" width="160"/> | <img src="05-images/sylphie/idle.gif" width="160"/> | <img src="05-images/sylphie-chibi/idle.gif" width="160"/> |
+| 洛琪希 | 洛琪希 · 无帽 | 艾丽丝 · 短发 |
+|:---:|:---:|:---:|
+| <img src="05-images/roxy/preview-idle.gif" width="160"/> | <img src="05-images/roxy-nohat/idle.gif" width="160"/> | <img src="05-images/eris/short-idle.gif" width="160"/> |
+
+| 艾丽丝 · 长发 | 希露菲 · 日常装 | 希露菲 · Q版 |
+|:---:|:---:|:---:|
+| <img src="05-images/eris/long-idle.gif" width="160"/> | <img src="05-images/sylphie/idle.gif" width="160"/> | <img src="05-images/sylphie-chibi/idle.gif" width="160"/> |
 
 ---
 
@@ -32,10 +36,11 @@
 1. [项目与角色](#1-项目与角色)
    - 1.1 [目录结构](#11-目录结构)
    - 1.2 [洛琪希](#12-洛琪希)
-   - 1.3 [艾丽丝 · 短发](#13-艾丽丝--短发)
-   - 1.4 [艾丽丝 · 长发](#14-艾丽丝--长发)
-   - 1.5 [希露菲 · 日常装](#15-希露菲--日常装)
-   - 1.6 [希露菲 · Q版](#16-希露菲--q版)
+   - 1.3 [洛琪希 · 无帽](#13-洛琪希--无帽)
+   - 1.4 [艾丽丝 · 短发](#14-艾丽丝--短发)
+   - 1.5 [艾丽丝 · 长发](#15-艾丽丝--长发)
+   - 1.6 [希露菲 · 日常装](#16-希露菲--日常装)
+   - 1.7 [希露菲 · Q版](#17-希露菲--q版)
 2. [功能与动作](#2-功能与动作)
    - 2.1 [功能](#21-功能)
    - 2.2 [动作与分镜](#22-动作与分镜)
@@ -76,6 +81,7 @@ RoxyPet-GitHub/
 ├── 02-assets/           # 素材
 │   ├── characters/      # 每个角色一个文件夹
 │   │   ├── roxy/        # 洛琪希：序列帧图（8 列 × 11 行）+ character.json
+│   │   ├── roxy-nohat/  # 洛琪希 · 无帽：图集 + character.json
 │   │   ├── eris-short/  # 艾丽丝 · 短发：图集 + character.json
 │   │   ├── eris-long/   # 艾丽丝 · 长发：图集 + character.json
 │   │   ├── sylphie-adult/  # 希露菲 · 日常装：图集 + character.json
@@ -97,10 +103,11 @@ RoxyPet-GitHub/
 ├── 05-images/           # README 配图
 │   ├── icon.png         # 应用图标
 │   ├── roxy/            # 洛琪希：立绘 / 总表 / 视线 / 抽帧 / 动图
+│   ├── roxy-nohat/      # 洛琪希 · 无帽：立绘 / 总表 / 动图
 │   ├── eris/            # 艾丽丝：立绘 / 总表 / 动图
 │   ├── sylphie/         # 希露菲 · 日常装
 │   └── sylphie-chibi/   # 希露菲 · Q版
-├── 06-art-source/       # 人物素材工程：roxy / eris-short / eris-long / sylphie / sylphie-chibi
+├── 06-art-source/       # 人物素材工程：roxy / roxy-nohat / eris-short / eris-long / sylphie / sylphie-chibi
 └── 07-docs/             # 角色扩展 · 语料 · 素材制作记录
 ```
 
@@ -128,7 +135,31 @@ RoxyPet-GitHub/
 
 ---
 
-### 1.3 艾丽丝 · 短发
+### 1.3 洛琪希 · 无帽
+
+> 蓝发双麻花辫、呆毛与蓝眼的魔术师；白蓝法师服、黑色交叉胸带、白色长靴，不戴魔法帽。
+
+与默认形象共享同一身份、人设、语料与人物会话；菜单显示「洛琪希 · 无帽」，任务菜单仍为「吩咐洛琪希」。
+
+| 项目 | 说明 |
+|:---|:---|
+| **台词库** | 与默认形象共用同一套 1009 条 |
+| **菜单措辞** | 「吩咐洛琪希」；Siri 口令：「洛琪希」 |
+| **素材工程** | 定稿母版、分镜原图、提示词与独立帧见 `06-art-source/roxy-nohat/` |
+
+| 立绘 | 动作总表（行走图分镜） |
+|:---:|:---:|
+| <img src="05-images/roxy-nohat/standing.png" width="200"/> | <img src="05-images/roxy-nohat/contact-sheet.jpg" width="420"/> |
+
+| 待机 | 奔跑 | 挥手 | 跳跃 | 转头 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="05-images/roxy-nohat/idle.gif" width="150"/> | <img src="05-images/roxy-nohat/run.gif" width="150"/> | <img src="05-images/roxy-nohat/wave.gif" width="150"/> | <img src="05-images/roxy-nohat/jump.gif" width="150"/> | <img src="05-images/roxy-nohat/look.gif" width="150"/> |
+
+[全帧](05-images/roxy-nohat/contact-sheet.jpg) · [全部动作](05-images/roxy-nohat/all-actions.gif) · [素材工程](06-art-source/roxy-nohat/) · [制作记录](07-docs/素材制作/洛琪希无帽素材制作记录.md)
+
+---
+
+### 1.4 艾丽丝 · 短发
 
 > 红发少女的旅行装束。
 
@@ -148,7 +179,7 @@ RoxyPet-GitHub/
 
 ---
 
-### 1.4 艾丽丝 · 长发
+### 1.5 艾丽丝 · 长发
 
 > 白色露肩上衣、黑色领结、深棕荷叶边裙。
 
@@ -168,7 +199,7 @@ RoxyPet-GitHub/
 
 ---
 
-### 1.5 希露菲 · 日常装
+### 1.6 希露菲 · 日常装
 
 > 白发红眼、尖耳的魔术师，修长比例。
 
@@ -194,7 +225,7 @@ RoxyPet-GitHub/
 
 ---
 
-### 1.6 希露菲 · Q版
+### 1.7 希露菲 · Q版
 
 > Q版比例，同一套无披肩日常装。
 

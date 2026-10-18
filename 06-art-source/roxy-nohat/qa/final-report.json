@@ -1,0 +1,27 @@
+{
+  "status": "complete",
+  "date": "2026-10-18",
+  "master": "sources/master.png",
+  "generator": "built-in image_gen",
+  "runtime_frames": 73,
+  "animation_states": 9,
+  "gaze_directions": 16,
+  "atlas": "../../02-assets/characters/roxy-nohat/spritesheet.png",
+  "atlas_size": [
+    3072,
+    4576
+  ],
+  "cell_size": [
+    384,
+    416
+  ],
+  "registration": "roxy-nohat",
+  "shared_character_identity": "roxy",
+  "build": "PASS",
+  "code_signature": "PASS",
+  "runtime_self_test": "PASS: 6 appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history.",
+  "runtime_test_environment": "Normal macOS graphical session; isolated session aborted before character checks during NSApplication initialization. Successful rerun made no preference or history writes.",
+  "visual_review": "Root contact sheet and native-size comparison checked; independent reviewer found no blocking identity, limb, direction or clipping issues.",
+  "previews": "../../05-images/roxy-nohat/",
+  "sources_and_prompts_preserved": true
+}
