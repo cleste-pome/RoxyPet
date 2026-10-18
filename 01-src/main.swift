@@ -2347,13 +2347,25 @@ final class PetController: NSObject, NSApplicationDelegate {
         let picker = NSMenuItem(title: "角色 · \(character.menuTitle)", action: nil, keyEquivalent: "")
         let choices = NSMenu()
         choices.autoenablesItems = false
+        // Group by identity, including custom costumes from separate folders.
+        var groups: [[PetCharacter]] = []
         for profile in characters {
-            let item = NSMenuItem(title: profile.menuTitle, action: #selector(selectCharacter(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = profile.id
-            item.state = profile.id == character.id ? .on : .off
-            item.isEnabled = !aiBusy
-            choices.addItem(item)
+            if let index = groups.firstIndex(where: { $0.first?.characterID == profile.characterID }) {
+                groups[index].append(profile)
+            } else {
+                groups.append([profile])
+            }
+        }
+        for (index, group) in groups.enumerated() {
+            if index > 0 { choices.addItem(.separator()) }
+            for profile in group {
+                let item = NSMenuItem(title: profile.menuTitle, action: #selector(selectCharacter(_:)), keyEquivalent: "")
+                item.target = self
+                item.representedObject = profile.id
+                item.state = profile.id == character.id ? .on : .off
+                item.isEnabled = !aiBusy
+                choices.addItem(item)
+            }
         }
         choices.addItem(.separator())
         let add = NSMenuItem(title: "添加其他角色…", action: #selector(openCharactersFolder), keyEquivalent: "")
@@ -2471,14 +2483,17 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     /// Offline integration checks against the packaged resources. No preferences, files or network changed.
     func runCharacterChecks() {
-        precondition(Set(characters.map(\.id)).isSuperset(of: ["roxy", "eris-short", "eris-long"]))
+        precondition(Set(characters.map(\.id)).isSuperset(of: ["roxy", "eris-short", "eris-long", "sylphie-adult", "sylphie-chibi"]))
+        let sylphieLooks = characters.filter { $0.characterID == "sylphie" }
+        precondition(sylphieLooks.first?.id == "sylphie-adult", "Sylphie defaults to the approved daily outfit")
+        precondition(sylphieLooks.first?.speech == sylphieLooks.last?.speech, "Sylphie appearances share one corpus")
         loadSpeechExtras()
         for _ in 0..<3 {
             for profile in characters {
                 precondition(switchCharacter(to: profile, announce: false, persist: false), "Atlas failed: \(profile.id)")
                 precondition(frames.count == 11 && masks.count == 11 && frames.allSatisfy { $0.count == 8 })
                 precondition(currentImage != nil && currentRow == 0 && currentCol == 0)
-                if profile.id == "eris-short" || profile.id == "eris-long" {
+                if ["eris-short", "eris-long", "sylphie-adult", "sylphie-chibi"].contains(profile.id) {
                     let bitmap = frames[0][0].cgImage(forProposedRect: nil, context: nil, hints: nil)!
                     precondition(bitmap.width == 384 && bitmap.height == 416, "Retina pixels lost: \(profile.id)")
                 }
@@ -2494,6 +2509,23 @@ final class PetController: NSObject, NSApplicationDelegate {
                     let picker = menu.items.first!.submenu!
                     precondition(picker.items.filter { $0.state == .on }.count == 1)
                     precondition(picker.items.first { $0.state == .on }?.representedObject as? String == profile.id)
+                    let byID = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
+                    var previousIdentity: String?
+                    var separated = false
+                    var visited = Set<String>()
+                    for item in picker.items {
+                        if item.isSeparatorItem { separated = true; continue }
+                        guard let id = item.representedObject as? String, let entry = byID[id] else { continue }
+                        if let previous = previousIdentity {
+                            precondition(separated == (previous != entry.characterID), "Separator must divide identities only")
+                        }
+                        if previousIdentity != entry.characterID {
+                            precondition(visited.insert(entry.characterID).inserted, "Costumes must stay together")
+                        }
+                        previousIdentity = entry.characterID
+                        separated = false
+                        precondition(item.title == entry.menuTitle)
+                    }
                 }
                 precondition(!lines("chat", CHAT_LINES).isEmpty)
                 precondition(!lines("greeting", GREETINGS).isEmpty)
@@ -2512,9 +2544,10 @@ final class PetController: NSObject, NSApplicationDelegate {
         let oldJSON = Data("[{\"t\":0,\"role\":\"roxy\",\"text\":\"原有记录\"}]".utf8)
         taskHistory = try! JSONDecoder().decode([TaskRecord].self, from: oldJSON)
         taskHistory.append(TaskRecord(t: 1, role: "roxy", text: "新记录", characterID: "eris", characterName: "艾丽丝"))
+        taskHistory.append(TaskRecord(t: 2, role: "roxy", text: "希露菲记录", characterID: "sylphie", characterName: "希露菲"))
         let html = historyHTML()
-        precondition(html.contains("洛琪希") && html.contains("艾丽丝"))
-        print("PASS: three characters, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history.")
+        precondition(html.contains("洛琪希") && html.contains("艾丽丝") && html.contains("希露菲"))
+        print("PASS: five appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history.")
     }
 
     // ---------- 右键菜单 ----------
