@@ -21,7 +21,7 @@
 
 目前可选 **3 位人物、6 套形象**（右键桌宠 → **角色** 随时切换；每次启动都从洛琪希开始）：
 
-| 洛琪希 | 洛琪希 · 无帽 | 艾丽丝 · 短发 | 艾丽丝 · 长发 | 希露菲 · 日常装 | 希露菲 · Q版 |
+| 洛琪希 · 魔术师 | 洛琪希 · 无帽 | 艾丽丝 · 短发 | 艾丽丝 · 长发 | 希露菲 · 日常装 | 希露菲 · Q版 |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | <img src="05-images/roxy/preview-idle.gif" width="160"/> | <img src="05-images/roxy-nohat/idle.gif" width="160"/> | <img src="05-images/eris/short-idle.gif" width="160"/> | <img src="05-images/eris/long-idle.gif" width="160"/> | <img src="05-images/sylphie/idle.gif" width="160"/> | <img src="05-images/sylphie-chibi/idle.gif" width="160"/> |
 
@@ -31,7 +31,7 @@
 
 1. [项目与角色](#1-项目与角色)
    - 1.1 [目录结构](#11-目录结构)
-   - 1.2 [洛琪希](#12-洛琪希)
+   - 1.2 [洛琪希 · 魔术师](#12-洛琪希--魔术师)
    - 1.3 [洛琪希 · 无帽](#13-洛琪希--无帽)
    - 1.4 [艾丽丝 · 短发](#14-艾丽丝--短发)
    - 1.5 [艾丽丝 · 长发](#15-艾丽丝--长发)
@@ -111,9 +111,9 @@ RoxyPet-GitHub/
 
 ---
 
-### 1.2 洛琪希
+### 1.2 洛琪希 · 魔术师
 
-> 蓝发双辫的**魔族**魔术师（米格路德族）。
+> 蓝发双辫的**魔族**魔术师（米格路德族），戴尖顶魔法帽的默认形象。
 
 | 项目 | 说明 |
 |:---|:---|
@@ -485,7 +485,7 @@ Roxy.app/Contents/Resources/speech/<人物>.json   ④ 运行时读取（~/.roxy
 
 | 名称 | 贡献与用途 |
 |:---|:---|
-| [易轩（JensenTong）](https://github.com/Emulation174) | 负责本项目中洛琪希「魔术师版本」的角色美术与序列帧动画 |
+| [易轩（JensenTong）](https://github.com/Emulation174) | 负责本项目中洛琪希「魔术师版本」（戴尖顶魔法帽）的角色美术与序列帧动画 |
 | 原作者：[理不尽な孫の手](https://x.com/Magote_rihujin) | 故事与角色设定的来源 |
 | 角色原案：[シロタカ](https://x.com/akatoris) | 角色设计的来源 |
 | 动画制作：[Studio Bind](https://st-bind.jp/) | 负责《无职转生 ～到了异世界就拿出真本事～》TV 动画的企划与制作 |

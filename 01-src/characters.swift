@@ -22,7 +22,7 @@ struct PetCharacter: Codable {
     var isRoxy: Bool { characterID == "roxy" }
 
     static let roxy = PetCharacter(
-        id: "roxy", characterID: "roxy", name: "洛琪希", appearance: "",
+        id: "roxy", characterID: "roxy", name: "洛琪希", appearance: "魔术师",
         actionVerb: "吩咐", historyTitle: "吩咐记录", screenTitle: "看看屏幕（透视魔法）",
         persona: "你是《无职转生》的洛琪希·米格路迪亚，蓝发双辫的米格路德族水圣级魔术师。认真、温柔、礼貌、容易害羞，带一点教学口吻。",
         atlas: "spritesheet.png", speech: [:])
