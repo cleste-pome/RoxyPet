@@ -122,9 +122,9 @@ RoxyPet-GitHub/
 |:---:|:---:|:---:|
 | <img src="05-images/roxy/chibi.png" width="180"/> | <img src="05-images/roxy/contact-sheet.png" width="360"/> | <img src="05-images/roxy/look-directions.png" width="320"/> |
 
-| 待机 | 奔跑 | 挥手 | 转头 |
-|:---:|:---:|:---:|:---:|
-| <img src="05-images/roxy/preview-idle.gif" width="150"/> | <img src="05-images/roxy/preview-run.gif" width="150"/> | <img src="05-images/roxy/preview-wave.gif" width="150"/> | <img src="05-images/roxy/preview-look.gif" width="150"/> |
+| 待机 | 奔跑 | 挥手 | 跳跃 | 转头 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="05-images/roxy/preview-idle.gif" width="150"/> | <img src="05-images/roxy/preview-run.gif" width="150"/> | <img src="05-images/roxy/preview-wave.gif" width="150"/> | <img src="05-images/roxy/preview-jump.gif" width="150"/> | <img src="05-images/roxy/preview-look.gif" width="150"/> |
 
 ---
 
@@ -142,9 +142,9 @@ RoxyPet-GitHub/
 |:---:|:---:|
 | <img src="05-images/eris/short-standing.png" width="200"/> | <img src="05-images/eris/short-contact-sheet.jpg" width="420"/> |
 
-| 待机 | 奔跑 | 挥手 | 转头 |
-|:---:|:---:|:---:|:---:|
-| <img src="05-images/eris/short-idle.gif" width="150"/> | <img src="05-images/eris/short-run.gif" width="150"/> | <img src="05-images/eris/short-wave.gif" width="150"/> | <img src="05-images/eris/short-look.gif" width="150"/> |
+| 待机 | 奔跑 | 挥手 | 跳跃 | 转头 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="05-images/eris/short-idle.gif" width="150"/> | <img src="05-images/eris/short-run.gif" width="150"/> | <img src="05-images/eris/short-wave.gif" width="150"/> | <img src="05-images/eris/short-jump.gif" width="150"/> | <img src="05-images/eris/short-look.gif" width="150"/> |
 
 ---
 
@@ -162,9 +162,9 @@ RoxyPet-GitHub/
 |:---:|:---:|
 | <img src="05-images/eris/long-standing.png" width="200"/> | <img src="05-images/eris/long-contact-sheet.jpg" width="420"/> |
 
-| 待机 | 奔跑 | 挥手 | 转头 |
-|:---:|:---:|:---:|:---:|
-| <img src="05-images/eris/long-idle.gif" width="150"/> | <img src="05-images/eris/long-run.gif" width="150"/> | <img src="05-images/eris/long-wave.gif" width="150"/> | <img src="05-images/eris/long-look.gif" width="150"/> |
+| 待机 | 奔跑 | 挥手 | 跳跃 | 转头 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="05-images/eris/long-idle.gif" width="150"/> | <img src="05-images/eris/long-run.gif" width="150"/> | <img src="05-images/eris/long-wave.gif" width="150"/> | <img src="05-images/eris/long-jump.gif" width="150"/> | <img src="05-images/eris/long-look.gif" width="150"/> |
 
 ---
 
@@ -186,9 +186,9 @@ RoxyPet-GitHub/
 
 保留两种比例：用户选定的修长版为默认，另可选择 Q版（见下一节）。同一人物的形象在菜单里放在一起，不同人物之间以横线分隔；任务菜单显示「拜托希露菲」。两版共享 `sylphie.json` 语料和人物会话，各有 73 个运行帧（含 16 向视线），单帧 384×416，显示窗口尺寸与其他人物一致。
 
-| 待机 | 奔跑 | 挥手 | 转头 |
-|:---:|:---:|:---:|:---:|
-| <img src="05-images/sylphie/idle.gif" width="150"/> | <img src="05-images/sylphie/run.gif" width="150"/> | <img src="05-images/sylphie/wave.gif" width="150"/> | <img src="05-images/sylphie/look.gif" width="150"/> |
+| 待机 | 奔跑 | 挥手 | 跳跃 | 转头 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="05-images/sylphie/idle.gif" width="150"/> | <img src="05-images/sylphie/run.gif" width="150"/> | <img src="05-images/sylphie/wave.gif" width="150"/> | <img src="05-images/sylphie/jump.gif" width="150"/> | <img src="05-images/sylphie/look.gif" width="150"/> |
 
 [默认版全帧](05-images/sylphie/contact-sheet.jpg) · [默认版工程](06-art-source/sylphie/) · [制作记录](07-docs/素材制作/希露菲素材制作记录.md)
 
@@ -210,9 +210,9 @@ RoxyPet-GitHub/
 |:---:|:---:|
 | <img src="05-images/sylphie-chibi/standing.png" width="200"/> | <img src="05-images/sylphie-chibi/contact-sheet.jpg" width="420"/> |
 
-| 待机 | 奔跑 | 挥手 | 转头 |
-|:---:|:---:|:---:|:---:|
-| <img src="05-images/sylphie-chibi/idle.gif" width="150"/> | <img src="05-images/sylphie-chibi/run.gif" width="150"/> | <img src="05-images/sylphie-chibi/wave.gif" width="150"/> | <img src="05-images/sylphie-chibi/look.gif" width="150"/> |
+| 待机 | 奔跑 | 挥手 | 跳跃 | 转头 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="05-images/sylphie-chibi/idle.gif" width="150"/> | <img src="05-images/sylphie-chibi/run.gif" width="150"/> | <img src="05-images/sylphie-chibi/wave.gif" width="150"/> | <img src="05-images/sylphie-chibi/jump.gif" width="150"/> | <img src="05-images/sylphie-chibi/look.gif" width="150"/> |
 
 [Q版全帧](05-images/sylphie-chibi/contact-sheet.jpg) · [Q版工程](06-art-source/sylphie-chibi/) · [制作记录](07-docs/素材制作/希露菲素材制作记录.md)
 
@@ -456,17 +456,21 @@ Roxy.app/Contents/Resources/speech/<人物>.json   ④ 运行时读取（~/.roxy
 
 ### 5.2 致谢与工具
 
-- **[易轩（JensenTong）](https://github.com/Emulation174)** —— 负责本项目中**洛琪希「魔术师版本」**的角色美术与序列帧动画
-- **[《无职转生》](https://ncode.syosetu.com/n9669bk/)原作者 理不尽な孫の手、角色原案 シロタカ** —— 角色设定与故事世界的来源
-- **[洛琪希图书馆](https://pan.roxylib.com/)** —— 原作文本资料
-- **[ChatGPT](https://chatgpt.com/)** —— 艾丽丝、希露菲素材（AI 图像生成）与多角色功能的协作开发
-- **[DeepSeek](https://www.deepseek.com/)** —— 文本创作协助与 API 对话支持
-- **[Claude Code](https://www.anthropic.com/claude-code)** —— 代码开发、语料与文档协作
-- **[Pillow](https://python-pillow.org/)、[NumPy](https://numpy.org/)** —— 图集打包与预览渲染
-- **[Xcode Command Line Tools](https://developer.apple.com/xcode/)** —— `swiftc` 编译
-- **[Python 3](https://www.python.org/)** —— 语料转换与素材脚本
+| 名称 | 贡献与用途 |
+|:---|:---|
+| [易轩（JensenTong）](https://github.com/Emulation174) | 负责本项目中洛琪希「魔术师版本」的角色美术与序列帧动画 |
+| 原作者：[理不尽な孫の手](https://x.com/Magote_rihujin) | 故事与角色设定的来源 |
+| 角色原案：[シロタカ](https://x.com/akatoris) | 角色设计的来源 |
+| 动画制作：[Studio Bind](https://st-bind.jp/) | 负责《无职转生 ～到了异世界就拿出真本事～》TV 动画的企划与制作 |
+| [洛琪希图书馆](https://pan.roxylib.com/) | 原作文本资料 |
+| [ChatGPT](https://chatgpt.com/) | 负责艾丽丝（短发 / 长发）与希露菲（日常装 / Q版）的角色立绘、整套动作原图与跳跃动作修订；并参与多角色菜单与素材流程的设计 |
+| [DeepSeek](https://www.deepseek.com/) | 语料撰写与修订的文本协助；同时作为桌宠「聊天 / 想句话」的 API 对话后端 |
+| [Claude Code](https://www.anthropic.com/claude-code) | 应用源码、构建与发布脚本、语料流水线及文档的编写与维护 |
+| [Pillow](https://python-pillow.org/)、[NumPy](https://numpy.org/) 等 | 图像处理：透明描边抽帧、同组缩放与脚底对齐、图集拼装，以及 GIF 预览渲染 |
+| [Xcode Command Line Tools](https://developer.apple.com/xcode/) | 提供 `swiftc` 与 `codesign`：编译 Swift 源码并完成应用签名 |
+| [Python 3](https://www.python.org/) | 承载素材与语料脚本：Markdown→JSON 语料转换、图集打包、预览渲染 |
 
-这个项目从编译到图像处理，用的都是开源社区多年积累下来的工具。感谢开源精神，我也想为社区贡献一份力量——仓库里的源码、语料和美术工程全部公开：可以学习、修改，也可以在此基础上继续开发。
+这个项目从构建到素材，几乎每一环都用了开源社区的工具：编译靠 Swift 编译器和 bash；语料转换、序列帧抽图、图集打包与预览渲染用的是 Python 3、Pillow 和 NumPy；对话与「看屏幕」可以直接接 DeepSeek 等兼容接口，也能在本地 LM Studio 上跑开源视觉模型。感谢开源精神，我也想为社区贡献一份力量——仓库里的源码、语料和美术工程全部公开：可以学习、修改，也可以在此基础上继续开发。
 
 ---
 

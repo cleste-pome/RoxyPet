@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 Roxy
+Copyright (c) 2026 cleste-pome (https://github.com/cleste-pome)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-────────── 附加说明：关于美术素材 ──────────
+────────── 附加说明：版权与素材 ──────────
 
-上述 MIT 许可**仅适用于本仓库的源代码**（01-src/、03-scripts/、04-integration/ 等）。
+本项目自行创作的部分——源代码（01-src/、03-scripts/、04-integration/ 等）、构建流程、文档与仓库结构——按上述 MIT 许可发布，可自由使用、修改与再分发。
 
-随仓库附带的角色美术素材——02-assets/characters/roxy/spritesheet.png、02-assets/Roxy.icns 及
-05-images/ 内的全部图片与动图——是为本粉丝项目制作的二次创作素材：
+随仓库附带的角色美术素材——02-assets/characters/ 内的图集、02-assets/Roxy.icns，以及
+05-images/ 内的全部图片与动图——是为本粉丝项目制作的二次创作素材，不在 MIT 许可范围内：
 
-- 《无职转生》及其角色的版权归 理不尽な孫の手 及原作相关权利方所有
-- 上述素材不在 MIT 许可范围内，仅供个人、非商业性使用
-- 再分发本项目（代码或成品）时，请替换为你自己拥有权利的素材
+- 《无职转生 ～到了异世界就拿出真本事～》：原作 理不尽な孫の手、插画 シロタカ、动画制作 Studio Bind；
+  作品、角色及相关设定的版权归原作者及上述权利方所有
+- 本项目为非官方、非商业的粉丝作品，与上述权利方无隶属关系，亦未获得其授权或认可
+- 本项目不收取任何费用，也不通过本项目进行售卖、打赏或其他商业获利
+- 仓库内美术素材仅供个人欣赏与非商业使用，请勿商用
+- 再分发本代码时，请替换为你自己拥有权利的素材
+- 如权利方认为本项目存在不妥之处，可通过仓库 Issues 联系，我们会及时处理
