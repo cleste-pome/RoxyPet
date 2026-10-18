@@ -21,13 +21,9 @@
 
 目前可选 **3 位人物、5 套形象**（右键桌宠 → **角色** 随时切换；每次启动都从洛琪希开始）：
 
-| 洛琪希 | 艾丽丝 · 短发 | 艾丽丝 · 长发 |
-|:---:|:---:|:---:|
-| <img src="05-images/roxy/preview-idle.gif" width="180"/> | <img src="05-images/eris/short-idle.gif" width="180"/> | <img src="05-images/eris/long-idle.gif" width="180"/> |
-
-| 希露菲 · 日常装 | 希露菲 · Q版 |
-|:---:|:---:|
-| <img src="05-images/sylphie/idle.gif" width="180"/> | <img src="05-images/sylphie-chibi/idle.gif" width="180"/> |
+| 洛琪希 | 艾丽丝 · 短发 | 艾丽丝 · 长发 | 希露菲 · 日常装 | 希露菲 · Q版 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="05-images/roxy/preview-idle.gif" width="160"/> | <img src="05-images/eris/short-idle.gif" width="160"/> | <img src="05-images/eris/long-idle.gif" width="160"/> | <img src="05-images/sylphie/idle.gif" width="160"/> | <img src="05-images/sylphie-chibi/idle.gif" width="160"/> |
 
 ---
 
