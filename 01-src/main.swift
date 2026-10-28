@@ -794,12 +794,19 @@ final class PetController: NSObject, NSApplicationDelegate {
         let pf = pet.frame
         var x = pf.midX - bub.frame.width / 2
         var y = pf.maxY + 6
-        if let scr = NSScreen.main ?? NSScreen.screens.first {
+        // 跟着桌宠所在的那块屏幕走；不能用 NSScreen.main（那是键盘焦点所在的屏幕，
+        // 接了扩展屏时经常是另一块，会把气泡夹到别的显示器上）。
+        let scr = pet.screen
+            ?? NSScreen.screens.first(where: { $0.frame.intersects(pf) })
+            ?? NSScreen.main
+            ?? NSScreen.screens.first
+        if let scr = scr {
             let vf = scr.visibleFrame
             x = min(max(x, vf.minX + 6), vf.maxX - bub.frame.width - 6)
             if y + bub.frame.height > vf.maxY - 6 {
                 y = pf.minY - bub.frame.height - 6   // 上方放不下 → 放下方
             }
+            y = min(max(y, vf.minY + 6), vf.maxY - bub.frame.height - 6)
         }
         bub.setFrameOrigin(NSPoint(x: x, y: y))
     }
