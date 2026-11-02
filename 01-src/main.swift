@@ -451,6 +451,10 @@ final class PetController: NSObject, NSApplicationDelegate {
     private let WAVE_SEQ: [(Int, Double)] = [(0, 0.14), (1, 0.14), (2, 0.14), (3, 0.28)]
     private let RUN_SEQ:  [(Int, Double)] = [(0, 0.12), (1, 0.12), (2, 0.12), (3, 0.12), (4, 0.12), (5, 0.12), (6, 0.12), (7, 0.22)]
     private let WORK_SEQ: [(Int, Double)] = [(0, 0.12), (1, 0.12), (2, 0.12), (3, 0.12), (4, 0.12), (5, 0.22), (5, 1.00)]  // 末尾定格 1 秒：工作循环做完停一拍，避免"低头"动作过密
+    // 待机微动作：托腮思考（第 7 行）、检视（第 8 行）、等待（第 6 行）
+    private let THINK_SEQ: [(Int, Double)] = [(0, 0.55), (1, 0.55), (2, 0.55), (3, 0.55), (4, 0.80), (5, 0.80)]
+    private let REVIEW_SEQ: [(Int, Double)] = [(0, 0.65), (1, 0.65), (2, 0.65), (3, 0.65), (4, 0.65), (5, 0.65)]
+    private let WAIT_SEQ: [(Int, Double)] = [(0, 0.75), (1, 0.75), (2, 0.75), (3, 0.75), (4, 0.75), (5, 0.75)]
 
     // 动画播放状态
     private var animKey = ""
@@ -484,6 +488,9 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var dshApprovalAcc = 0.0
     private var lastDshApprovalId = ""
     private var dshHeartbeatAcc = 0.0
+    // Claude Code PermissionRequest 审批桥
+    private var claudeApprovalAcc = 0.0
+    private var lastClaudeApprovalId = ""
     /// dsh 是否已接入（启动时检测到 dsh 命令）
     private static func isDshConnected() -> Bool { harnessPaths["dsh"] != nil }
     /// 最近一次余额（总额）与展示文案；实时显示用
@@ -530,6 +537,11 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var glanceAt: CFTimeInterval = 0       // 下一次"侧头瞥一眼"的时间
     private var glanceUntil: CFTimeInterval = 0     // 本次瞥视结束时间
     private var glanceDir: Int = 4                  // 瞥视方向（16 向：4=右，12=左）
+    private var glanceQueue: [Int] = []             // 摇头晃脑：连续切换的视线方向
+    private var glanceStepAt: CFTimeInterval = 0
+    private var nextIdleMicroAt: CFTimeInterval = 0 // 下一次待机微动作
+    private var idleMicroBag: [String] = []
+    private var lastIdleMicro = ""
     private var statusItem: NSStatusItem?
     private var statusVisibilityItem: NSMenuItem?
 
@@ -1000,6 +1012,9 @@ final class PetController: NSObject, NSApplicationDelegate {
     private func oncePlayback(for kind: String) -> (row: Int, sequence: [(Int, Double)], extraID: String?)? {
         if kind == "jump" { return (4, JUMP_SEQ, nil) }
         if kind == "wave" { return (3, WAVE_SEQ, nil) }
+        if kind == "think" { return (7, THINK_SEQ, nil) }
+        if kind == "review" { return (8, REVIEW_SEQ, nil) }
+        if kind == "wait" { return (6, WAIT_SEQ, nil) }
         if let clip = extraClips[kind] { return (0, clip.sequence, kind) }
         return nil
     }
@@ -1309,6 +1324,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         guard window != nil else { return }
 
         pollClaudeState(dt: dt)
+        pollClaudeApproval(dt: dt)
         pollDshBridge(dt: dt)
         pollDshBilling(dt: dt)
         pollHarnessDetection(dt: dt)
@@ -1455,7 +1471,11 @@ final class PetController: NSObject, NSApplicationDelegate {
 
         // ---------- 待机小动作：偶尔侧头瞥一眼（让待机不呆板；与"点头"无关）----------
         if key == "idle" || key == "glance" {
-            if glanceUntil > 0 && now >= glanceUntil { glanceUntil = 0 }
+            if glanceUntil > 0 && now >= glanceUntil { glanceUntil = 0; glanceQueue.removeAll() }
+            if glanceUntil > 0 && now >= glanceStepAt && !glanceQueue.isEmpty {
+                glanceDir = glanceQueue.removeFirst()
+                glanceStepAt = now + 0.42
+            }
             if glanceAt == 0 { glanceAt = now + Double.random(in: 3.5...7.0) }
             if glanceUntil == 0 && now >= glanceAt {
                 glanceUntil = now + Double.random(in: 0.5...0.9)
@@ -1465,6 +1485,41 @@ final class PetController: NSObject, NSApplicationDelegate {
         } else {
             glanceAt = 0
             glanceUntil = 0
+            glanceQueue.removeAll()
+        }
+
+        // ---------- 待机微动作：摇头晃脑 / 托腮思考 / 检视 / 等待 ----------
+        // 不依赖“系统空闲 60 秒”：只要她安静待机，每隔十几秒就做一个小动作。
+        // 拖拽、说话、看鼠标、工作、权限弹窗期间一律不抢戏。
+        if key == "idle", !hovering, !bubbleVisible, !petHidden, !dragging,
+           onceKind.isEmpty, pendingOnce.isEmpty, chainedExtraKind == nil,
+           now >= lookUntil, now >= glanceUntil, systemActivity.canAnimateAutomatically {
+            if nextIdleMicroAt == 0 { nextIdleMicroAt = now + Double.random(in: 6...12) }
+            if now >= nextIdleMicroAt {
+                if idleMicroBag.isEmpty {
+                    idleMicroBag = ["sway", "sway", "think", "review", "wait", "staff-idle"].shuffled()
+                    if idleMicroBag.first == lastIdleMicro,
+                       let i = idleMicroBag.firstIndex(where: { $0 != lastIdleMicro }) {
+                        idleMicroBag.swapAt(0, i)
+                    }
+                }
+                let kind = idleMicroBag.removeFirst()
+                lastIdleMicro = kind
+                if kind == "sway" {
+                    // 左右各看一眼再回正：不是单次瞥视，而是连贯的“摇头晃脑”。
+                    glanceDir = 12
+                    glanceQueue = [4, 12, 4, 12]
+                    glanceStepAt = now + 0.42
+                    glanceUntil = now + 2.2
+                    glanceAt = now + Double.random(in: 6...10)
+                } else {
+                    beginOnce(kind, repeats: 1, ambient: true, reason: .idle)
+                }
+                nextIdleMicroAt = now + Double.random(in: 10...20)
+            }
+        } else if key != "idle" {
+            // 进入工作/交互后重新计时，避免一回到待机就立刻做动作。
+            nextIdleMicroAt = 0
         }
 
         // 气泡维护
@@ -1784,6 +1839,61 @@ final class PetController: NSObject, NSApplicationDelegate {
                 if doneSrc == "dsh" { refreshDshBalance(speakChange: true) }
             }
         }
+    }
+
+    // ---------- Claude Code 权限审批（PermissionRequest 钩子）----------
+    // 钩子把请求写到 ~/.roxy-pet/claude/requests/<id>.json 并等待回复；
+    // 这里弹出「允许一次 / 拒绝」，回复写到 replies/<id>.json。
+    private func pollClaudeApproval(dt: Double) {
+        guard PetController.currentHarness() == "claude" else { return }
+        claudeApprovalAcc += dt
+        if claudeApprovalAcc < 0.4 { return }
+        claudeApprovalAcc = 0
+        let base = NSHomeDirectory() + "/.roxy-pet/claude"
+        let reqDir = base + "/requests"
+        let repDir = base + "/replies"
+        guard let names = try? FileManager.default.contentsOfDirectory(atPath: reqDir) else { return }
+        var pending: [(Double, String)] = []
+        let now = Date().timeIntervalSince1970
+        for name in names where name.hasSuffix(".json") {
+            let path = reqDir + "/" + name
+            guard let data = FileManager.default.contents(atPath: path),
+                  let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let created = obj["createdAt"] as? Double,
+                  let exp = obj["expiresAt"] as? Double else { continue }
+            if now > exp + 1 {
+                try? FileManager.default.removeItem(atPath: path)
+                continue
+            }
+            pending.append((created, name))
+        }
+        guard let (_, name) = pending.sorted(by: { $0.0 < $1.0 }).first else { return }
+        let path = reqDir + "/" + name
+        guard let data = FileManager.default.contents(atPath: path),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let id = obj["id"] as? String, !id.isEmpty,
+              id != lastClaudeApprovalId else { return }
+        lastClaudeApprovalId = id
+        let tool = obj["tool"] as? String ?? "tool"
+        var summary = obj["summary"] as? String ?? ""
+        if summary.count > 600 { summary = String(summary.prefix(600)) + "…" }
+        if summary.isEmpty { summary = "（没有可显示的参数）" }
+        setPetHidden(false)
+        let alert = NSAlert()
+        alert.messageText = "Claude Code 请求批准"
+        alert.informativeText = "工具：\(tool)\n\(summary)"
+        alert.addButton(withTitle: "允许一次")
+        alert.addButton(withTitle: "拒绝")
+        NSApp.activate(ignoringOtherApps: true)
+        NSSound.beep()
+        let resp = alert.runModal()
+        let decision = resp == .alertFirstButtonReturn ? "allow" : "deny"
+        try? FileManager.default.createDirectory(atPath: repDir, withIntermediateDirectories: true)
+        let reply: [String: Any] = ["id": id, "decision": decision]
+        if let d = try? JSONSerialization.data(withJSONObject: reply) {
+            try? d.write(to: URL(fileURLWithPath: repDir + "/" + id + ".json"), options: .atomic)
+        }
+        try? FileManager.default.removeItem(atPath: path)
     }
 
     // ---------- DeepSeek Harness（dsh）----------

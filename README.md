@@ -261,7 +261,8 @@ RoxyPet-GitHub/
 - 🎭 **拖动**：按住拖动，她会朝拖动方向奔跑（左拖向左跑、右拖向右跑）
 - 💬 **洛琪希 1009 条台词库**：打招呼、闲聊、按时段/星期/情绪自动切换；全部本地随机，零消耗
 - ⏰ **硬件联动**：整点报时（深夜自动静音）、电池低电量提醒、电量充满庆祝
-- 🤝 **Claude Code 联动**（可选）：你发消息 → 她跑动"工作"；回答完毕 → 挥手报告，气泡里带回复摘要，点气泡跳回对应终端窗口
+- 🤝 **Claude Code 联动**（可选）：你发消息 → 她低头思考（工作中）；回答完毕 → 挥手报告，气泡里带回复摘要，点气泡跳回对应终端窗口
+- 🌙 **待机微动作**：安静时会左右摇头晃脑、托腮思考、检视、等待、持杖待机，不再只是站着眨眼
 - 🐋 **DeepSeek Harness 联动**（可选）：会话状态、回复转述与**权限批准**（允许一次 / 拒绝）都能在桌宠这边完成
 - 💰 **DeepSeek 余额**：菜单一键查询总额 / 赠送 / 充值余额
 - 📮 **吩咐洛琪希**：闲聊直接走 API 当场回答（又快又省）；需要动手的任务勾选后交给本机 Claude Code 执行。对话**全程留档**（聊天气泡 + Markdown 渲染，永久保存可翻查），结果自动进剪贴板
@@ -401,7 +402,7 @@ cd RoxyPet-GitHub/03-scripts
 }
 ```
 
-- 你发消息 → 她跑动（工作中）；回答完毕 → 挥手报告，气泡带回复摘要
+- 你发消息 → 她低头思考（工作中）；回答完毕 → 挥手报告，气泡带回复摘要
 - 点气泡 → 复制摘要并跳回对应的终端窗口（Terminal / iTerm2）
 - 「吩咐洛琪希」：聊天直连 API；勾选「让她动手做」时走本机 `claude` CLI（需已配置 Claude Code；该模式以跳过权限确认的方式执行，请只吩咐你信任的任务）
 
@@ -425,12 +426,23 @@ cd RoxyPet-GitHub/03-scripts
 
 | 工具 | 机制 | 效果 | 需要做什么 |
 |---|---|---|---|
-| **Claude Code** | hooks → `state.claude` | 干活跑动 / 完工挥手+回复转述 / 等待提醒 | 配好上面的 hooks（`hook.sh`）|
+| **Claude Code** | hooks → `state.claude` | 干活思考 / 完工挥手+回复转述 / 权限与等待提示（可在桌宠里批准） | 配好 `hook.sh` 与 `claude-approval.sh` |
 | **Codex** | `notify` → `codex-notify.sh` | 完工挥手 + 回复转述 | `~/.codex/config.toml`：`notify = ["…/.roxy-pet/codex-notify.sh", "turn-ended"]`（若已有 notify 程序，在脚本里先转发，见脚本注释）|
 | **opencode** | 进程检测（`opencode run`） | 运行中跑动 / 结束挥手 | 无需配置，把执行器切到 opencode 即可 |
 | **DeepSeek Harness** | 桥插件 → `state.dsh` | 干活跑动 / 完工挥手+回复转述 / 权限批准 | 安装 `04-integration/dsh-plugin`（见 4.2.3）|
 
 同一时间只联动当前选中的执行器：派活给 Claude Code 就自动盯 Claude Code，切到 Harness 就自动盯 Harness（并自动开启对话同步与实时余额）。
+
+**在桌宠里批准 Claude Code 权限**：把 `04-integration/claude-approval.sh` 复制到 `~/.roxy-pet/` 并加执行权限，然后在 `~/.claude/settings.json` 的 `hooks.PermissionRequest` 里指向它：
+
+```json
+"PermissionRequest": [{
+  "matcher": "",
+  "hooks": [{ "type": "command", "command": "$HOME/.roxy-pet/claude-approval.sh", "timeout": 50 }]
+}]
+```
+
+终端要权限时，桌宠会弹「允许一次 / 拒绝」并把选择回传给 Claude Code；35 秒不回答、桌宠没开或任务执行器不是 Claude Code 时，自动回退到终端原来的权限提示。改动 hooks 后需要重开 Claude Code 会话才会生效。
 
 #### 4.2.3 DeepSeek Harness 联动
 
