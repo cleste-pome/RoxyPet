@@ -3396,30 +3396,39 @@ final class PetController: NSObject, NSApplicationDelegate {
         reset.target = self
         menu.addItem(reset)
         menu.addItem(.separator())
-        // 接入后多出一栏：余额 / 刷新 / 对话同步 / 实时余额 / 连接设置 全部平铺在这里，
-        // 不放进「点一下再展开」的子菜单，也不出现品牌字样。
+        // DeepSeek Harness 相关操作统一收进一个子菜单：
+        // 连接状态 / 余额 / 刷新余额 / 对话同步 / 实时余额 / 连接设置。
         if PetController.isDshConnected() {
             let d = UserDefaults.standard
+            let dshItem = NSMenuItem(title: "DeepSeek Harness", action: nil, keyEquivalent: "")
+            let dshMenu = NSMenu()
+            let conn = NSMenuItem(title: "连接：已连接", action: nil, keyEquivalent: "")
+            conn.isEnabled = false
+            dshMenu.addItem(conn)
             let balance = NSMenuItem(title: dshBalanceTotal.map { String(format: "余额：¥%.2f", $0) } ?? "余额：未查询",
                                      action: nil, keyEquivalent: "")
             balance.isEnabled = false
-            menu.addItem(balance)
+            dshMenu.addItem(balance)
             let refresh = NSMenuItem(title: "刷新余额", action: #selector(queryDeepSeekBalance), keyEquivalent: "")
             refresh.target = self
-            menu.addItem(refresh)
+            dshMenu.addItem(refresh)
+            dshMenu.addItem(.separator())
             let convOn = d.object(forKey: "roxyDshConversation") == nil ? true : d.bool(forKey: "roxyDshConversation")
             let conv = NSMenuItem(title: "对话同步", action: #selector(toggleDshConversation), keyEquivalent: "")
             conv.target = self
             conv.state = convOn ? .on : .off
-            menu.addItem(conv)
+            dshMenu.addItem(conv)
             let liveOn = d.object(forKey: "roxyDshBalanceLive") == nil ? true : d.bool(forKey: "roxyDshBalanceLive")
             let live = NSMenuItem(title: "实时余额", action: #selector(toggleDshBalanceLive), keyEquivalent: "")
             live.target = self
             live.state = liveOn ? .on : .off
-            menu.addItem(live)
+            dshMenu.addItem(live)
+            dshMenu.addItem(.separator())
             let settingsItem = NSMenuItem(title: "连接设置…", action: #selector(showSettingsWindow), keyEquivalent: "")
             settingsItem.target = self
-            menu.addItem(settingsItem)
+            dshMenu.addItem(settingsItem)
+            dshItem.submenu = dshMenu
+            menu.addItem(dshItem)
             menu.addItem(.separator())
         }
         menu.addItem(.separator())
