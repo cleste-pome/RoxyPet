@@ -17,6 +17,7 @@
 //   行 9-10：16 个视线方向帧（0°=正上，顺时针每 22.5° 一档）
 
 import Cocoa
+import Darwin
 import QuartzCore
 import WebKit
 
@@ -190,6 +191,22 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var characters = PetCharacter.loadCatalog()
     private var character = PetCharacter.roxy
     private var characterName: String { character.name }
+
+    // 单实例锁：flock 持有到进程退出，避免仓库版与 /Applications 版各跑一只。
+    private var instanceLockFD: Int32 = -1
+
+    private func acquireSingleInstanceLock() -> Bool {
+        let dir = NSHomeDirectory() + "/.roxy-pet"
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        let fd = open(dir + "/roxy.lock", O_CREAT | O_RDWR, 0o644)
+        if fd < 0 { return true }
+        if flock(fd, LOCK_EX | LOCK_NB) != 0 {
+            close(fd)
+            return false
+        }
+        instanceLockFD = fd
+        return true
+    }
 
     private func lines(_ key: String, _ fallback: [String]) -> [String] {
         character.lines(key, roxy: fallback)
@@ -460,6 +477,19 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var dshApprovalAcc = 0.0
     private var lastDshApprovalId = ""
     private var dshHeartbeatAcc = 0.0
+    /// dsh 是否已接入（启动时检测到 dsh 命令）
+    private static func isDshConnected() -> Bool { harnessPaths["dsh"] != nil }
+    /// 最近一次余额（总额）与展示文案；实时显示用
+    private var dshBalanceTotal: Double?
+    private var dshBalanceText = ""
+    private var dshBalanceAcc = 0.0
+    private var dshBalanceInFlight = false
+    /// 对话同步：DSH 双向对话（user/message + assistant/message）
+    private var dshHistory: [TaskRecord] = []
+    private var dshHistorySig = ""
+    private var dshHistoryAcc = 0.0
+    /// 未连接时的定期自动探测（每 5 分钟）
+    private var harnessDetectAcc = 0.0
 
     // 气泡
     private var bubbleWindow: NSWindow?
@@ -518,6 +548,7 @@ final class PetController: NSObject, NSApplicationDelegate {
            let arr = try? JSONDecoder().decode([TaskRecord].self, from: data) {
             taskHistory = arr
         }
+        loadDshHistory()
         // 防断裂：上次若有一条"用户消息"没等到回答（App 中途退出/重启），补一条说明
         if let last = taskHistory.last, last.role == "user" {
             taskHistory.append(TaskRecord(t: Date().timeIntervalSince1970, role: "roxy",
@@ -525,6 +556,36 @@ final class PetController: NSObject, NSApplicationDelegate {
                                           characterID: last.characterID, characterName: last.characterName))
             saveTaskHistory()
         }
+    }
+    /// 对话同步：读回 dsh 桥插件写的双向对话（user/message + assistant/message）。
+    /// 只用于「记录」窗口展示，不写回 task-history.json（各存各的，互不覆盖）。
+    private func loadDshHistory() {
+        let d = UserDefaults.standard
+        if d.object(forKey: "roxyDshConversation") != nil, !d.bool(forKey: "roxyDshConversation") {
+            if !dshHistory.isEmpty { dshHistory = [] }
+            dshHistorySig = "off"
+            return
+        }
+        let path = NSHomeDirectory() + "/.roxy-pet/dsh/conversation.json"
+        guard let data = FileManager.default.contents(atPath: path),
+              let arr = try? JSONDecoder().decode([TaskRecord].self, from: data) else {
+            if !dshHistory.isEmpty { dshHistory = [] }
+            return
+        }
+        // 系统注入的运行时上下文每轮都会作为 user 消息出现，展示时丢掉
+        let noise = ["Current runtime context",
+                     "This snapshot supersedes earlier runtime-context snapshots",
+                     "<system-reminder>",
+                     "[dsh-cost-meter]"]
+        dshHistory = arr.filter { rec in
+            !noise.contains { rec.text.hasPrefix($0) || rec.text.contains($0) }
+        }.map { rec in
+            if rec.role == "user" {
+                return TaskRecord(t: rec.t, role: "user", text: rec.text, characterID: nil, characterName: nil)
+            }
+            return TaskRecord(t: rec.t, role: "roxy", text: rec.text, characterID: nil, characterName: "Harness")
+        }
+        dshHistorySig = "\(dshHistory.count)-\(dshHistory.last?.t ?? 0)"
     }
     private func saveTaskHistory() {
         if taskHistory.count > 500 { taskHistory.removeFirst(taskHistory.count - 500) }
@@ -633,10 +694,11 @@ final class PetController: NSObject, NSApplicationDelegate {
         let df = DateFormatter()
         df.dateFormat = "M月d日 HH:mm"
         var rows = ""
-        if taskHistory.isEmpty {
+        let merged = (taskHistory + dshHistory).sorted { $0.t < $1.t }
+        if merged.isEmpty {
             rows = "<div class='empty'>还没有记录哦～<br>在菜单里选「\(character.actionTitle)」，把任务交给我吧。</div>"
         } else {
-            for r in taskHistory {
+            for r in merged {
                 let isUser = (r.role == "user")
                 let who = htmlEscape(isUser ? "你" : (r.characterName ?? "洛琪希"))
                 let cls = isUser ? "me" : "roxy"
@@ -693,6 +755,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             historyWindow = w
             historyWeb = web
         }
+        loadDshHistory()
         refreshHistoryWindow()
         historyWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -714,6 +777,12 @@ final class PetController: NSObject, NSApplicationDelegate {
     // ---------- 启动 ----------
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        // 单实例锁：仓库版与 /Applications 版同时打开时会各放一只，必须只留一个。
+        guard acquireSingleInstanceLock() else {
+            NSLog("Roxy: another instance is already running; exiting")
+            NSApp.terminate(nil)
+            return
+        }
         // 每次启动都从洛琪希开始；「角色」菜单可在本次运行里随时切换
         character = characters.first(where: { $0.isRoxy }) ?? characters[0]
         if !loadAtlas() { character = characters[0] }
@@ -726,9 +795,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         loadSpeechExtras()
         loadTaskHistory()
         setupStatusItem()
-        for h in ["claude", "codex", "opencode", "dsh"] {
-            if let path = PetController.findBinary(h) { PetController.harnessPaths[h] = path }
-        }
+        PetController.detectHarnesses()
         if UserDefaults.standard.object(forKey: "roxyOwnerTitle") == nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                 self?.promptForTitle(firstRun: true)
@@ -1234,6 +1301,8 @@ final class PetController: NSObject, NSApplicationDelegate {
 
         pollClaudeState(dt: dt)
         pollDshBridge(dt: dt)
+        pollDshBilling(dt: dt)
+        pollHarnessDetection(dt: dt)
         pollSchedules(now: now, dt: dt)
         pollSystemActivity(now: now)
 
@@ -1685,6 +1754,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                 // 她转派的任务结果由 runClaudeTask 统一展示，避免重复
                 triggerCompletionReaction(workDuration: completedWorkDuration)
                 speakDoneReport(from: doneSrc)
+                if doneSrc == "dsh" { refreshDshBalance(speakChange: true) }
             }
         }
     }
@@ -1716,7 +1786,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         let tool = (obj["toolName"] as? String) ?? "工具"
         let reason = (obj["reason"] as? String) ?? ""
         let alert = NSAlert()
-        alert.messageText = "DeepSeek Harness 请求批准"
+        alert.messageText = "Harness 请求批准"
         alert.informativeText = reason.isEmpty ? "工具：\(tool)" : "工具：\(tool)\n原因：\(reason)"
         alert.addButton(withTitle: "允许一次")
         alert.addButton(withTitle: "拒绝")
@@ -1727,6 +1797,87 @@ final class PetController: NSObject, NSApplicationDelegate {
             try? out.write(to: URL(fileURLWithPath: dir + "/approval-reply.json"))
         }
         speak(decision == "allow" ? "好，这次我批准了。" : "这次我拒绝了。")
+    }
+
+    /// 运行途中装了 Harness 也能自动接上：未连接时每 5 分钟探测一次。
+    private func pollHarnessDetection(dt: Double) {
+        guard !PetController.isDshConnected() else { return }
+        harnessDetectAcc += dt
+        guard harnessDetectAcc >= 300 else { return }
+        harnessDetectAcc = 0
+        PetController.detectHarnesses()
+        if PetController.isDshConnected() {
+            refreshHarnessDetection(announce: true)
+        }
+    }
+
+    /// DeepSeek Harness：对话同步刷新 + 余额实时显示（每 60 秒；开关在设置里）。
+    private func pollDshBilling(dt: Double) {
+        guard PetController.isDshConnected() else { return }
+        // 记录窗口开着时，定期把 DSH 对话拉进来（桥插件写文件，不占 token、不打扰会话）
+        dshHistoryAcc += dt
+        if dshHistoryAcc >= 2 {
+            dshHistoryAcc = 0
+            if historyWindow?.isVisible == true {
+                let before = dshHistorySig
+                loadDshHistory()
+                let after = "\(dshHistory.count)-\(dshHistory.last?.t ?? 0)"
+                if before != after { refreshHistoryWindow() }
+            }
+        }
+        // 余额：默认每 60 秒刷新一次
+        let d = UserDefaults.standard
+        let live = d.object(forKey: "roxyDshBalanceLive") == nil ? true : d.bool(forKey: "roxyDshBalanceLive")
+        guard live else { return }
+        dshBalanceAcc += dt
+        if dshBalanceAcc >= 60 && !dshBalanceInFlight {
+            dshBalanceAcc = 0
+            refreshDshBalance(speakChange: false)
+        }
+    }
+
+    /// 拉一次官方余额；失败保持旧值（不打扰）。
+    private func refreshDshBalance(speakChange: Bool) {
+        guard !dshBalanceInFlight else { return }
+        let d = UserDefaults.standard
+        if d.object(forKey: "roxyDshBalanceLive") != nil, !d.bool(forKey: "roxyDshBalanceLive") { return }
+        guard PetController.apiConfig() != nil else { return }
+        dshBalanceInFlight = true
+        PetController.fetchDeepSeekBalance { [weak self] text, total in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.dshBalanceInFlight = false
+                if let total {
+                    if speakChange, let prev = self.dshBalanceTotal, total < prev - 0.001 {
+                        self.speak("这轮花了 ¥" + String(format: "%.2f", prev - total)
+                                   + "，余额 ¥" + String(format: "%.2f", total), seconds: 6)
+                    }
+                    self.dshBalanceTotal = total
+                }
+                if let text { self.dshBalanceText = text }
+                self.refreshDshStatusLine()
+            }
+        }
+    }
+
+    /// 设置窗口里的「DeepSeek Harness」状态行（连接状态 + 余额）
+    private func refreshDshStatusLine() {
+        guard let label = swDshStatusLabel else { return }
+        let connected = PetController.harnessPaths["dsh"] != nil
+        if let path = PetController.harnessPaths["dsh"] {
+            var line = "已连接 · " + path
+            if !dshBalanceText.isEmpty { line += "\n" + dshBalanceText }
+            label.stringValue = line
+            label.textColor = .secondaryLabelColor
+        } else {
+            label.stringValue = "未连接——先安装 Harness，或点「重新检测」"
+            label.textColor = .systemOrange
+        }
+        for v in swDshExtraViews { v.isHidden = !connected }
+        // 余额变化时让菜单里的「DeepSeek Harness」一栏也跟着更新
+        if settingsWindow == nil || settingsWindow?.isVisible == false {
+            statusItem?.menu = makeMenu(forStatusBar: true)
+        }
     }
 
     // 完工播报：优先转述实际回复摘要（30 秒内新鲜的），否则用台词库
@@ -2237,17 +2388,34 @@ final class PetController: NSObject, NSApplicationDelegate {
         }
         let alert = NSAlert()
         alert.messageText = character.actionTitle
-        alert.informativeText = "聊天直接输入即可（她当场回答，又快又省）；需要动手做的事，请勾选下方选项，交给 Claude Code 执行。"
+        alert.informativeText = "聊天直接输入即可（她当场回答，又快又省）；需要动手做的事，先勾选下方选项，再选这次交给哪个执行器。"
         alert.addButton(withTitle: "交给\(characterName)")
         alert.addButton(withTitle: "查看记录")
         alert.addButton(withTitle: "取消")
-        let box = NSView(frame: NSRect(x: 0, y: 0, width: 340, height: 54))
-        let input = NSTextField(frame: NSRect(x: 0, y: 30, width: 340, height: 24))
+        let box = NSView(frame: NSRect(x: 0, y: 0, width: 360, height: 96))
+        let input = NSTextField(frame: NSRect(x: 0, y: 68, width: 360, height: 24))
         input.placeholderString = "在这里输入想说的话，或想让\(characterName)做的事…"
-        let ccCheck = NSButton(checkboxWithTitle: "让她动手做（交给 Claude Code 执行）", target: nil, action: nil)
-        ccCheck.frame = NSRect(x: 0, y: 4, width: 340, height: 20)
+        let ccCheck = NSButton(checkboxWithTitle: "让她动手做（交给下面选中的执行器）", target: nil, action: nil)
+        ccCheck.frame = NSRect(x: 0, y: 42, width: 360, height: 20)
+        let pop = NSPopUpButton(frame: NSRect(x: 0, y: 10, width: 360, height: 26))
+        let optionKeys: [(String, String)] = [("claude", "Claude Code"), ("codex", "Codex"), ("opencode", "opencode"), ("dsh", "Harness")]
+        var keys: [String] = []
+        let currentHarness = PetController.currentHarness()
+        var defaultIndex = -1
+        for (key, title) in optionKeys where PetController.harnessPaths[key] != nil {
+            pop.addItem(withTitle: title)
+            keys.append(key)
+            if key == currentHarness { defaultIndex = pop.numberOfItems - 1 }
+        }
+        if pop.numberOfItems == 0 {
+            pop.addItem(withTitle: "（没有可用的执行器）")
+            pop.isEnabled = false
+        } else if defaultIndex >= 0 {
+            pop.selectItem(at: defaultIndex)
+        }
         box.addSubview(input)
         box.addSubview(ccCheck)
+        box.addSubview(pop)
         alert.accessoryView = box
         NSApp.activate(ignoringOtherApps: true)
         alert.window.makeFirstResponder(input)
@@ -2256,7 +2424,9 @@ final class PetController: NSObject, NSApplicationDelegate {
         guard resp == .alertFirstButtonReturn else { return }
         let text = input.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
-        runClaudeTask(text, ccMode: ccCheck.state == .on)
+        let wantWork = ccCheck.state == .on && !keys.isEmpty
+        let chosen = wantWork ? keys[min(pop.indexOfSelectedItem, keys.count - 1)] : nil
+        runClaudeTask(text, ccMode: wantWork, harnessOverride: chosen)
     }
 
     /// 当前角色人设系统提示词（对话与任务共用，称呼跟随用户设置）
@@ -2275,7 +2445,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         case "claude": label = "Claude Code"
         case "codex": label = "Codex"
         case "opencode": label = "opencode"
-        case "dsh": label = "DeepSeek Harness"
+        case "dsh": label = "Harness"
         default: label = "「仅对话」模式"
         }
         speak(h == "chat" ? "好，以后就只聊天，不动手了。" : "好，以后「动手做」就交给 \(label) 啦。")
@@ -2372,8 +2542,8 @@ final class PetController: NSObject, NSApplicationDelegate {
         return cleaned.isEmpty ? nil : cleaned
     }
 
-    private func runClaudeTask(_ text: String, ccMode: Bool) {
-        let harness = PetController.currentHarness()
+    private func runClaudeTask(_ text: String, ccMode: Bool, harnessOverride: String? = nil) {
+        let harness = harnessOverride ?? PetController.currentHarness()
         let chatMode = !ccMode || harness == "chat"
         if chatMode && !PetController.hasAPIConfig() {
             speak("唔……我还没连上「那边的世界」呢。先帮我配置一下 API，再找我一次就好哦。")
@@ -2459,37 +2629,57 @@ final class PetController: NSObject, NSApplicationDelegate {
     }
 
     // ---------- DeepSeek 余额 ----------
-    @objc private func queryDeepSeekBalance() {
+    /// 查官方余额（GET /user/balance）。回调在后台线程，调用方自行切主线程。
+    /// - Returns: (展示文案, 总额数值-仅当能解析)
+    private static func fetchDeepSeekBalance(completion: @escaping (String?, Double?) -> Void) {
         guard let (_, key, _) = PetController.apiConfig() else {
-            speak("还没配置 API，查不了余额哦。")
-            promptForAPISettings()
+            completion("还没配置 API，查不了 DeepSeek 余额哦。", nil)
             return
         }
-        speak("我去看看账上还剩多少……", seconds: 4)
         var req = URLRequest(url: URL(string: "https://api.deepseek.com/user/balance")!)
         req.setValue("Bearer " + key, forHTTPHeaderField: "Authorization")
         req.timeoutInterval = 20
-        URLSession.shared.dataTask(with: req) { [weak self] data, _, err in
-            var text = "余额查询失败了，稍后再试试吧。"
+        URLSession.shared.dataTask(with: req) { data, _, err in
+            var text = "DeepSeek 余额查询失败，稍后再试试吧。"
+            var total: Double?
             if err == nil, let data = data,
                let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] {
                 let infos = obj["balance_infos"] as? [[String: Any]] ?? []
                 let parts: [String] = infos.compactMap { info in
                     let cur = (info["currency"] as? String) ?? ""
                     let sym = cur == "CNY" ? "¥" : (cur == "USD" ? "$" : cur + " ")
-                    guard let total = info["total_balance"] as? String else { return nil }
+                    guard let totalStr = info["total_balance"] as? String else { return nil }
+                    if total == nil { total = Double(totalStr) }
                     let granted = (info["granted_balance"] as? String) ?? "0"
                     let topped = (info["topped_up_balance"] as? String) ?? "0"
-                    return "\(sym)\(total)（赠送 \(sym)\(granted)、充值 \(sym)\(topped)）"
+                    return "\(sym)\(totalStr)（赠送 \(sym)\(granted)、充值 \(sym)\(topped)）"
                 }
                 if !parts.isEmpty {
-                    text = "余额：" + parts.joined(separator: "；")
+                    text = "DeepSeek 余额：" + parts.joined(separator: "；")
                 } else if let available = obj["is_available"] as? Bool, !available {
-                    text = "接口说当前账户不可用，可能余额不足或 Key 无效。"
+                    text = "DeepSeek 余额不可用：可能余额不足或 Key 无效。"
                 }
             }
-            DispatchQueue.main.async { self?.speak(text) }
+            completion(text, total)
         }.resume()
+    }
+
+    @objc private func queryDeepSeekBalance() {
+        guard PetController.apiConfig() != nil else {
+            speak("还没配置 API，查不了余额哦。")
+            promptForAPISettings()
+            return
+        }
+        speak("我去看看账上还剩多少……", seconds: 4)
+        PetController.fetchDeepSeekBalance { [weak self] text, total in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.speak(text ?? "DeepSeek 余额查询失败，稍后再试试吧。")
+                if let total { self.dshBalanceTotal = total }
+                if let text { self.dshBalanceText = text }
+                self.refreshDshStatusLine()
+            }
+        }
     }
 
     // ---------- AI 点选发言（默认不用；点选才消耗大模型额度）----------
@@ -2524,18 +2714,57 @@ final class PetController: NSObject, NSApplicationDelegate {
     // ---------- 任务执行器（可切换的 harness）----------
     private static var harnessPaths: [String: String] = [:]
 
-    private static func findBinary(_ name: String) -> String? {
+    /// 用 zsh 找命令（最多等 2 秒，避免交互 shell 卡住启动）。
+    private static func shellLookup(_ name: String, interactive: Bool) -> String? {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        p.arguments = ["-lc", "command -v " + name]
+        p.arguments = [interactive ? "-ilc" : "-lc", "command -v " + name]
         let out = Pipe()
         p.standardOutput = out
+        p.standardError = FileHandle.nullDevice
         try? p.run()
-        p.waitUntilExit()
+        let deadline = Date().addingTimeInterval(2)
+        while p.isRunning && Date() < deadline { Thread.sleep(forTimeInterval: 0.05) }
+        if p.isRunning { p.terminate(); return nil }
         let s = String(data: out.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        if !s.isEmpty && FileManager.default.isExecutableFile(atPath: s) { return s }
+        // 交互 shell 可能先打印提示，最后一行才是路径
+        let candidate = s.split(separator: "\n").last.map(String.init) ?? s
+        if !candidate.isEmpty && FileManager.default.isExecutableFile(atPath: candidate) { return candidate }
         return nil
+    }
+
+    /// 自动探测本机命令（每台机器路径都可能不同，不写死任何一台的环境）。
+    private static func findBinary(_ name: String) -> String? {
+        // 1) 登录 shell（.zprofile / .zshenv）
+        if let found = shellLookup(name, interactive: false) { return found }
+        // 2) 登录 + 交互 shell：很多人的 PATH 写在 .zshrc 里，GUI 启动的 app 读不到
+        if let found = shellLookup(name, interactive: true) { return found }
+        // 3) 常见安装位置兜底（npm -g / homebrew / bun / cargo / asdf / volta / pnpm 等）
+        let home = NSHomeDirectory()
+        let candidates = [
+            "/opt/homebrew/bin/" + name,
+            "/usr/local/bin/" + name,
+            home + "/.local/bin/" + name,
+            home + "/.bun/bin/" + name,
+            home + "/.opencode/bin/" + name,
+            home + "/.cargo/bin/" + name,
+            home + "/.volta/bin/" + name,
+            home + "/.asdf/shims/" + name,
+            home + "/.npm-global/bin/" + name,
+            home + "/.local/share/pnpm/" + name,
+            "/usr/bin/" + name,
+            "/bin/" + name,
+        ]
+        for c in candidates where FileManager.default.isExecutableFile(atPath: c) { return c }
+        return nil
+    }
+
+    /// 每次启动 / 打开设置 / 定期重新探测所有 CLI。
+    static func detectHarnesses() {
+        for h in ["claude", "codex", "opencode", "dsh"] {
+            if let p = findBinary(h) { harnessPaths[h] = p }
+        }
     }
 
     private static func processRunning(match: String) -> Bool {
@@ -2719,23 +2948,51 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var swHarnessRadios: [NSButton] = []
     private var swWatchBoxes: [NSButton] = []
     private var swStatusLabel: NSTextField?
+    // DeepSeek Harness 分组
+    private var swDshStatusLabel: NSTextField?
+    private var swDshWatchBox: NSButton?
+    private var swDshConvBox: NSButton?
+    private var swDshLiveBox: NSButton?
+    /// 未连接时隐藏的 Harness 明细行（只留状态 + 重新检测）
+    private var swDshExtraViews: [NSView] = []
     private var settingsSaveClicked = false
 
     @objc private func showSettingsWindow() {
         setPetHidden(false)
         if settingsWindow == nil { buildSettingsWindow() }
         settingsSaveClicked = false
+        refreshHarnessDetection()
         refreshSettingsFields()
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 
     private func buildSettingsWindow() {
-        let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 500, height: 540),
+        let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 620, height: 820),
                          styleMask: [.titled, .closable], backing: .buffered, defer: false)
         w.title = "\(characterName) · 设置"
         w.isReleasedWhenClosed = false
 
+        func groupTitle(_ text: String) -> NSTextField {
+            let l = NSTextField(labelWithString: text)
+            l.font = NSFont.boldSystemFont(ofSize: 12)
+            return l
+        }
+        func separatorLine() -> NSBox {
+            let box = NSBox()
+            box.boxType = .separator
+            box.widthAnchor.constraint(equalToConstant: 560).isActive = true
+            return box
+        }
+        func vstack(_ views: [NSView], spacing: CGFloat = 6) -> NSStackView {
+            let st = NSStackView(views: views)
+            st.orientation = .vertical
+            st.alignment = .leading
+            st.spacing = spacing
+            return st
+        }
+
+        // ---- 对话 ----
         let fTitle = NSTextField(string: "")
         fTitle.placeholderString = "她怎么称呼您（留空则用「您」）"
         let fBase = NSTextField(string: "")
@@ -2750,8 +3007,47 @@ final class PetController: NSObject, NSApplicationDelegate {
         status.font = NSFont.systemFont(ofSize: 11)
         status.textColor = .secondaryLabelColor
         status.lineBreakMode = .byTruncatingMiddle
+        for v in [fTitle, fBase, fKey, mBox] as [NSView] {
+            v.widthAnchor.constraint(equalToConstant: 340).isActive = true
+        }
+        let chatGrid = NSGridView(views: [
+            [NSTextField(labelWithString: "称呼"), fTitle],
+            [NSTextField(labelWithString: "API 接口地址"), fBase],
+            [NSTextField(labelWithString: "API Key"), fKey],
+            [NSTextField(labelWithString: "模型"), mBox],
+            [NSGridCell.emptyContentView, status],
+        ])
+        chatGrid.rowAlignment = .firstBaseline
+        chatGrid.column(at: 0).xPlacement = .trailing
+        chatGrid.column(at: 1).xPlacement = .leading
+        chatGrid.columnSpacing = 12
+        chatGrid.rowSpacing = 8
 
-        let hDefs: [(String, String)] = [("claude", "Claude Code"), ("codex", "Codex"), ("opencode", "opencode"), ("dsh", "DeepSeek Harness"), ("chat", "仅对话（不执行命令）")]
+        // ---- DeepSeek Harness ----
+        let dshStatus = NSTextField(labelWithString: "")
+        dshStatus.font = NSFont.systemFont(ofSize: 11)
+        dshStatus.textColor = .secondaryLabelColor
+        dshStatus.lineBreakMode = .byWordWrapping
+        dshStatus.maximumNumberOfLines = 3
+        dshStatus.preferredMaxLayoutWidth = 520
+        dshStatus.widthAnchor.constraint(equalToConstant: 520).isActive = true
+        let recheck = NSButton(title: "重新检测", target: self, action: #selector(redetectDsh))
+        recheck.bezelStyle = .rounded
+        let queryBtn = NSButton(title: "查询 DeepSeek 余额", target: self, action: #selector(queryDeepSeekBalance))
+        queryBtn.bezelStyle = .rounded
+        let dshButtons = NSStackView(views: [recheck, queryBtn])
+        dshButtons.orientation = .horizontal
+        dshButtons.spacing = 8
+        let dshWatch = NSButton(checkboxWithTitle: "状态联动：干活跑动 · 完工挥手 · 权限批准", target: nil, action: nil)
+        let dshConv = NSButton(checkboxWithTitle: "对话同步：把双向对话显示在「记录」里", target: nil, action: nil)
+        let dshLive = NSButton(checkboxWithTitle: "实时显示 DeepSeek 余额：每 60 秒刷新，完工时显示本轮花费", target: nil, action: nil)
+        let dshHint = NSTextField(labelWithString: "需要在 Harness 里安装 04-integration/dsh-plugin（dsh-plugin-roxy）")
+        dshHint.font = NSFont.systemFont(ofSize: 11)
+        dshHint.textColor = .tertiaryLabelColor
+        let dshToggles = vstack([dshWatch, dshConv, dshLive], spacing: 4)
+
+        // ---- 任务执行器 ----
+        let hDefs: [(String, String)] = [("claude", "Claude Code"), ("codex", "Codex"), ("opencode", "opencode"), ("dsh", "Harness"), ("chat", "仅对话（不执行命令）")]
         var radios: [NSButton] = []
         for (i, hd) in hDefs.enumerated() {
             let missing = (hd.0 != "chat" && PetController.harnessPaths[hd.0] == nil)
@@ -2761,22 +3057,17 @@ final class PetController: NSObject, NSApplicationDelegate {
             rb.isEnabled = !missing
             radios.append(rb)
         }
-        let radioStack = NSStackView(views: radios)
-        radioStack.orientation = .vertical
-        radioStack.alignment = .leading
-        radioStack.spacing = 5
+        let radioStack = vstack(radios, spacing: 5)
 
-        let watchDefs: [(String, String)] = [("claude", "Claude Code —— 干活跑动 · 完工挥手 · 等待提醒"), ("codex", "Codex —— 完工挥手（含回复转述）"), ("opencode", "opencode —— 进程检测：运行中跑动 · 结束挥手"), ("dsh", "DeepSeek Harness —— 干活跑动 · 完工挥手 · 权限批准")]
+        // ---- 状态联动（其它 CLI）----
+        let watchDefs: [(String, String)] = [("claude", "Claude Code —— 干活跑动 · 完工挥手 · 等待提醒"), ("codex", "Codex —— 完工挥手（含回复转述）"), ("opencode", "opencode —— 进程检测：运行中跑动 · 结束挥手")]
         var watches: [NSButton] = []
         for (i, wd) in watchDefs.enumerated() {
             let cb = NSButton(checkboxWithTitle: wd.1, target: nil, action: nil)
             cb.tag = i
             watches.append(cb)
         }
-        let watchStack = NSStackView(views: watches)
-        watchStack.orientation = .vertical
-        watchStack.alignment = .leading
-        watchStack.spacing = 3
+        let watchStack = vstack(watches, spacing: 4)
         let watchNote = NSTextField(labelWithString: "可多选：勾上哪家，她就在哪家干活时有反应")
         watchNote.font = NSFont.systemFont(ofSize: 11)
         watchNote.textColor = .secondaryLabelColor
@@ -2790,35 +3081,20 @@ final class PetController: NSObject, NSApplicationDelegate {
         btns.orientation = .horizontal
         btns.spacing = 10
 
-        let grid = NSGridView(views: [
-            [NSTextField(labelWithString: "称呼"), fTitle],
-            [NSGridCell.emptyContentView, NSGridCell.emptyContentView],
-            [NSTextField(labelWithString: "API 接口地址"), fBase],
-            [NSTextField(labelWithString: "API Key"), fKey],
-            [NSTextField(labelWithString: "模型"), mBox],
-            [NSGridCell.emptyContentView, status],
-            [NSGridCell.emptyContentView, NSGridCell.emptyContentView],
-            [NSTextField(labelWithString: "任务执行器"), radioStack],
-            [NSGridCell.emptyContentView, NSGridCell.emptyContentView],
-            [NSTextField(labelWithString: "状态联动"), watchStack],
-            [NSGridCell.emptyContentView, watchNote],
-            [NSGridCell.emptyContentView, NSGridCell.emptyContentView],
-            [NSGridCell.emptyContentView, btns],
-        ])
-        grid.rowAlignment = .firstBaseline
-        grid.column(at: 0).xPlacement = .trailing
-        grid.column(at: 1).xPlacement = .leading
-        grid.translatesAutoresizingMaskIntoConstraints = false
-        for v in [fTitle, fBase, fKey, mBox] as [NSView] {
-            v.widthAnchor.constraint(equalToConstant: 300).isActive = true
-        }
-
-        let content = NSView(frame: NSRect(x: 0, y: 0, width: 500, height: 540))
-        content.addSubview(grid)
+        let root = vstack([
+            groupTitle("对话"), chatGrid, separatorLine(),
+            groupTitle("Harness"), dshStatus, dshButtons, dshToggles, dshHint, separatorLine(),
+            groupTitle("任务执行器"), radioStack, separatorLine(),
+            groupTitle("状态联动"), watchStack, watchNote, btns,
+        ], spacing: 8)
+        root.translatesAutoresizingMaskIntoConstraints = false
+        let content = NSView(frame: NSRect(x: 0, y: 0, width: 620, height: 820))
+        content.addSubview(root)
         NSLayoutConstraint.activate([
-            grid.topAnchor.constraint(equalTo: content.topAnchor, constant: 22),
-            grid.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 22),
-            grid.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -22),
+            root.topAnchor.constraint(equalTo: content.topAnchor, constant: 20),
+            root.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 24),
+            root.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -24),
+            root.bottomAnchor.constraint(lessThanOrEqualTo: content.bottomAnchor, constant: -20),
         ])
         w.contentView = content
         w.center()
@@ -2830,6 +3106,12 @@ final class PetController: NSObject, NSApplicationDelegate {
         swHarnessRadios = radios
         swWatchBoxes = watches
         swStatusLabel = status
+        swDshStatusLabel = dshStatus
+        swDshWatchBox = dshWatch
+        swDshConvBox = dshConv
+        swDshLiveBox = dshLive
+        swDshExtraViews = [queryBtn, dshToggles, dshHint]
+        refreshDshStatusLine()
     }
 
     private func refreshSettingsFields() {
@@ -2843,12 +3125,19 @@ final class PetController: NSObject, NSApplicationDelegate {
         if let idx = names.firstIndex(of: cur) {
             for (i, rb) in swHarnessRadios.enumerated() { rb.state = (i == idx) ? .on : .off }
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode", "roxyWatchDsh"]
-        let watchDefaults = [true, false, false, true]
+        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
+        let watchDefaults = [true, false, false]
         for (i, cb) in swWatchBoxes.enumerated() {
             let on = d.object(forKey: watchKeys[i]) == nil ? watchDefaults[i] : d.bool(forKey: watchKeys[i])
             cb.state = on ? .on : .off
         }
+        let dshWatchOn = d.object(forKey: "roxyWatchDsh") == nil ? true : d.bool(forKey: "roxyWatchDsh")
+        swDshWatchBox?.state = dshWatchOn ? .on : .off
+        let dshConvOn = d.object(forKey: "roxyDshConversation") == nil ? true : d.bool(forKey: "roxyDshConversation")
+        swDshConvBox?.state = dshConvOn ? .on : .off
+        let dshLiveOn = d.object(forKey: "roxyDshBalanceLive") == nil ? true : d.bool(forKey: "roxyDshBalanceLive")
+        swDshLiveBox?.state = dshLiveOn ? .on : .off
+        refreshDshStatusLine()
         if let cfg = PetController.apiConfig() {
             var line = "当前生效：\(cfg.base.host ?? cfg.base.absoluteString) · \(cfg.model)"
             if (d.string(forKey: "roxyApiBase") ?? "").isEmpty && (d.string(forKey: "roxyApiKey") ?? "").isEmpty {
@@ -2872,12 +3161,19 @@ final class PetController: NSObject, NSApplicationDelegate {
            names[on.tag] != (d.string(forKey: "roxyHarness") ?? "claude") {
             return false
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode", "roxyWatchDsh"]
-        let watchDefaults = [true, false, false, true]
+        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
+        let watchDefaults = [true, false, false]
         for (i, cb) in swWatchBoxes.enumerated() {
             let cur = d.object(forKey: watchKeys[i]) == nil ? watchDefaults[i] : d.bool(forKey: watchKeys[i])
             if (cb.state == .on) != cur { return false }
         }
+        func unchanged(_ box: NSButton?, _ key: String, _ def: Bool) -> Bool {
+            let cur = d.object(forKey: key) == nil ? def : d.bool(forKey: key)
+            return (box?.state == .on) == cur
+        }
+        if !unchanged(swDshWatchBox, "roxyWatchDsh", true) { return false }
+        if !unchanged(swDshConvBox, "roxyDshConversation", true) { return false }
+        if !unchanged(swDshLiveBox, "roxyDshBalanceLive", true) { return false }
         return true
     }
 
@@ -2902,18 +3198,66 @@ final class PetController: NSObject, NSApplicationDelegate {
         if let on = swHarnessRadios.first(where: { $0.state == .on }) {
             d.set(names[on.tag], forKey: "roxyHarness")
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode", "roxyWatchDsh"]
+        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
         for (i, cb) in swWatchBoxes.enumerated() {
             d.set(cb.state == .on, forKey: watchKeys[i])
         }
+        d.set(swDshWatchBox?.state == .on, forKey: "roxyWatchDsh")
+        d.set(swDshConvBox?.state == .on, forKey: "roxyDshConversation")
+        d.set(swDshLiveBox?.state == .on, forKey: "roxyDshBalanceLive")
         statusItem?.menu = makeMenu(forStatusBar: true)
         refreshSettingsFields()
         speak("设置保存好啦。")
     }
 
+    @objc private func toggleDshConversation() {
+        let d = UserDefaults.standard
+        let cur = d.object(forKey: "roxyDshConversation") == nil ? true : d.bool(forKey: "roxyDshConversation")
+        d.set(!cur, forKey: "roxyDshConversation")
+        refreshHistoryWindow()
+        refreshSettingsFields()
+        statusItem?.menu = makeMenu(forStatusBar: true)
+        speak(!cur ? "好，对话会同步进记录了。" : "好，记录里先不显示 Harness 的对话了。", seconds: 5)
+    }
+
+    @objc private func toggleDshBalanceLive() {
+        let d = UserDefaults.standard
+        let cur = d.object(forKey: "roxyDshBalanceLive") == nil ? true : d.bool(forKey: "roxyDshBalanceLive")
+        d.set(!cur, forKey: "roxyDshBalanceLive")
+        refreshSettingsFields()
+        statusItem?.menu = makeMenu(forStatusBar: true)
+        speak(!cur ? "好，余额每 60 秒刷新一次。" : "好，实时余额关掉了，需要时点「刷新余额」。", seconds: 5)
+    }
+
     @objc private func harnessRadioChanged(_ sender: NSButton) {
         // 手动互斥（不依赖 AppKit 的自动分组规则，任何布局下都可靠）
         for rb in swHarnessRadios { rb.state = (rb === sender) ? .on : .off }
+    }
+
+    /// 重新探测所有 CLI，并刷新设置里的标题、Harness 状态与菜单。
+    private func refreshHarnessDetection(announce: Bool = false) {
+        PetController.detectHarnesses()
+        let names = ["claude", "codex", "opencode", "dsh"]
+        let titles = ["Claude Code", "Codex", "opencode", "Harness"]
+        for (i, rb) in swHarnessRadios.enumerated() where i < titles.count {
+            let missing = (PetController.harnessPaths[names[i]] == nil)
+            rb.title = missing ? titles[i] + "（未安装）" : titles[i] + " ✓ 已检测到"
+            rb.isEnabled = !missing
+        }
+        refreshDshStatusLine()
+        statusItem?.menu = makeMenu(forStatusBar: true)
+        if announce {
+            if let path = PetController.harnessPaths["dsh"] {
+                speak("找到 Harness 啦：" + path, seconds: 6)
+            } else {
+                speak("没检测到 Harness，装好后我会自动再找。", seconds: 8)
+            }
+        }
+    }
+
+    /// 设置里点「重新检测」
+    @objc private func redetectDsh() {
+        refreshHarnessDetection(announce: true)
     }
 
     @objc private func closeSettingsWindow() { settingsWindow?.orderOut(nil) }
@@ -3048,12 +3392,36 @@ final class PetController: NSObject, NSApplicationDelegate {
         let hist = NSMenuItem(title: "查看\(character.historyTitle)", action: #selector(showTaskHistory), keyEquivalent: "")
         hist.target = self
         menu.addItem(hist)
-        let bal = NSMenuItem(title: "查询 DeepSeek 余额", action: #selector(queryDeepSeekBalance), keyEquivalent: "")
-        bal.target = self
-        menu.addItem(bal)
         let reset = NSMenuItem(title: "回到屏幕右下角", action: #selector(resetPosition), keyEquivalent: "")
         reset.target = self
         menu.addItem(reset)
+        menu.addItem(.separator())
+        // 接入后多出一栏：余额 / 刷新 / 对话同步 / 实时余额 / 连接设置 全部平铺在这里，
+        // 不放进「点一下再展开」的子菜单，也不出现品牌字样。
+        if PetController.isDshConnected() {
+            let d = UserDefaults.standard
+            let balance = NSMenuItem(title: dshBalanceTotal.map { String(format: "余额：¥%.2f", $0) } ?? "余额：未查询",
+                                     action: nil, keyEquivalent: "")
+            balance.isEnabled = false
+            menu.addItem(balance)
+            let refresh = NSMenuItem(title: "刷新余额", action: #selector(queryDeepSeekBalance), keyEquivalent: "")
+            refresh.target = self
+            menu.addItem(refresh)
+            let convOn = d.object(forKey: "roxyDshConversation") == nil ? true : d.bool(forKey: "roxyDshConversation")
+            let conv = NSMenuItem(title: "对话同步", action: #selector(toggleDshConversation), keyEquivalent: "")
+            conv.target = self
+            conv.state = convOn ? .on : .off
+            menu.addItem(conv)
+            let liveOn = d.object(forKey: "roxyDshBalanceLive") == nil ? true : d.bool(forKey: "roxyDshBalanceLive")
+            let live = NSMenuItem(title: "实时余额", action: #selector(toggleDshBalanceLive), keyEquivalent: "")
+            live.target = self
+            live.state = liveOn ? .on : .off
+            menu.addItem(live)
+            let settingsItem = NSMenuItem(title: "连接设置…", action: #selector(showSettingsWindow), keyEquivalent: "")
+            settingsItem.target = self
+            menu.addItem(settingsItem)
+            menu.addItem(.separator())
+        }
         menu.addItem(.separator())
         if !forStatusBar {
             menu.addItem(viz)

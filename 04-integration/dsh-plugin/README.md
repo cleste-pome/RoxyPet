@@ -8,6 +8,8 @@ DeepSeek Harness ↔ 洛琪希桌宠 的桥插件。宿主侧只读写 `~/.roxy-
 |---|---|
 | 状态联动 | 监听 `session/event` 的 `turn/start`、`tool/call`、`turn/end`，写 `~/.roxy-pet/state.dsh`（`working` / `done` / `notice` + 时间戳）|
 | 回复转述 | 监听 `assistant/message`，把文本写进 `~/.roxy-pet/last_reply.dsh` |
+| 对话同步 | 监听 `user/message` + `assistant/message`，追加到 `~/.roxy-pet/dsh/conversation.json`（最多 300 条；子代理会话不写入） |
+| 用量回传 | 监听 `turn/end`，把 token 用量写进 `~/.roxy-pet/dsh/usage.json`（不含正文） |
 | 权限批准 | 监听 `approval/request`，写 `~/.roxy-pet/dsh/approval.json`；桌宠写回 `approval-reply.json`（`allow` / `deny`）后返回 `allowed-once` / `rejected` |
 
 ## 安全闸门

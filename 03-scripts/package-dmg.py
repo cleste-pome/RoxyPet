@@ -139,7 +139,10 @@ def copy_layout(old_dmg, stage, mountpoint):
     with mounted(old_dmg, mountpoint) as old_root:
         layout_file = old_root / ".DS_Store"
         if not layout_file.is_file() or layout_file.is_symlink():
-            raise RuntimeError("Existing DMG has no regular .DS_Store; cannot preserve its icon layout")
+            # A previous package (or a stripped image) may lack the Finder layout.
+            # Packaging must still succeed; fall back to the default icon layout.
+            print("Warning: existing DMG has no .DS_Store; keeping default icon layout", file=sys.stderr)
+            return [], {}
         names = [name for name in LAYOUT_ASSETS
                  if (old_root / name).exists() or (old_root / name).is_symlink()]
         before = manifest(old_root, names)

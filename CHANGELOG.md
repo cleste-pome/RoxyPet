@@ -2,13 +2,17 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## 未发布
+## v2.4.1 — 2026-11-02（Harness 联动修正版）
 
-- 修复：接扩展显示器时，气泡跟随的是键盘焦点所在屏幕（`NSScreen.main`）、而不是桌宠自身所在的屏幕，导致气泡飘到另一块显示器。
-- 新增 **DeepSeek Harness 任务执行器**：设置里可选 `dsh --profile headless`，与 Claude Code / Codex / opencode 并列。
-- 新增 **dsh-plugin-roxy 桥插件**（`04-integration/dsh-plugin/`）：把 dsh 的会话状态、最终回复和权限审批请求桥接给桌宠；桌宠离线时自动交还 dsh 自己的审批界面。
-- 新增 **「查询 DeepSeek 余额」** 菜单：调用官方 `GET /user/balance`，气泡显示总额 / 赠送 / 充值。
-- 设置新增 DeepSeek Harness 执行器与状态联动开关（状态联动默认开启）。
+- 修复：接扩展显示器时，气泡跟随的是键盘焦点所在屏幕（`NSScreen.main`）、而不是桌宠自身所在的屏幕。
+- 新增 **Harness 任务执行器**：设置里可选 `dsh --profile headless`，与 Claude Code / Codex / opencode 并列；每次点菜单「洛琪希（聊天 / 做事）」时还能在弹窗里临时选这次交给哪家。
+- 新增 **dsh-plugin-roxy 桥插件**（`04-integration/dsh-plugin/`）：把 dsh 的会话状态、最终回复、双向对话与权限审批请求桥接给桌宠；桌宠离线时自动交还 dsh 自己的审批界面。
+- 新增 **设置分区**：按「对话 / Harness / 任务执行器 / 状态联动」分组，每区一条分隔线；Harness 一栏里直接放连接状态、重新检测、余额开关等，未连接时只显示状态与检测按钮。界面文案统一不出现品牌字样。
+- 新增 **菜单栏独立一栏**：接入 Harness 后，主菜单里直接平铺「余额：¥xx / 刷新余额 / 对话同步 / 实时余额 / 连接设置…」，不是需要点开才看的子菜单；未接入时不出现。
+- 新增 **自动检测**：每次启动、每次打开设置、运行中每 5 分钟都会重新探测本机安装的 CLI（登录 shell / 登录+交互 shell / Homebrew / /usr/local / ~/.local/bin / bun / opencode / cargo / volta / asdf / npm-global / pnpm 等常见位置），换台电脑装也不用手动配路径。
+- 新增 **「余额」**：调用官方 `GET /user/balance`，菜单栏一栏里显示总额；「实时余额」开关默认开启——每 60 秒刷新，回合结束报「这轮花了 ¥x，余额 ¥y」。
+- 新增 **对话同步**：桥插件把 `user/message` + `assistant/message` 写入 `~/.roxy-pet/dsh/conversation.json`，桌宠「记录」窗口按时间合并显示双向对话（每 2 秒自动刷新，系统注入的上下文与子代理会话不显示）。
+- 新增 **每轮 token 用量**：桥插件把 `turn/end` 里的 usage 写入 `~/.roxy-pet/dsh/usage.json`（不含正文）。
 
 ## v2.3 — 2026-10-18（洛琪希无帽形象）
 

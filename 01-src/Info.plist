@@ -2,29 +2,29 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleName</key>
-	<string>Roxy</string>
 	<key>CFBundleDisplayName</key>
 	<string>Roxy</string>
-	<key>CFBundleIdentifier</key>
-	<string>local.roxypet.desktop</string>
 	<key>CFBundleExecutable</key>
 	<string>Roxy</string>
 	<key>CFBundleIconFile</key>
 	<string>Roxy</string>
+	<key>CFBundleIdentifier</key>
+	<string>local.roxypet.desktop</string>
+	<key>CFBundleName</key>
+	<string>Roxy</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.3</string>
+	<string>2.4.1</string>
 	<key>CFBundleVersion</key>
-	<string>5</string>
+	<string>7</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>LSUIElement</key>
 	<true/>
-	<key>NSHighResolutionCapable</key>
-	<true/>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>把对应的 Claude Code 会话窗口带到前台（需要控制终端应用）。</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
 </dict>
 </plist>

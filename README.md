@@ -444,8 +444,12 @@ dsh plugin --profile desktop add /path/to/RoxyPet-GitHub/04-integration/dsh-plug
 
 - **心跳闸门**：桌宠每 5 秒写一次 `~/.roxy-pet/dsh/roxy-heartbeat`；插件只在心跳新鲜时接管审批，桌宠没开就自动 `next()` 交还 dsh 自己的界面
 - **超时**：默认 120 秒没人回答 → `cancelled`（fail-closed）
-- **余额查询**：菜单「查询 DeepSeek 余额」→ `GET https://api.deepseek.com/user/balance`，气泡显示总额 / 赠送 / 充值
-- **状态联动开关**：设置 → 状态联动 → DeepSeek Harness（默认开启）
+- **自动检测**：每次启动 App 都会自动探测本机的 `dsh`（登录 shell / 交互 shell / Homebrew / npm / bun / cargo / asdf 等常见位置），设置里打开也会重新探测；运行中装了 Harness，5 分钟内也会自动接上
+- **余额查询**：设置 → Harness →「查询余额」→ `GET https://api.deepseek.com/user/balance`，显示总额 / 赠送 / 充值
+- **设置分组**：连接状态（含 dsh 路径）/ 重新检测 / 状态联动 / 对话同步 / 实时余额都在「设置 → DeepSeek Harness」一栏；接入前主菜单不出现 DeepSeek 入口
+- **对话同步**：桥插件把双向对话写到 `~/.roxy-pet/dsh/conversation.json`，桌宠「记录」窗口按时间合并显示（不占用模型 token）
+- **实时余额**：每 60 秒刷新一次；Harness 回合结束时显示本轮花费（可在设置里关掉）
+- **状态联动开关**：同一分组里，默认开启
 
 ---
 
