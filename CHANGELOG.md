@@ -5,6 +5,10 @@
 ## 未发布
 
 - 修复：接扩展显示器时，气泡跟随的是键盘焦点所在屏幕（`NSScreen.main`）、而不是桌宠自身所在的屏幕，导致气泡飘到另一块显示器。
+- 新增 **DeepSeek Harness 任务执行器**：设置里可选 `dsh --profile headless`，与 Claude Code / Codex / opencode 并列。
+- 新增 **dsh-plugin-roxy 桥插件**（`04-integration/dsh-plugin/`）：把 dsh 的会话状态、最终回复和权限审批请求桥接给桌宠；桌宠离线时自动交还 dsh 自己的审批界面。
+- 新增 **「查询 DeepSeek 余额」** 菜单：调用官方 `GET /user/balance`，气泡显示总额 / 赠送 / 充值。
+- 设置新增 DeepSeek Harness 执行器与状态联动开关（状态联动默认开启）。
 
 ## v2.3 — 2026-10-18（洛琪希无帽形象）
 

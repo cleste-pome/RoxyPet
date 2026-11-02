@@ -1,0 +1,26 @@
+{
+  "result": "PASS",
+  "method": "Native desktop accessibility menus",
+  "application": "/Applications/Roxy.app",
+  "checks": {
+    "roxy": [
+      "持杖待机",
+      "蓄力咏唱",
+      "施放水球术",
+      "法杖致意"
+    ],
+    "eris-long": [
+      "持剑待机",
+      "练剑挥斩",
+      "剑礼致意"
+    ],
+    "eris-short": [
+      "持剑待机",
+      "练剑挥斩",
+      "剑礼致意"
+    ]
+  },
+  "all_six_appearance_choices_visible": true,
+  "restored_appearance": "roxy",
+  "user_unlocked_mac": true
+}

@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "columns": 8,
+  "rows": 5,
+  "cellWidth": 384,
+  "cellHeight": 416,
+  "actions": [
+    {
+      "id": "staff-idle",
+      "title": "持杖待机",
+      "row": 0,
+      "frameCount": 8,
+      "frameDuration": 0.5
+    },
+    {
+      "id": "staff-channel",
+      "title": "蓄力咏唱",
+      "row": 1,
+      "frameCount": 8,
+      "frameDuration": 0.18
+    },
+    {
+      "id": "water-cast",
+      "title": "施放水球术",
+      "row": 2,
+      "frameCount": 8,
+      "frameDuration": 0.15
+    },
+    {
+      "id": "staff-salute",
+      "title": "法杖致意",
+      "row": 3,
+      "frameCount": 6,
+      "frameDuration": 0.18
+    },
+    {
+      "id": "cumulonimbus",
+      "title": "豪雷积雨云",
+      "row": 4,
+      "frameCount": 8,
+      "frameDuration": 0.28
+    }
+  ]
+}

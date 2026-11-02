@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "columns": 8,
+  "rows": 3,
+  "cellWidth": 384,
+  "cellHeight": 416,
+  "actions": [
+    {
+      "id": "daily-rest",
+      "title": "整理衣袖",
+      "row": 0,
+      "frameCount": 4,
+      "frameDuration": 0.35
+    },
+    {
+      "id": "daily-focus",
+      "title": "托腮思考",
+      "row": 1,
+      "frameCount": 4,
+      "frameDuration": 0.35
+    },
+    {
+      "id": "daily-greet",
+      "title": "点头致意",
+      "row": 2,
+      "frameCount": 4,
+      "frameDuration": 0.35
+    }
+  ]
+}

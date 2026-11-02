@@ -1,0 +1,26 @@
+[
+  {
+    "file": "anime-episode-02-storm.jpg",
+    "url": "https://otakuauthor.com/wp-content/uploads/2021/09/Mushoku-Tensei-Jobless-Reincarnation-Episode-2-Roxy-shows-Rudeus-Saint-level-water-magic.jpg",
+    "sha256": "34360379c405da9511e520b89a3f83bfb2b54df584d1fe6bd1f835590048a938",
+    "bytes": 89096
+  },
+  {
+    "file": "anime-episode-02-chant.jpg",
+    "url": "https://cdn.shopify.com/s/files/1/0821/2489/8619/files/MusyokuTensei_ep02_0117.jpg?v=1751735485",
+    "sha256": "0eee0f7830f5a15a4c80d946d466d8389ec3ad04d09833419ad69e57dacf2d35",
+    "bytes": 141679
+  },
+  {
+    "url": "https://ncode.syosetu.com/n9669bk/7/",
+    "type": "primary novel",
+    "title": "第六話「尊敬の理由」",
+    "used_for": "Deliberate chant, raised hands, gathering dark cloud, heavy rain and descending lightning; cloud dispersal. No copied incantation."
+  },
+  {
+    "url": "https://mushokutensei.jp/story/02/",
+    "type": "official episode identification",
+    "title": "#2 師匠",
+    "used_for": "Episode2 context. Server rejected direct image fetch; archived screenshots are anime stills mirrored by the linked sites, not original hosted reference art."
+  }
+]

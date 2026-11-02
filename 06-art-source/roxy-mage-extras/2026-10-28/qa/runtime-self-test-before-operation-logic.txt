@@ -1,0 +1,2 @@
+PASS: 3 optional costume sidecars, independent Eris sword artwork, strict metadata fallback, base/extra cache, native pixels, old reactions and reply ordering, drag queue, idle interruption, work-cycle boundary.
+PASS: 6 appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history, optional costume clips and fallback.

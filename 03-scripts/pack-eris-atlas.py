@@ -18,13 +18,13 @@ CELL = (384, 416)
 BASELINE = 404
 
 
-def split_sheet(image, count):
+def split_sheet(image, count, rows=2):
     """Run-length connected components, preserving every visible alpha component (alpha >= 16)."""
     rgba = np.array(image.convert('RGBA'))
     h, w = rgba.shape[:2]
     # Suppress only the nearly invisible PNG fringe, never isolated body parts.
     rgba[rgba[:, :, 3] < 16] = 0
-    cols = count // 2
+    cols = count // rows
     parent, spans, previous = [], [], []
 
     def root(i):
@@ -60,10 +60,10 @@ def split_sheet(image, count):
             b[4] += r - l
     owners = {}
     for key, (l, t, r, b, area) in bounds.items():
-        if area > 100 and (r-l > w/cols*1.45 or b-t > h*.65):
+        if area > 100 and (r-l > w/cols*1.45 or b-t > h/rows*1.3):
             raise ValueError(f'Connected neighbouring figures: {(l,t,r,b)}; repair source sheet')
         col = min(cols - 1, int((l+r)/2 / (w/cols)))
-        row = min(1, int((t+b)/2 / (h/2)))
+        row = min(rows - 1, int((t+b)/2 / (h/rows)))
         owners[key] = row * cols + col
     groups = [np.zeros_like(rgba) for _ in range(count)]
     for y, l, r, label in spans:

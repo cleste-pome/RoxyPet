@@ -1,0 +1,44 @@
+{
+  "base_appearances_preserved": [
+    "sylphie-chibi",
+    "eris-long",
+    "roxy",
+    "eris-short",
+    "sylphie-adult",
+    "roxy-nohat"
+  ],
+  "sidecars": [
+    {
+      "appearance": "sylphie-chibi",
+      "actions": 3,
+      "new_frames": 12
+    },
+    {
+      "appearance": "eris-long",
+      "actions": 3,
+      "new_frames": 22
+    },
+    {
+      "appearance": "roxy",
+      "actions": 5,
+      "new_frames": 38
+    },
+    {
+      "appearance": "eris-short",
+      "actions": 3,
+      "new_frames": 22
+    },
+    {
+      "appearance": "sylphie-adult",
+      "actions": 3,
+      "new_frames": 12
+    },
+    {
+      "appearance": "roxy-nohat",
+      "actions": 3,
+      "new_frames": 12
+    }
+  ],
+  "total_new_actions": 20,
+  "total_new_frames": 118
+}

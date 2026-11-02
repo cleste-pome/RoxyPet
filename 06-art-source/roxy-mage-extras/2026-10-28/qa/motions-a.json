@@ -1,0 +1,269 @@
+{
+  "generator": "built-in image_gen",
+  "task": "additive sidecar actions only; no base atlas or base animation modified",
+  "inputs": [
+    "sources/master.png",
+    "references/installed-idle.png"
+  ],
+  "states": [
+    {
+      "state": "staff-idle",
+      "frame_count": 8,
+      "columns": 4,
+      "rows": 2,
+      "source": "sources/staff-idle.png",
+      "prompt": "prompts/staff-idle.md",
+      "generated_original": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-6cea916d-8c0c-4db6-9d5d-3ae5c3b378d1.png",
+      "light_background_preview": "revisions/motions-a/staff-idle-light-qa.png",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "mode": "RGBA",
+      "source_sha256": "5e56f89fcea9172ced37c910a2a42a17d217edeec72e8cea5dbf4ef6078b2af3",
+      "original_sha256": "5e56f89fcea9172ced37c910a2a42a17d217edeec72e8cea5dbf4ef6078b2af3",
+      "prompt_sha256": "c8df50e64f44dc744a8b05e78a8d61cc141ebefc23b0e8ec4a70bd98eab7bffc",
+      "split_pass": true,
+      "whole_visible_alpha_coverage": true,
+      "alpha_min": 0,
+      "alpha_max": 255,
+      "transparent_pixel_fraction": 0.4036653083442711,
+      "edge_visible_pixel_counts_top_bottom_left_right": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            15,
+            18,
+            373,
+            544
+          ],
+          "size": [
+            358,
+            526
+          ]
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            367,
+            18,
+            726,
+            544
+          ],
+          "size": [
+            359,
+            526
+          ]
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            725,
+            18,
+            1087,
+            544
+          ],
+          "size": [
+            362,
+            526
+          ]
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1084,
+            18,
+            1439,
+            544
+          ],
+          "size": [
+            355,
+            526
+          ]
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            16,
+            554,
+            372,
+            1073
+          ],
+          "size": [
+            356,
+            519
+          ]
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            367,
+            554,
+            728,
+            1073
+          ],
+          "size": [
+            361,
+            519
+          ]
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            727,
+            554,
+            1091,
+            1073
+          ],
+          "size": [
+            364,
+            519
+          ]
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1085,
+            554,
+            1439,
+            1073
+          ],
+          "size": [
+            354,
+            519
+          ]
+        }
+      ]
+    },
+    {
+      "state": "staff-salute",
+      "frame_count": 6,
+      "columns": 3,
+      "rows": 2,
+      "source": "sources/staff-salute.png",
+      "prompt": "prompts/staff-salute.md",
+      "generated_original": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-b4341828-9bbf-4d2f-9a9a-a6a1a0e5c9e2.png",
+      "light_background_preview": "revisions/motions-a/staff-salute-light-qa.png",
+      "source_size": [
+        1448,
+        1086
+      ],
+      "mode": "RGBA",
+      "source_sha256": "c85c3c380bc0c476e8d575d4a2aa31330daec692e8ee8be80f143cdff151e0c0",
+      "original_sha256": "c85c3c380bc0c476e8d575d4a2aa31330daec692e8ee8be80f143cdff151e0c0",
+      "prompt_sha256": "8156ab3b18dcf1c331419aa89600afe75f95968f6a9d872f168661d02ee9d724",
+      "split_pass": true,
+      "whole_visible_alpha_coverage": true,
+      "alpha_min": 0,
+      "alpha_max": 255,
+      "transparent_pixel_fraction": 0.5109994861776707,
+      "edge_visible_pixel_counts_top_bottom_left_right": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            63,
+            3,
+            483,
+            550
+          ],
+          "size": [
+            420,
+            547
+          ]
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            525,
+            3,
+            933,
+            550
+          ],
+          "size": [
+            408,
+            547
+          ]
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            975,
+            6,
+            1382,
+            550
+          ],
+          "size": [
+            407,
+            544
+          ]
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            74,
+            548,
+            482,
+            1076
+          ],
+          "size": [
+            408,
+            528
+          ]
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            538,
+            559,
+            925,
+            1076
+          ],
+          "size": [
+            387,
+            517
+          ]
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            987,
+            559,
+            1385,
+            1076
+          ],
+          "size": [
+            398,
+            517
+          ]
+        }
+      ]
+    }
+  ],
+  "input_sha256": {
+    "sources/master.png": "6917a3bcfd412a7b9cd1c09f74fcfe0fa08bdd6827a5de290e960b00a127e031",
+    "references/installed-idle.png": "bc429d0e74cfdd530bc1f6b0f1c8df18cc25bc0e6b5d929de0af79da0e30241e"
+  },
+  "validator": "03-scripts/pack-eris-atlas.py::split_sheet",
+  "alpha_threshold": 16,
+  "manual_review": {
+    "light_background": "Reviewed both sheets composited on #F3F4F6; silhouettes crisp and complete; apparent colored fringes in dark raw display are hidden RGB, not visible edge pollution. QA composites are previews only, not source edits.",
+    "frame_counts": "staff-idle 4x2 = 8, staff-salute 3x2 = 6",
+    "character": "Stable approved hat, blue twin braids, black bows, white/blue/black/gold outfit, chibi face and proportions",
+    "staff": "One white fork-head staff with blue suspended crystal and black cage grip in every frame, held in anatomical left hand on viewer right; full crown and bottom tip visible; continuous hand contact",
+    "idle": "Subtle breath/blink/weight-shift loop; frame 3 half-closed eyes, frame 4 fully closed, frame 5 reopened; tip remains near feet",
+    "salute": "Small staff lift, nod/smile, hold, lowering, returns to calm rest; same full staff design and length",
+    "layout": "Some source margins are tight but no actual clipping, no connected neighboring figures; split_sheet preserves all visible components. No redraw needed."
+  }
+}

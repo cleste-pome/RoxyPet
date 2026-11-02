@@ -29,6 +29,10 @@ cp "$TMP/Roxy" "$APP/Contents/MacOS/Roxy"
 cp "$SRC/Info.plist" "$APP/Contents/Info.plist"
 cp "$ASSETS/characters/roxy/spritesheet.png" "$APP/Contents/Resources/spritesheet.png"
 cp -R "$ASSETS/characters" "$APP/Contents/Resources/characters"
+# Other costume actions remain beside their own atlas; only built-in Roxy uses a resource-root sidecar.
+if [ -d "$ASSETS/characters/roxy/actions" ]; then
+  cp -R "$ASSETS/characters/roxy/actions" "$APP/Contents/Resources/roxy-actions"
+fi
 rm -rf "$APP/Contents/Resources/characters/roxy"   # 洛琪希从 Resources/spritesheet.png 读取，避免图集打包两份
 if [ -d "$ASSETS/speech" ]; then
   cp -R "$ASSETS/speech" "$APP/Contents/Resources/speech"
@@ -48,9 +52,17 @@ else
 fi
 
 echo "== 6/7 验证 =="
-codesign --verify "$APP" && echo "signature OK"
+codesign --verify --deep --strict "$APP" && echo "signature OK"
 
 echo "== 7/7 输出到仓库根目录 =="
 rm -rf "$ROOT/$APPNAME"
 cp -R "$APP" "$ROOT/$APPNAME"
+# iCloud/Finder may attach metadata while copying into the output directory.
+# Strip only signing-incompatible Finder/resource-fork metadata from our build.
+for ATTRIBUTE in com.apple.FinderInfo com.apple.ResourceFork; do
+  xattr -dr "$ATTRIBUTE" "$ROOT/$APPNAME" 2>/dev/null || true
+done
+# File-provider metadata may return here; strict verification has already passed
+# on the isolated build. The release script verifies its exact staged copy again.
+codesign --verify "$ROOT/$APPNAME"
 echo "构建产物: $ROOT/$APPNAME"

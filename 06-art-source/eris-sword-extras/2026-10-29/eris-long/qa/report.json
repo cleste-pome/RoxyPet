@@ -1,0 +1,355 @@
+{
+  "character": "eris-long",
+  "date": "2026-10-29",
+  "tool": "built-in image_gen",
+  "transparent_background_requested": true,
+  "identity_reference": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-long/sources/master.png",
+  "sword_reference": "/var/folders/qf/551xtg_d563b7tj_j6jrnh2w0000gn/T/codex-clipboard-0ec3138d-f441-4d9f-8e80-c2ded34d268f.png",
+  "states": [
+    {
+      "name": "sword-idle",
+      "source": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/sources/sword-idle.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "source_sha256": "104b798fe8c514ae3646d82140a3482d1c43bd2ff6ae828c43ff04286c5389b5",
+      "prompt": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/prompts/sword-idle.md",
+      "generated_original": "generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-fdcbb8a3-8a7a-4927-9aa3-85a6f88e3b02.png",
+      "expected_frames": 8,
+      "alpha_min": 0,
+      "alpha_max": 254,
+      "fully_transparent_fraction": 0.5054098765055338,
+      "nearly_transparent_fraction": 0.5818373362223307,
+      "split_pass": true,
+      "frame_bboxes": [
+        [
+          13,
+          25,
+          382,
+          497
+        ],
+        [
+          397,
+          19,
+          770,
+          497
+        ],
+        [
+          778,
+          19,
+          1149,
+          498
+        ],
+        [
+          1164,
+          21,
+          1531,
+          497
+        ],
+        [
+          13,
+          530,
+          385,
+          1009
+        ],
+        [
+          398,
+          530,
+          777,
+          1009
+        ],
+        [
+          778,
+          528,
+          1150,
+          1009
+        ],
+        [
+          1164,
+          530,
+          1535,
+          1009
+        ]
+      ],
+      "frame_sizes": [
+        [
+          369,
+          472
+        ],
+        [
+          373,
+          478
+        ],
+        [
+          371,
+          479
+        ],
+        [
+          367,
+          476
+        ],
+        [
+          372,
+          479
+        ],
+        [
+          379,
+          479
+        ],
+        [
+          372,
+          481
+        ],
+        [
+          371,
+          479
+        ]
+      ],
+      "min_canvas_edge_clearance_px": 1,
+      "visual_check_image": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/qa/sword-idle-on-light.jpg",
+      "prompt_sha256": "558af1bb832273807fe4c8cb4604aa6e18cbecfefb8562a44cbd94fd1e0fac1b",
+      "visual_review": {
+        "pass": true,
+        "identity_and_long_red_hair_preserved": true,
+        "original_blouse_skirt_stockings_shoes_preserved": true,
+        "chibi_proportions_preserved": true,
+        "sword_present_every_frame": true,
+        "single_consistent_sword_design": true,
+        "right_hand_dominant_grip": true,
+        "complete_body_and_shoes": true,
+        "complete_blade_tips": true,
+        "no_neighbor_connection": true,
+        "no_background_or_effects": true,
+        "no_permanent_back_sword_or_sheath": true,
+        "action_sequence_correct": true
+      }
+    },
+    {
+      "name": "sword-practice",
+      "source": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/sources/sword-practice.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "source_sha256": "1eaddc3ae18084aca8870642f7d7b4f0283fb649b26b3a482b3e55077b8ef89f",
+      "prompt": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/prompts/sword-practice.md",
+      "generated_original": "generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-564134d6-cb04-4863-a290-900e1c98cddc.png",
+      "expected_frames": 8,
+      "alpha_min": 0,
+      "alpha_max": 254,
+      "fully_transparent_fraction": 0.5413773854573568,
+      "nearly_transparent_fraction": 0.5953661600748698,
+      "split_pass": true,
+      "frame_bboxes": [
+        [
+          18,
+          29,
+          402,
+          502
+        ],
+        [
+          403,
+          43,
+          801,
+          501
+        ],
+        [
+          843,
+          33,
+          1149,
+          501
+        ],
+        [
+          1162,
+          70,
+          1497,
+          502
+        ],
+        [
+          9,
+          527,
+          422,
+          989
+        ],
+        [
+          446,
+          525,
+          778,
+          989
+        ],
+        [
+          770,
+          536,
+          1152,
+          989
+        ],
+        [
+          1152,
+          534,
+          1533,
+          989
+        ]
+      ],
+      "frame_sizes": [
+        [
+          384,
+          473
+        ],
+        [
+          398,
+          458
+        ],
+        [
+          306,
+          468
+        ],
+        [
+          335,
+          432
+        ],
+        [
+          413,
+          462
+        ],
+        [
+          332,
+          464
+        ],
+        [
+          382,
+          453
+        ],
+        [
+          381,
+          455
+        ]
+      ],
+      "min_canvas_edge_clearance_px": 3,
+      "visual_check_image": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/qa/sword-practice-on-light.jpg",
+      "prompt_sha256": "04c24be891c6f5768193fd17cf9378ba9b2ea2c4cee7cc1a2f62368107ea2847",
+      "visual_review": {
+        "pass": true,
+        "identity_and_long_red_hair_preserved": true,
+        "original_blouse_skirt_stockings_shoes_preserved": true,
+        "chibi_proportions_preserved": true,
+        "sword_present_every_frame": true,
+        "single_consistent_sword_design": true,
+        "right_hand_dominant_grip": true,
+        "complete_body_and_shoes": true,
+        "complete_blade_tips": true,
+        "no_neighbor_connection": true,
+        "no_background_or_effects": true,
+        "no_permanent_back_sword_or_sheath": true,
+        "action_sequence_correct": true
+      }
+    },
+    {
+      "name": "sword-salute",
+      "source": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/sources/sword-salute.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "source_sha256": "00a7624e9b0ad6e0186224c6b12ed9c3fc8b7fbc77b05b5c05a7c1e9736b2366",
+      "prompt": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/prompts/sword-salute.md",
+      "generated_original": "generated_images/01a14f3c-a425-7433-966d-3fe3007e0c64/exec-967bc3c3-d822-4f02-a50d-f6bf91c552c9.png",
+      "expected_frames": 6,
+      "alpha_min": 0,
+      "alpha_max": 254,
+      "fully_transparent_fraction": 0.6008752187093099,
+      "nearly_transparent_fraction": 0.6433906555175781,
+      "split_pass": true,
+      "frame_bboxes": [
+        [
+          72,
+          12,
+          524,
+          511
+        ],
+        [
+          611,
+          12,
+          973,
+          511
+        ],
+        [
+          1080,
+          14,
+          1433,
+          511
+        ],
+        [
+          158,
+          522,
+          520,
+          1014
+        ],
+        [
+          581,
+          522,
+          980,
+          1014
+        ],
+        [
+          1019,
+          522,
+          1468,
+          1013
+        ]
+      ],
+      "frame_sizes": [
+        [
+          452,
+          499
+        ],
+        [
+          362,
+          499
+        ],
+        [
+          353,
+          497
+        ],
+        [
+          362,
+          492
+        ],
+        [
+          399,
+          492
+        ],
+        [
+          449,
+          491
+        ]
+      ],
+      "min_canvas_edge_clearance_px": 10,
+      "visual_check_image": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/\u6d1b\u742a\u5e0c\u684c\u5ba0/RoxyPet-GitHub/06-art-source/eris-sword-extras/2026-10-29/eris-long/qa/sword-salute-on-light.jpg",
+      "prompt_sha256": "27708164d4dda5d1e64218babe3389a0124c9cda7f9b831e15664d4a7bf9bcf9",
+      "visual_review": {
+        "pass": true,
+        "identity_and_long_red_hair_preserved": true,
+        "original_blouse_skirt_stockings_shoes_preserved": true,
+        "chibi_proportions_preserved": true,
+        "sword_present_every_frame": true,
+        "single_consistent_sword_design": true,
+        "right_hand_dominant_grip": true,
+        "complete_body_and_shoes": true,
+        "complete_blade_tips": true,
+        "no_neighbor_connection": true,
+        "no_background_or_effects": true,
+        "no_permanent_back_sword_or_sheath": true,
+        "action_sequence_correct": true
+      }
+    }
+  ],
+  "identity_reference_sha256": "9207ec5950a6685065e3be68ee11a2e20681bd58357381d8863c82c6656c5a15",
+  "sword_reference_sha256": "7bfdcfb15e3fc5e25479f7217552a40eb48b224fc669fe6b3941b92fc227d39a",
+  "qa_method": "Read-only split_sheet(image,count) from 03-scripts/pack-eris-atlas.py; alpha statistics and visual inspection on a pale background.",
+  "original_assets_modified": false,
+  "runtime_code_modified": false,
+  "runtime_asset_pngs_modified": false,
+  "total_frames": 22,
+  "padding_note": "Requested generous source gutters were narrower in generated output, but all full figures and blade tips are complete and separate; split_sheet passes with exact alpha coverage. Final integration may add margins."
+}

@@ -1,0 +1,418 @@
+{
+  "generator": "built-in image_gen",
+  "kind": "additive sword extra actions; original character actions and runtime asset files unmodified",
+  "inputs": [
+    {
+      "role": "character sole identity",
+      "original": "06-art-source/eris-short/sources/master.png",
+      "archived": "revisions/input-master.png",
+      "original_sha256": "cdec60438c27fbc9bf2114374155972463614df6179454b40c9790286d736d79",
+      "archived_sha256": "cdec60438c27fbc9bf2114374155972463614df6179454b40c9790286d736d79"
+    },
+    {
+      "role": "sword and pose only; no hair or costume copied",
+      "original": "/var/folders/qf/551xtg_d563b7tj_j6jrnh2w0000gn/T/codex-clipboard-0ec3138d-f441-4d9f-8e80-c2ded34d268f.png",
+      "archived": "revisions/input-official-sword.png",
+      "original_sha256": "7bfdcfb15e3fc5e25479f7217552a40eb48b224fc669fe6b3941b92fc227d39a",
+      "archived_sha256": "7bfdcfb15e3fc5e25479f7217552a40eb48b224fc669fe6b3941b92fc227d39a"
+    }
+  ],
+  "states": [
+    {
+      "state": "sword-idle",
+      "count": 8,
+      "columns": 4,
+      "rows": 2,
+      "source": "sources/sword-idle.png",
+      "prompt": "prompts/sword-idle.md",
+      "generated_original": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-8c994da5-5f90-423c-b649-82204b77cbfa.png",
+      "light_background_preview": "qa/sword-idle-light.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "mode": "RGBA",
+      "source_sha256": "a0b79648eca76a6f8054616fc5e61da5e4c236c85914c8bff53d7ed82fb51f41",
+      "generated_original_sha256": "a0b79648eca76a6f8054616fc5e61da5e4c236c85914c8bff53d7ed82fb51f41",
+      "prompt_sha256": "a261d03bd08050132011c08065445afa54939dacba81b456ca75817e3a66cd57",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_pixel_fraction": 0.5627709013766369,
+      "split_pass": true,
+      "visible_alpha_coverage_preserved": true,
+      "canvas_edge_visible_alpha_top_bottom_left_right": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            69,
+            7,
+            305,
+            525
+          ],
+          "size": [
+            236,
+            518
+          ]
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            432,
+            8,
+            668,
+            525
+          ],
+          "size": [
+            236,
+            517
+          ]
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            800,
+            8,
+            1035,
+            525
+          ],
+          "size": [
+            235,
+            517
+          ]
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1178,
+            7,
+            1413,
+            525
+          ],
+          "size": [
+            235,
+            518
+          ]
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            67,
+            553,
+            307,
+            1065
+          ],
+          "size": [
+            240,
+            512
+          ]
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            421,
+            553,
+            680,
+            1062
+          ],
+          "size": [
+            259,
+            509
+          ]
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            791,
+            550,
+            1031,
+            1066
+          ],
+          "size": [
+            240,
+            516
+          ]
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1174,
+            552,
+            1415,
+            1066
+          ],
+          "size": [
+            241,
+            514
+          ]
+        }
+      ]
+    },
+    {
+      "state": "sword-practice",
+      "count": 8,
+      "columns": 4,
+      "rows": 2,
+      "source": "sources/sword-practice.png",
+      "prompt": "prompts/sword-practice.md",
+      "generated_original": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-3c9dbbef-f688-4b56-b0ae-3f8cc9d4bb7b.png",
+      "light_background_preview": "qa/sword-practice-light.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "mode": "RGBA",
+      "source_sha256": "07d1d97eebc67aa1153b7848c00bf090156844e539c534cc5c071c56936e297d",
+      "generated_original_sha256": "07d1d97eebc67aa1153b7848c00bf090156844e539c534cc5c071c56936e297d",
+      "prompt_sha256": "7c3e9422945e7f73d6f8ef1391ec957c62aa139ac9c22ad4d66e6b61f4b4a37e",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_pixel_fraction": 0.6286609840969445,
+      "split_pass": true,
+      "visible_alpha_coverage_preserved": true,
+      "canvas_edge_visible_alpha_top_bottom_left_right": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            9,
+            19,
+            315,
+            518
+          ],
+          "size": [
+            306,
+            499
+          ]
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            404,
+            38,
+            704,
+            513
+          ],
+          "size": [
+            300,
+            475
+          ]
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            771,
+            10,
+            1054,
+            518
+          ],
+          "size": [
+            283,
+            508
+          ]
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            1111,
+            66,
+            1441,
+            522
+          ],
+          "size": [
+            330,
+            456
+          ]
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            6,
+            635,
+            347,
+            1054
+          ],
+          "size": [
+            341,
+            419
+          ]
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            429,
+            577,
+            692,
+            1056
+          ],
+          "size": [
+            263,
+            479
+          ]
+        },
+        {
+          "frame": 6,
+          "source_bbox": [
+            719,
+            571,
+            1015,
+            1058
+          ],
+          "size": [
+            296,
+            487
+          ]
+        },
+        {
+          "frame": 7,
+          "source_bbox": [
+            1093,
+            563,
+            1397,
+            1059
+          ],
+          "size": [
+            304,
+            496
+          ]
+        }
+      ]
+    },
+    {
+      "state": "sword-salute",
+      "count": 6,
+      "columns": 3,
+      "rows": 2,
+      "source": "sources/sword-salute.png",
+      "prompt": "prompts/sword-salute.md",
+      "generated_original": "generated_images/01a14f3c-28da-7cb2-9bd9-7409e821b00e/exec-e2abf3c2-9120-488d-aa42-529d757ed117.png",
+      "light_background_preview": "qa/sword-salute-light.png",
+      "size": [
+        1448,
+        1086
+      ],
+      "mode": "RGBA",
+      "source_sha256": "bd8483b149fff276ae90a7051735e5a1ae9804407cdce492d9fa6cdb0d41bcc6",
+      "generated_original_sha256": "bd8483b149fff276ae90a7051735e5a1ae9804407cdce492d9fa6cdb0d41bcc6",
+      "prompt_sha256": "ec0d43b196385e538667054851336b67a85c86605fdec011b17bba61f0508edc",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_pixel_fraction": 0.6886694545343549,
+      "split_pass": true,
+      "visible_alpha_coverage_preserved": true,
+      "canvas_edge_visible_alpha_top_bottom_left_right": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "source_bbox": [
+            45,
+            4,
+            408,
+            533
+          ],
+          "size": [
+            363,
+            529
+          ]
+        },
+        {
+          "frame": 1,
+          "source_bbox": [
+            619,
+            5,
+            854,
+            535
+          ],
+          "size": [
+            235,
+            530
+          ]
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            1088,
+            5,
+            1322,
+            534
+          ],
+          "size": [
+            234,
+            529
+          ]
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            177,
+            541,
+            412,
+            1074
+          ],
+          "size": [
+            235,
+            533
+          ]
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            548,
+            550,
+            865,
+            1072
+          ],
+          "size": [
+            317,
+            522
+          ]
+        },
+        {
+          "frame": 5,
+          "source_bbox": [
+            975,
+            544,
+            1341,
+            1075
+          ],
+          "size": [
+            366,
+            531
+          ]
+        }
+      ]
+    }
+  ],
+  "validator": "03-scripts/pack-eris-atlas.py::split_sheet",
+  "alpha_threshold": 16,
+  "manual_review": {
+    "light_background": "All three sheets reviewed on light #F3F4F6. Fine outline, full body/ahoge/boots/blade tip visible, no apparent RGB fringe in final alpha composite. Light QA images are previews only; source artwork untouched.",
+    "character_identity": "Short red hair, curved ahoge, black headband with plate, red eyes, white black-trimmed coat with dark brown chest guard/strap and belt, brown shorts/gloves/crossed-strap boots preserved. Official reference long hair and clothing not copied.",
+    "sword": "One silver slightly curved single-edge sword with brown-red handle and gold oval guard in every frame. Anatomical right hand retains grip, both hands assist in practice and salute. No scabbard, back sword, prop release or blade disappearance.",
+    "idle": "Low guard, breathing/blink/weight shift; frame 4 closed eyes; frame 8 returns close to frame 1.",
+    "practice": "Eight-stage lift/side-of-head ready/diagonal cut/follow-through/recovery cycle; crisp single blade, no target, blood, large effects or blur.",
+    "salute": "Six-stage vertical sword salute, nod/smile, pause, lower and return.",
+    "layout": "Actual silhouettes exceed the requested conservative 285x420 target in some frames, but all are wholly visible, no neighboring connection, and independent split_sheet preserved exact visible alpha. No regeneration solely for tight margins; runtime packer may add padding with uniform per-action scale."
+  }
+}

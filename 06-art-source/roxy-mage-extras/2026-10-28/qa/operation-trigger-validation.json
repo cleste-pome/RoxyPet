@@ -1,0 +1,41 @@
+{
+  "result": "PASS",
+  "source_folder": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/洛琪希桌宠/RoxyPet-GitHub",
+  "system_idle_sampling_seconds": 1,
+  "idle_pose_per_idle_episode": 1,
+  "return_threshold_seconds": 180,
+  "return_salute_cooldown_seconds": 120,
+  "automatic_work_input_quiet_seconds": 3,
+  "work_insertion": "Only at completion of the original work animation cycle",
+  "wake_input_before_final_resume_notification": "covered",
+  "duplicate_return_after_completion_or_explicit_interaction": "coalesced",
+  "legacy_interactions_and_queues_preserved": true,
+  "input_contents_or_clipboard_read": false,
+  "new_input_monitor_permission_required": false,
+  "original_six_appearances_and_three_sidecar_resources": "All original base resources unchanged; six independent additional packs",
+  "new_action_menu_entries": false,
+  "event_driven_completion_priority": "PASS",
+  "cumulonimbus_minimum_continuous_work_seconds": 120,
+  "cumulonimbus_requires_successful_completion": true,
+  "cumulonimbus_optional_fallback": "water-cast",
+  "cumulonimbus_task_timing_isolated_and_reset": "PASS",
+  "cumulonimbus_external_opencode_process_watcher": false,
+  "updated_date": "2026-10-30",
+  "idle_pose_threshold_range_seconds": [
+    60,
+    100
+  ],
+  "work_insertion_interval_range_seconds": [
+    24,
+    45
+  ],
+  "context_variants_no_immediate_repeat": true,
+  "cumulonimbus_eligible_probability": 0.3333333333333333,
+  "cumulonimbus_cooldown_seconds": 180,
+  "appearance_count_with_optional_actions": 6,
+  "click_actions": "All installed extra clips plus wave/jump, shuffled complete rounds",
+  "click_no_immediate_repeat": true,
+  "rapid_click_pending_limit": 1,
+  "click_preserves_completion_chain": true,
+  "cumulonimbus_click_activation": "Explicit click may select it without the automatic long-task gate"
+}

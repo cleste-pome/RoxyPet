@@ -1,0 +1,6 @@
+PASS: pure aggregate-idle return/cooldown, wake-key ordering and deduplication, costume reset, exact battery status parsing.
+PASS: roxy causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and manual bypass.
+PASS: eris-short causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and manual bypass.
+PASS: eris-long causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and manual bypass.
+PASS: 3 optional costume sidecars, independent Eris sword artwork, strict metadata fallback, base/extra cache, native pixels, old reactions and reply ordering, drag queue, idle interruption, work-cycle boundary.
+PASS: 6 appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history, optional costume clips and fallback.

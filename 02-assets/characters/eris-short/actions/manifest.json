@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "columns": 8,
+  "rows": 3,
+  "cellWidth": 384,
+  "cellHeight": 416,
+  "actions": [
+    {
+      "id": "sword-idle",
+      "title": "持剑待机",
+      "row": 0,
+      "frameCount": 8,
+      "frameDuration": 0.4
+    },
+    {
+      "id": "sword-practice",
+      "title": "练剑挥斩",
+      "row": 1,
+      "frameCount": 8,
+      "frameDuration": 0.14
+    },
+    {
+      "id": "sword-salute",
+      "title": "剑礼致意",
+      "row": 2,
+      "frameCount": 6,
+      "frameDuration": 0.18
+    }
+  ]
+}

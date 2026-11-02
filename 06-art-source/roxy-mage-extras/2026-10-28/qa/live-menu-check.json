@@ -1,0 +1,20 @@
+{
+  "result": "PASS: final menu construction self-test",
+  "method": "AppKit menu inspection in --self-test; no final screenshot captured",
+  "new_action_menu_entries": false,
+  "all_six_appearance_choices_visible": true,
+  "checked_menus": [
+    "pet right-click",
+    "menu bar"
+  ],
+  "appearances": [
+    "roxy",
+    "roxy-nohat",
+    "eris-short",
+    "eris-long",
+    "sylphie-adult",
+    "sylphie-chibi"
+  ],
+  "supersedes": "live-menu-check-before-menu-removal.json",
+  "note": "Historical live screenshot check is retained separately; its action menu entries were subsequently removed at user request."
+}

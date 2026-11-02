@@ -1,0 +1,211 @@
+{
+  "tool": "built-in image_gen",
+  "source_sha256": "6629b64b418c9b0b772c0e10ef68af72262dcb87d5106c6481b4dbd959ddb927",
+  "base_sha256": "bb5fb27c04fa03e9dce8b70d4eb54387245412cd6350304f39079d30e211bb9e",
+  "frames": [
+    {
+      "action": "daily-rest",
+      "col": 0,
+      "source_bbox": [
+        82,
+        8,
+        304,
+        403
+      ],
+      "output_bbox": [
+        82,
+        13,
+        302,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-rest",
+      "col": 1,
+      "source_bbox": [
+        379,
+        8,
+        603,
+        403
+      ],
+      "output_bbox": [
+        81,
+        13,
+        303,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-rest",
+      "col": 2,
+      "source_bbox": [
+        662,
+        10,
+        883,
+        403
+      ],
+      "output_bbox": [
+        82,
+        15,
+        301,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-rest",
+      "col": 3,
+      "source_bbox": [
+        957,
+        8,
+        1179,
+        403
+      ],
+      "output_bbox": [
+        82,
+        13,
+        302,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-focus",
+      "col": 0,
+      "source_bbox": [
+        81,
+        419,
+        305,
+        815
+      ],
+      "output_bbox": [
+        81,
+        12,
+        303,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-focus",
+      "col": 1,
+      "source_bbox": [
+        382,
+        419,
+        606,
+        815
+      ],
+      "output_bbox": [
+        81,
+        12,
+        303,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-focus",
+      "col": 2,
+      "source_bbox": [
+        663,
+        422,
+        879,
+        815
+      ],
+      "output_bbox": [
+        85,
+        15,
+        299,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-focus",
+      "col": 3,
+      "source_bbox": [
+        957,
+        419,
+        1179,
+        815
+      ],
+      "output_bbox": [
+        82,
+        12,
+        302,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-greet",
+      "col": 0,
+      "source_bbox": [
+        82,
+        832,
+        305,
+        1229
+      ],
+      "output_bbox": [
+        81,
+        11,
+        302,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-greet",
+      "col": 1,
+      "source_bbox": [
+        385,
+        831,
+        608,
+        1229
+      ],
+      "output_bbox": [
+        81,
+        10,
+        302,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-greet",
+      "col": 2,
+      "source_bbox": [
+        662,
+        845,
+        886,
+        1229
+      ],
+      "output_bbox": [
+        81,
+        24,
+        303,
+        404
+      ],
+      "scale": 0.9899497487437185
+    },
+    {
+      "action": "daily-greet",
+      "col": 3,
+      "source_bbox": [
+        957,
+        832,
+        1179,
+        1229
+      ],
+      "output_bbox": [
+        82,
+        11,
+        302,
+        404
+      ],
+      "scale": 0.9899497487437185
+    }
+  ]
+}

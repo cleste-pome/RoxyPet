@@ -49,6 +49,7 @@
    - 4.2 [与 Claude Code 联动（可选）](#42-与-claude-code-联动可选)
      - 4.2.1 [任务执行器（可切换）](#421-任务执行器可切换)
      - 4.2.2 [状态联动（可多选）](#422-状态联动可多选)
+     - 4.2.3 [DeepSeek Harness 联动](#423-deepseek-harness-联动)
    - 4.3 [自定义与扩展](#43-自定义与扩展)
    - 4.4 [语料为什么有两种格式](#44-语料为什么有两种格式)
 5. [声明与致谢](#5-声明与致谢)
@@ -93,9 +94,10 @@ RoxyPet-GitHub/
 │   ├── import-speech.py         # 语料 Markdown → JSON
 │   ├── pack-eris-atlas.py       # 艾丽丝图集打包
 │   └── render-character-previews.py  # 预览图 / 动图渲染
-├── 04-integration/      # Claude Code / Codex 联动
+├── 04-integration/      # Claude Code / Codex / dsh 联动
 │   ├── hook.sh
-│   └── codex-notify.sh
+│   ├── codex-notify.sh
+│   └── dsh-plugin/      # DeepSeek Harness 桥插件（状态 / 回复 / 审批）
 ├── 05-images/           # README 配图
 │   ├── icon.png         # 应用图标
 │   ├── roxy/            # 洛琪希：立绘 / 总表 / 视线 / 抽帧 / 动图
@@ -260,6 +262,8 @@ RoxyPet-GitHub/
 - 💬 **洛琪希 1009 条台词库**：打招呼、闲聊、按时段/星期/情绪自动切换；全部本地随机，零消耗
 - ⏰ **硬件联动**：整点报时（深夜自动静音）、电池低电量提醒、电量充满庆祝
 - 🤝 **Claude Code 联动**（可选）：你发消息 → 她跑动"工作"；回答完毕 → 挥手报告，气泡里带回复摘要，点气泡跳回对应终端窗口
+- 🐋 **DeepSeek Harness 联动**（可选）：会话状态、回复转述与**权限批准**（允许一次 / 拒绝）都能在桌宠这边完成
+- 💰 **DeepSeek 余额**：菜单一键查询总额 / 赠送 / 充值余额
 - 📮 **吩咐洛琪希**：闲聊直接走 API 当场回答（又快又省）；需要动手的任务勾选后交给本机 Claude Code 执行。对话**全程留档**（聊天气泡 + Markdown 渲染，永久保存可翻查），结果自动进剪贴板
 - 🫥 **一键隐身**：菜单栏常驻一个小图标（和后台 App 一样）；右键菜单或点图标即可「隐藏洛琪希 / 显示洛琪希」——隐身时她在后台安静待命，随时召回
 - 🔮 **透视魔法**（可选）：截屏交给视觉大模型，用洛琪希的口吻点评你的屏幕
@@ -410,9 +414,10 @@ cd RoxyPet-GitHub/03-scripts
 | **Claude Code** | `claude -p` | 默认；持久会话（跨任务记忆）|
 | **Codex** | `codex exec` | 沙箱自治模式（workspace-write 沙箱 + 自动审批复核）；每次任务独立会话 |
 | **opencode** | `opencode run` | 自动批准（尊重显式 deny 规则）；会话续接 |
+| **DeepSeek Harness** | `dsh --profile headless` | 一次性任务；配合 4.2.3 的桥插件可回传状态与批准请求 |
 | **仅对话** | — | 勾选也只聊天，不执行命令 |
 
-> 三种 CLI 均以无头模式运行，并以各自的"自动执行"参数工作——**请只吩咐你信任的任务**。
+> 四种 CLI 均以无头模式运行，并以各自的"自动执行"参数工作——**请只吩咐你信任的任务**。
 
 #### 4.2.2 状态联动（可多选）
 
@@ -423,8 +428,24 @@ cd RoxyPet-GitHub/03-scripts
 | **Claude Code** | hooks → `state.claude` | 干活跑动 / 完工挥手+回复转述 / 等待提醒 | 配好上面的 hooks（`hook.sh`）|
 | **Codex** | `notify` → `codex-notify.sh` | 完工挥手 + 回复转述 | `~/.codex/config.toml`：`notify = ["…/.roxy-pet/codex-notify.sh", "turn-ended"]`（若已有 notify 程序，在脚本里先转发，见脚本注释）|
 | **opencode** | 进程检测（`opencode run`） | 运行中跑动 / 结束挥手 | 无需配置，勾选即可 |
+| **DeepSeek Harness** | 桥插件 → `state.dsh` | 干活跑动 / 完工挥手+回复转述 / 权限批准 | 安装 `04-integration/dsh-plugin`（见 4.2.3）|
 
 「任务执行器」（派活给谁）与「状态联动」（盯谁干活）相互独立：你可以派活给 Claude Code，同时盯着 Codex 和 opencode 的动态。
+
+#### 4.2.3 DeepSeek Harness 联动
+
+把仓库里的桥插件装进 dsh 的 profile（桌面版用 `desktop`）：
+
+```sh
+dsh plugin --profile desktop add /path/to/RoxyPet-GitHub/04-integration/dsh-plugin
+```
+
+装完重启 DeepSeek Harness。插件会把会话状态与回复写到 `~/.roxy-pet/state.dsh` / `last_reply.dsh`，需要审批时写 `~/.roxy-pet/dsh/approval.json`；桌宠弹出「允许一次 / 拒绝」后把决定写回 `approval-reply.json`。
+
+- **心跳闸门**：桌宠每 5 秒写一次 `~/.roxy-pet/dsh/roxy-heartbeat`；插件只在心跳新鲜时接管审批，桌宠没开就自动 `next()` 交还 dsh 自己的界面
+- **超时**：默认 120 秒没人回答 → `cancelled`（fail-closed）
+- **余额查询**：菜单「查询 DeepSeek 余额」→ `GET https://api.deepseek.com/user/balance`，气泡显示总额 / 赠送 / 充值
+- **状态联动开关**：设置 → 状态联动 → DeepSeek Harness（默认开启）
 
 ---
 

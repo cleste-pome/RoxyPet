@@ -1,0 +1,18 @@
+PASS: context-scoped random selection, no immediate repeats, all eligible variants reachable and single-action fallback.
+PASS: pure aggregate-idle return/cooldown, wake-key ordering and deduplication, costume reset, exact battery status parsing.
+PASS: per-source continuous work duration, 120-second boundary, unrelated-task isolation, interrupted-work reset and failed direct-task exclusion.
+PASS: roxy complete shuffled click rounds, no immediate repeats, rapid-click coalescing, completion-chain priority and missing-pack fallback.
+PASS: roxy causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and event-trigger priority.
+PASS: optional cumulonimbus threshold/fallback, original-wave/reply ordering, failed-task consumption and costume timing reset.
+PASS: eris-short complete shuffled click rounds, no immediate repeats, rapid-click coalescing, completion-chain priority and missing-pack fallback.
+PASS: eris-short causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and event-trigger priority.
+PASS: eris-long complete shuffled click rounds, no immediate repeats, rapid-click coalescing, completion-chain priority and missing-pack fallback.
+PASS: eris-long causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and event-trigger priority.
+PASS: roxy-nohat complete shuffled click rounds, no immediate repeats, rapid-click coalescing, completion-chain priority and missing-pack fallback.
+PASS: roxy-nohat causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and event-trigger priority.
+PASS: sylphie-adult complete shuffled click rounds, no immediate repeats, rapid-click coalescing, completion-chain priority and missing-pack fallback.
+PASS: sylphie-adult causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and event-trigger priority.
+PASS: sylphie-chibi complete shuffled click rounds, no immediate repeats, rapid-click coalescing, completion-chain priority and missing-pack fallback.
+PASS: sylphie-chibi causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and event-trigger priority.
+PASS: 6 optional costume sidecars, independent Eris sword artwork, strict metadata fallback, base/extra cache, native pixels, old reactions and reply ordering, drag queue, idle interruption, work-cycle boundary.
+PASS: 6 appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history, optional costume clips and fallback.

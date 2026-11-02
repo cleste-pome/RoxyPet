@@ -1,0 +1,18 @@
+Use case: identity-preserve.
+Asset type: an ADDITIONAL animation sheet for the existing installed Roxy desktop pet. This adds a staff action, not a replacement base animation.
+Reference image 1 is the NEW approved staff-holding master and the authority for character and prop identity. Reference image 2 is the actual installed idle frame, used ONLY as an auxiliary reminder of the existing cute chibi proportions and face. Match the master's face, large blue eyes, periwinkle twin blue braids with black bows, compact chibi head-to-body proportions, oversized black witch hat with white-gold-white bands and bent tip, white mage tunic with black shoulder trim and crossed chest straps, blue-gray center panel with blue edges and two gold fasteners, black scalloped skirt and white boots with tan toes. No tall adult proportions; do not change the hat shape or costume. No cloak.
+ONE identical OFFICIAL STAFF stays firmly in the anatomical LEFT hand on VIEWER RIGHT in EVERY frame, with fingers visibly wrapped around the shaft. The staff has the exact master's white/light-gray segmented long shaft with dark joints and dark bottom tip, black faceted cage-like upper grip, sculptural white DOUBLE-CURVED FORK head and suspended faceted BLUE crystal between the fork forms. Do not replace it with a wood branch, golden rod, generic crescent, trident, flower or short wand. Staff length, shape, crystal and grip stay constant. Never switch hands or make the prop disappear. Entire staff crown, crystal, shaft and bottom tip must fit inside each frame.
+Style: precise polished 2D anime sprite matching the master, crisp dark outlines and clean cel shading. All colored interiors opaque and the background ACTUALLY TRANSPARENT alpha.
+Canvas: landscape about 2048x1536 or sufficient high resolution, EXACTLY TWO rows of evenly spaced invisible cells. Read frames left to right across row 1 then row 2. Each cell contains ONE COMPLETE FULL BODY plus the COMPLETE STAFF at identical scale and a stable ground baseline, with clear transparent margins around all sides. Keep the full hat brim and tip, hands, braids, ribbons, legs, boots and long staff INSIDE the cell. Make figures small enough to fit; do not crop or overlap neighboring hats, braids, feet or staffs. Front-facing camera constant. No scene, floor, cast shadow, checkerboard, colored backdrop, panel line, labels, numbers, text, watermark, speed marks, detached effects or particles.
+Grid: exactly FOUR columns by TWO rows = EIGHT complete poses.
+Action STAFF-IDLE: a calm 4-second looping held-staff rest, 0.5 seconds per frame. Feet planted; staff bottom tip remains near the ground/boot baseline throughout; left hand always maintains grip. Right arm relaxed by her side. Keep differences subtle and low distraction, with tiny chest rise and braid/hat-tip settling.
+Frame 1: calm front-facing staff stance identical to master, soft smile, eyes open.
+Frame 2: gentle inhale, chest barely rises, tiny braid lag.
+Frame 3: exhale begins, eyelids half closed.
+Frame 4: BOTH eyes fully closed for a brief blink, head angle nearly unchanged.
+Frame 5: eyes reopening, natural calm expression.
+Frame 6: fully open eyes, tiny weight shift onto one boot without lifting the staff tip off ground.
+Frame 7: shift settles back to center, braids settle.
+Frame 8: returns extremely close to frame 1, same smile, eyes open and staff angle, seamless loop.
+Do not create a wave, walk, large gesture, hat-tip greeting or magical casting. Staff itself remains almost vertical in its same design in every pose.
+Final check: exactly 8 full-body staff-bearing chibi poses in 4 columns and two rows, full hats and staff crowns and tips visible, no neighboring overlap, same approved identity and real transparent alpha.

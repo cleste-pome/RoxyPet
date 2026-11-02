@@ -1,0 +1,31 @@
+{
+  "status": "installed and running",
+  "date": "2026-10-30",
+  "application": "/Applications/Roxy.app",
+  "new_binary_sha256": "633658d2ea1a0c0646bbc0a66647d53ff7976f12348693a197d6385f04ec0ad0",
+  "backup_application": "/Applications/.Roxy-before-action-expansion-20261029-6a3299f1.app",
+  "old_resources_byte_identical": true,
+  "three_sidecars_installed": true,
+  "restart_pending": false,
+  "runtime_self_test": "PASS: final app with all 20 clips, 6 appearances, both menus without extra entries, aggregate input rules and long-task signature spell",
+  "new_actions": 20,
+  "new_frames": 118,
+  "desktop_launch": "PASS: final installed executable observed running and stable after launch",
+  "trigger_logic_update": "active: real input-idle, wake/return, quiet work, acknowledgement coalescing",
+  "restored_appearance": "roxy",
+  "previous_action_build_backup": "/Applications/.Roxy-before-daily-20261030-e8db55b7.app",
+  "running_old_pids": [],
+  "source_folder": "<home>/Library/Mobile Documents/com~apple~CloudDocs/ClaudeCode/洛琪希桌宠/RoxyPet-GitHub",
+  "operation_trigger_tests": "PASS",
+  "running_executable": "/Applications/Roxy.app/Contents/MacOS/Roxy",
+  "launch_verification": "All installed files/modes/links match the tested repo app and verified DMG; installed strict signature passes",
+  "desktop_capture_note": "Final verification uses process and file/signature inspection; no new desktop screenshot was captured.",
+  "running_pids": [
+    32248
+  ],
+  "new_action_menu_entries": false,
+  "cumulonimbus": "8 frames; successful continuous work >=120 seconds; probability 1/3; cooldown 180s; old completion wave preserved",
+  "dmg_matches_installed_app": true,
+  "dmg_sha256": "3e22460f79b017a3a80c08da9d34d7f08a7392927ea18ad6b82989cc1bd94999",
+  "six_sidecars_installed": true
+}

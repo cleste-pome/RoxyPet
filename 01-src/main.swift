@@ -30,7 +30,6 @@ let TICK_FPS: Double = 60.0               // 主循环频率
 let STATE_POLL_INTERVAL: Double = 0.25    // Claude Code 状态文件轮询间隔（秒）
 let WORK_TIMEOUT_SECONDS: Double = 1200   // working 状态超过 20 分钟无更新则忽略
 let WAVE_REPEAT = 2                       // 挥手播放遍数
-let CLICK_SWITCH_PROB: Double = 0.9       // 单击反应"换成另一个动作"的概率（首次必挥手；之后跳/挥手马尔可夫式交替：九成换、一成重复）
 
 // 说话与提醒
 let GREET_DELAY: Double = 6.0             // 启动后多少秒打招呼
@@ -202,11 +201,223 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var frames: [[NSImage]] = []      // [row][col]
     private var masks: [[[UInt8]]] = []       // [row][col][pixel] alpha
     private var hoverMask: [UInt8] = []       // 交互判定用"站姿轮廓"（行 0 全部帧并集）
+    // Optional costume-specific clips leave the six existing base atlases untouched.
+    private struct ExtraActionDescription: Decodable {
+        let id: String
+        let title: String
+        let row: Int
+        let frameCount: Int
+        let frameDuration: Double
+    }
+    private struct ExtraActionManifest: Decodable {
+        let version: Int
+        let columns: Int
+        let rows: Int
+        let cellWidth: Int
+        let cellHeight: Int
+        let actions: [ExtraActionDescription]
+    }
+    private struct ExtraClip {
+        let description: ExtraActionDescription
+        let frames: [NSImage]
+        var sequence: [(Int, Double)] { frames.indices.map { ($0, description.frameDuration) } }
+    }
+    private struct ExtraBehavior {
+        let idle: String
+        let salute: String
+        let work: String
+        let done: String
+    }
+    private var extraBehavior: ExtraBehavior? {
+        switch character.id {
+        case "roxy":
+            return ExtraBehavior(idle: "staff-idle", salute: "staff-salute", work: "staff-channel", done: "water-cast")
+        case "roxy-nohat", "sylphie-adult", "sylphie-chibi":
+            return ExtraBehavior(idle: "daily-rest", salute: "daily-greet", work: "daily-focus", done: "daily-greet")
+        case "eris-short", "eris-long":
+            return ExtraBehavior(idle: "sword-idle", salute: "sword-salute", work: "sword-practice", done: "sword-salute")
+        default: return nil
+        }
+    }
+    private var deterministicActionChecks = false
+    private var lastContextAction: [String: String] = [:]
+    private var nextIdleDelay = Double.random(in: 60...100)
+    private var lastStormAt: CFTimeInterval?
+
+    private static func variedChoice(_ candidates: [String], previous: String?, entropy: UInt) -> String {
+        precondition(!candidates.isEmpty)
+        let fresh = candidates.count > 1 ? candidates.filter { $0 != previous } : candidates
+        let choices = fresh.isEmpty ? candidates : fresh
+        return choices[Int(entropy % UInt(choices.count))]
+    }
+
+    private func contextAction(_ primary: String, alternatives: [String], context: String) -> String {
+        if deterministicActionChecks { return primary }
+        var choices: [String] = []
+        for id in [primary] + alternatives where (extraClips[id] != nil || id == "wave") && !choices.contains(id) {
+            choices.append(id)
+        }
+        guard !choices.isEmpty else { return primary }
+        let key = character.id + ":" + context
+        let choice = Self.variedChoice(choices, previous: lastContextAction[key], entropy: UInt.random(in: 0...UInt.max))
+        lastContextAction[key] = choice
+        return choice
+    }
+
+    private func completionExtraID(workDuration: Double? = nil) -> String? {
+        if character.id == "roxy", let seconds = workDuration, seconds.isFinite,
+           seconds >= CompletionWorkTiming.signatureThreshold, extraClips["cumulonimbus"] != nil {
+            let now = CACurrentMediaTime()
+            if deterministicActionChecks || ((lastStormAt == nil || now - lastStormAt! >= 180) && Int.random(in: 0..<3) == 0) {
+                lastStormAt = now
+                return "cumulonimbus"
+            }
+        }
+        guard let behavior = extraBehavior, extraClips[behavior.done] != nil else { return nil }
+        return contextAction(behavior.done, alternatives: [behavior.salute], context: "success")
+    }
+    /// Only continuous work actually observed in this costume counts toward a large completion spell.
+    /// Notice, missing/stale state, cancellation, or switching costume starts a fresh interval.
+    private struct CompletionWorkTiming {
+        static let signatureThreshold = 120.0
+        private(set) var startedAtBySource: [String: CFTimeInterval] = [:]
+
+        mutating func update(workingSources: Set<String>, at now: CFTimeInterval) {
+            guard now.isFinite else { reset(); return }
+            startedAtBySource = startedAtBySource.filter { workingSources.contains($0.key) && $0.value <= now }
+            for source in workingSources where startedAtBySource[source] == nil {
+                startedAtBySource[source] = now
+            }
+        }
+
+        func duration(for source: String, at now: CFTimeInterval) -> Double? {
+            guard let started = startedAtBySource[source], now.isFinite, now >= started else { return nil }
+            return now - started
+        }
+
+        mutating func reset() { startedAtBySource.removeAll() }
+    }
+    private struct DirectWorkTiming {
+        let startedAt: CFTimeInterval
+        let costumeID: String
+
+        func duration(for costume: String, at now: CFTimeInterval, successful: Bool) -> Double? {
+            guard successful, costume == costumeID, now.isFinite, now >= startedAt else { return nil }
+            return now - startedAt
+        }
+    }
+    private var completionWorkTiming = CompletionWorkTiming()
+    private var directWorkTiming: DirectWorkTiming?
+    private enum WorkspaceActivitySignal {
+        case willSleep, screensDidSleep, sessionDidResignActive
+        case didWake, screensDidWake, sessionDidBecomeActive
+    }
+    private enum WorkspacePause: Hashable { case system, screens, session }
+    private enum AmbientReason { case idle, work, returnSalute }
+
+    /// Aggregate input-idle seconds only; no key contents, event taps, or window inspection.
+    private struct SystemActivityState {
+        var idleSeconds: Double?
+        var lastSampleAt: TimeInterval?
+        var peakIdleSeconds = 0.0
+        var idlePosePlayed = false
+        var pendingReturnSalute = false
+        var lastReturnSaluteAt: TimeInterval?
+        var pauses = Set<WorkspacePause>()
+        var awaitingWakeInput = false
+        var wakeInputConsumed = false
+        var isPaused: Bool { !pauses.isEmpty }
+        var canAnimateAutomatically: Bool { !isPaused && !awaitingWakeInput && idleSeconds != nil }
+
+        mutating func receive(_ signal: WorkspaceActivitySignal) {
+            let wasPaused = isPaused
+            switch signal {
+            case .willSleep: pauses.insert(.system)
+            case .screensDidSleep: pauses.insert(.screens)
+            case .sessionDidResignActive: pauses.insert(.session)
+            case .didWake: pauses.remove(.system)
+            case .screensDidWake: pauses.remove(.screens)
+            case .sessionDidBecomeActive: pauses.remove(.session)
+            }
+            switch signal {
+            case .willSleep, .screensDidSleep, .sessionDidResignActive:
+                awaitingWakeInput = true
+                wakeInputConsumed = false
+                pendingReturnSalute = false
+            case .didWake, .screensDidWake, .sessionDidBecomeActive:
+                if !wakeInputConsumed { awaitingWakeInput = true }
+            }
+            if wasPaused && !isPaused && awaitingWakeInput {
+                // A wake key may arrive before the final workspace notification.
+                idleSeconds = nil
+                lastSampleAt = nil
+            }
+        }
+
+        @discardableResult mutating func sample(idleSeconds seconds: Double, at now: TimeInterval) -> Bool {
+            guard seconds.isFinite, seconds >= 0, now.isFinite else {
+                idleSeconds = nil; lastSampleAt = nil; peakIdleSeconds = 0
+                return false
+            }
+            let elapsed = lastSampleAt.map { max(0, now - $0) } ?? 0
+            let inputObserved = seconds < 3 && (idleSeconds == nil || seconds + 0.25 < idleSeconds! + elapsed)
+            let returnedAfterAbsence = peakIdleSeconds >= 180
+            idleSeconds = seconds
+            lastSampleAt = now
+            if isPaused {
+                peakIdleSeconds = max(peakIdleSeconds, seconds)
+                return inputObserved
+            }
+            if inputObserved {
+                if returnedAfterAbsence || awaitingWakeInput {
+                    if lastReturnSaluteAt == nil || now - lastReturnSaluteAt! >= 120 { pendingReturnSalute = true }
+                }
+                idlePosePlayed = false
+                peakIdleSeconds = seconds
+                if awaitingWakeInput {
+                    awaitingWakeInput = false
+                    wakeInputConsumed = true
+                }
+            } else {
+                peakIdleSeconds = max(peakIdleSeconds, seconds)
+            }
+            return inputObserved
+        }
+
+        mutating func takeReturnSalute(at now: TimeInterval) -> Bool {
+            guard pendingReturnSalute else { return false }
+            pendingReturnSalute = false
+            guard lastReturnSaluteAt == nil || now - lastReturnSaluteAt! >= 120 else { return false }
+            lastReturnSaluteAt = now
+            return true
+        }
+
+        mutating func acknowledgeReturn(at now: TimeInterval) {
+            pendingReturnSalute = false
+            lastReturnSaluteAt = now
+        }
+
+        mutating func resetForCostumeChange() {
+            idleSeconds = nil; lastSampleAt = nil; peakIdleSeconds = 0
+            idlePosePlayed = false; pendingReturnSalute = false
+            awaitingWakeInput = isPaused
+            wakeInputConsumed = !isPaused
+        }
+    }
+    private var extraClips: [String: ExtraClip] = [:]
+    private var nextExtraWorkActionAt: CFTimeInterval = 0
+    private var systemActivity = SystemActivityState()
+    private var lastSystemActivityPollAt: CFTimeInterval = 0
+    private var observingWorkspaceActivity = false
+    private var ambientOnce = false
+    private var ambientReason: AmbientReason?
+    private var chainedExtraKind: String?
     private var timer: Timer?
 
     private(set) var currentImage: NSImage?
     private var currentRow = -1
     private var currentCol = -1
+    private var currentSheetKey = "base"
     private var lastTick: CFTimeInterval = 0
     private var startTime: CFTimeInterval = 0
 
@@ -221,7 +432,7 @@ final class PetController: NSObject, NSApplicationDelegate {
     // 动画播放状态
     private var animKey = ""
     private var animElapsed = 0.0
-    private var onceKind = ""                 // "", "wave", "jump"
+    private var onceKind = ""                 // Base reactions or a validated optional clip ID.
     private var onceRepeatsLeft = 0
     private var pendingOnce = ""
     private var pendingOnceRepeats: Int? = nil
@@ -229,7 +440,9 @@ final class PetController: NSObject, NSApplicationDelegate {
     // 交互状态
     private var wasHovering = false
     private var nextTouchIsJump = true             // 触碰反应交替开关：true=跳，false=挥手
-    private var lastClickAction: String? = nil     // 单击反应的上一次动作（马尔可夫链状态）
+    private var lastClickAction: String? = nil
+    private var clickActionBag: [String] = []
+    private var queuedClickKind: String?
     private var lookUntil = 0.0
     private var lastLookDir = -1
     private var dragging = false
@@ -242,6 +455,11 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var workState = "idle"
     private var lastOnceTS = 0.0
     private var statePollAcc = 0.0
+
+    // DeepSeek Harness 桥（dsh-plugin-roxy）
+    private var dshApprovalAcc = 0.0
+    private var lastDshApprovalId = ""
+    private var dshHeartbeatAcc = 0.0
 
     // 气泡
     private var bubbleWindow: NSWindow?
@@ -508,7 +726,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         loadSpeechExtras()
         loadTaskHistory()
         setupStatusItem()
-        for h in ["claude", "codex", "opencode"] {
+        for h in ["claude", "codex", "opencode", "dsh"] {
             if let path = PetController.findBinary(h) { PetController.harnessPaths[h] = path }
         }
         if UserDefaults.standard.object(forKey: "roxyOwnerTitle") == nil {
@@ -518,6 +736,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         }
         startTime = CACurrentMediaTime()
         show(row: 0, col: 0)
+        observeWorkspaceActivity()
         startTimer()
         // 若因授权流程重启，则自动续跑一次「透视魔法」（有权限直接看，没有则轻声提示，不打扰）
         let rf = NSHomeDirectory() + "/.roxy-pet/peek-retry"
@@ -532,6 +751,58 @@ final class PetController: NSObject, NSApplicationDelegate {
                 }
             }
         }
+    }
+
+    private func observeWorkspaceActivity() {
+        guard !observingWorkspaceActivity else { return }
+        observingWorkspaceActivity = true
+        let center = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.willSleepNotification, NSWorkspace.screensDidSleepNotification,
+                     NSWorkspace.sessionDidResignActiveNotification, NSWorkspace.didWakeNotification,
+                     NSWorkspace.screensDidWakeNotification, NSWorkspace.sessionDidBecomeActiveNotification] {
+            center.addObserver(self, selector: #selector(workspaceActivityChanged(_:)), name: name, object: nil)
+        }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
+        timer?.invalidate()
+    }
+
+    @objc private func workspaceActivityChanged(_ notification: Notification) {
+        let signal: WorkspaceActivitySignal
+        switch notification.name {
+        case NSWorkspace.willSleepNotification: signal = .willSleep
+        case NSWorkspace.screensDidSleepNotification: signal = .screensDidSleep
+        case NSWorkspace.sessionDidResignActiveNotification: signal = .sessionDidResignActive
+        case NSWorkspace.didWakeNotification: signal = .didWake
+        case NSWorkspace.screensDidWakeNotification: signal = .screensDidWake
+        case NSWorkspace.sessionDidBecomeActiveNotification: signal = .sessionDidBecomeActive
+        default: return
+        }
+        if Thread.isMainThread { receiveWorkspaceActivity(signal) }
+        else { DispatchQueue.main.async { [weak self] in self?.receiveWorkspaceActivity(signal) } }
+    }
+
+    private func receiveWorkspaceActivity(_ signal: WorkspaceActivitySignal) {
+        systemActivity.receive(signal)
+        if systemActivity.isPaused || systemActivity.awaitingWakeInput {
+            cancelAmbientOnce()
+            nextExtraWorkActionAt = 0
+        }
+    }
+
+    private func pollSystemActivity(now: CFTimeInterval) {
+        guard lastSystemActivityPollAt == 0 || now - lastSystemActivityPollAt >= 1 else { return }
+        lastSystemActivityPollAt = now
+        let anyInputEvent = CGEventType(rawValue: UInt32.max)!
+        let idle = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: anyInputEvent)
+        acceptSystemActivity(idleSeconds: idle, at: Date().timeIntervalSince1970)
+    }
+
+    private func acceptSystemActivity(idleSeconds: Double, at now: TimeInterval) {
+        let inputObserved = systemActivity.sample(idleSeconds: idleSeconds, at: now)
+        if inputObserved && ambientReason != .returnSalute { cancelAmbientOnce() }
     }
 
     private func loadAtlas() -> Bool {
@@ -590,7 +861,71 @@ final class PetController: NSObject, NSApplicationDelegate {
         frames = newFrames
         masks = newMasks
         hoverMask = hm
+        extraClips = loadExtraClips()
         return true
+    }
+
+    private func extraActionsDirectory() -> URL? {
+        if character.id == "roxy" {
+            return Bundle.main.resourceURL?.appendingPathComponent("roxy-actions", isDirectory: true)
+        }
+        return character.atlasURL?.deletingLastPathComponent().appendingPathComponent("actions", isDirectory: true)
+    }
+
+    private func loadExtraClips() -> [String: ExtraClip] {
+        guard let directory = extraActionsDirectory(),
+              let data = try? Data(contentsOf: directory.appendingPathComponent("manifest.json")),
+              let image = NSImage(contentsOf: directory.appendingPathComponent("spritesheet.png")),
+              let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return [:] }
+        return Self.decodeExtraClips(data: data, image: cg)
+    }
+
+    /// Decode into a temporary collection; any malformed optional sidecar simply disables it.
+    private static func decodeExtraClips(data: Data?, image: CGImage?) -> [String: ExtraClip] {
+        guard let data = data, data.count <= 65_536, let cg = image,
+              let spec = try? JSONDecoder().decode(ExtraActionManifest.self, from: data),
+              spec.version == 1, spec.columns == COLS, (1...16).contains(spec.rows),
+              spec.cellWidth == CELL_W * 2, spec.cellHeight == CELL_H * 2,
+              cg.width == spec.columns * spec.cellWidth, cg.height == spec.rows * spec.cellHeight,
+              [.premultipliedLast, .premultipliedFirst, .last, .first].contains(cg.alphaInfo),
+              !spec.actions.isEmpty, spec.actions.count <= spec.rows,
+              Set(spec.actions.map(\.id)).count == spec.actions.count,
+              Set(spec.actions.map(\.row)).count == spec.actions.count,
+              let space = CGColorSpace(name: CGColorSpace.sRGB) else { return [:] }
+        var decoded: [String: ExtraClip] = [:]
+        for action in spec.actions {
+            guard PetCharacter.validID(action.id), action.id.count <= 48,
+                  !["wave", "jump"].contains(action.id),
+                  !action.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  action.title.count <= 40, action.title.rangeOfCharacter(from: .controlCharacters) == nil,
+                  (0..<spec.rows).contains(action.row), (1...COLS).contains(action.frameCount),
+                  action.frameDuration.isFinite, (0.03...2.0).contains(action.frameDuration) else { return [:] }
+            var images: [NSImage] = []
+            for col in 0..<action.frameCount {
+                let rect = CGRect(x: col * spec.cellWidth, y: action.row * spec.cellHeight,
+                                  width: spec.cellWidth, height: spec.cellHeight)
+                guard let cell = cg.cropping(to: rect),
+                      let context = CGContext(data: nil, width: CELL_W, height: CELL_H,
+                                              bitsPerComponent: 8, bytesPerRow: CELL_W * 4,
+                                              space: space,
+                                              bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return [:] }
+                context.draw(cell, in: CGRect(x: 0, y: 0, width: CELL_W, height: CELL_H))
+                let bytes = context.data!.assumingMemoryBound(to: UInt8.self)
+                var visible = 0
+                for pixel in 0..<(CELL_W * CELL_H) where bytes[pixel * 4 + 3] > 64 { visible += 1 }
+                guard visible > 500 else { return [:] }
+                images.append(NSImage(cgImage: cell, size: NSSize(width: CELL_W, height: CELL_H)))
+            }
+            decoded[action.id] = ExtraClip(description: action, frames: images)
+        }
+        return decoded
+    }
+
+    private func oncePlayback(for kind: String) -> (row: Int, sequence: [(Int, Double)], extraID: String?)? {
+        if kind == "jump" { return (4, JUMP_SEQ, nil) }
+        if kind == "wave" { return (3, WAVE_SEQ, nil) }
+        if let clip = extraClips[kind] { return (0, clip.sequence, kind) }
+        return nil
     }
 
     private func setupWindow() {
@@ -813,6 +1148,8 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     // ---------- 事件钩子 ----------
     func dragStarted(atMouseX x: CGFloat, atMouseY y: CGFloat) {
+        acknowledgeDesktopReturn()
+        cancelAmbientOnce()
         dragging = true
         dragMoved = false
         dragPrevX = x
@@ -827,18 +1164,60 @@ final class PetController: NSObject, NSApplicationDelegate {
             let r = pendingOnceRepeats
             pendingOnce = ""
             pendingOnceRepeats = nil
-            startOnce(k, repeats: r)
+            beginOnce(k, repeats: r, preserveChain: true)
         }
     }
 
     func startOnce(_ kind: String, repeats: Int? = nil) {
+        beginOnce(kind, repeats: repeats)
+    }
+
+    private func beginOnce(_ kind: String, repeats: Int? = nil, ambient: Bool = false,
+                           reason: AmbientReason? = nil, preserveChain: Bool = false) {
+        guard oncePlayback(for: kind) != nil else { return }
+        if !preserveChain { chainedExtraKind = nil }
         if dragging {
             pendingOnce = kind
             pendingOnceRepeats = repeats
             return
         }
         onceKind = kind
-        onceRepeatsLeft = repeats ?? ((kind == "jump") ? 1 : WAVE_REPEAT)
+        onceRepeatsLeft = max(1, repeats ?? (kind == "wave" ? WAVE_REPEAT : 1))
+        ambientOnce = ambient
+        ambientReason = ambient ? reason : nil
+        animKey = ""
+        animElapsed = 0
+    }
+
+    private func cancelAmbientOnce() {
+        guard ambientOnce else { return }
+        onceKind = ""; onceRepeatsLeft = 0; ambientOnce = false; ambientReason = nil
+        animKey = ""; animElapsed = 0
+    }
+
+    // Preserve the old completion wave in full, then append this costume's optional finish.
+    private func acknowledgeDesktopReturn(at now: TimeInterval = Date().timeIntervalSince1970) {
+        guard !petHidden, !systemActivity.isPaused else { return }
+        systemActivity.acknowledgeReturn(at: now)
+    }
+
+    private func triggerCompletionReaction(activityNow: TimeInterval = Date().timeIntervalSince1970,
+                                           workDuration: Double? = nil) {
+        acknowledgeDesktopReturn(at: activityNow)
+        triggerWave()
+        if let id = completionExtraID(workDuration: workDuration) { chainedExtraKind = id }
+    }
+
+    // A reply adds a finish; it must not replace an in-flight or drag-queued user reaction.
+    private func appendReplyExtraAction(activityNow: TimeInterval = Date().timeIntervalSince1970,
+                                       workDuration: Double? = nil) {
+        guard let id = completionExtraID(workDuration: workDuration) else { return }
+        acknowledgeDesktopReturn(at: activityNow)
+        if (!ambientOnce && !onceKind.isEmpty && onceRepeatsLeft > 0) || !pendingOnce.isEmpty {
+            chainedExtraKind = id
+        } else {
+            startOnce(id, repeats: 1)
+        }
     }
 
     func triggerWave() { startOnce("wave") }
@@ -854,7 +1233,9 @@ final class PetController: NSObject, NSApplicationDelegate {
         guard window != nil else { return }
 
         pollClaudeState(dt: dt)
+        pollDshBridge(dt: dt)
         pollSchedules(now: now, dt: dt)
+        pollSystemActivity(now: now)
 
         // 情绪维护（本地）：久未互动 → lonely；被连续摸头 → shy（限时）
         if lastInteractAt == 0 { lastInteractAt = now }
@@ -875,7 +1256,10 @@ final class PetController: NSObject, NSApplicationDelegate {
                 nextTouchIsJump.toggle()
             }
         }
-        if wasHovering && !hovering { lookUntil = now + LOOK_WINDOW_SECONDS }
+        if wasHovering && !hovering {
+            cancelAmbientOnce()
+            lookUntil = now + LOOK_WINDOW_SECONDS
+        }
         wasHovering = hovering
         // 注视刚结束（到点）：小概率说一句
         if lookUntil > 0 && now >= lookUntil {
@@ -899,12 +1283,15 @@ final class PetController: NSObject, NSApplicationDelegate {
             dragPrevX = mx
         }
 
+        pollExtraActions(now: now, dt: dt)
+
         // ---- 显示决策（优先级从高到低）----
         if onceRepeatsLeft <= 0 { onceKind = "" }
 
         var key = ""
         var seqRow = 0
         var seq: [(Int, Double)]? = nil
+        var extraID: String? = nil
         var loop = true
         var lookDirNow: Int? = nil
 
@@ -914,8 +1301,11 @@ final class PetController: NSObject, NSApplicationDelegate {
             seq = RUN_SEQ
         } else if !onceKind.isEmpty {
             key = "once-" + onceKind
-            seqRow = (onceKind == "jump") ? 4 : 3
-            seq = (onceKind == "jump") ? JUMP_SEQ : WAVE_SEQ
+            if let playback = oncePlayback(for: onceKind) {
+                seqRow = playback.row
+                seq = playback.sequence
+                extraID = playback.extraID
+            }
             loop = false
         } else if now < lookUntil {
             key = "look"
@@ -943,24 +1333,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         }
 
         if let seq = seq {
-            animElapsed += dt
-            let total = seq.reduce(0) { $0 + $1.1 }
-            if animElapsed >= total {
-                if loop {
-                    animElapsed = animElapsed.truncatingRemainder(dividingBy: total)
-                } else {
-                    onceRepeatsLeft -= 1
-                    if onceRepeatsLeft > 0 {
-                        animElapsed -= total
-                    } else {
-                        animElapsed = 0
-                    }
-                }
-            }
-            var acc = 0.0
-            var idx = seq.count - 1
-            for (i, fr) in seq.enumerated() { acc += fr.1; if animElapsed < acc { idx = i; break } }
-            show(row: seqRow, col: seq[idx].0)
+            advanceSequence(row: seqRow, sequence: seq, loop: loop, extraID: extraID, dt: dt)
         } else if let d = lookDirNow {
             lastLookDir = d
             let rc = dirToRowCol(d)
@@ -1024,6 +1397,87 @@ final class PetController: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func advanceSequence(row: Int, sequence: [(Int, Double)], loop: Bool, extraID: String?, dt: Double) {
+        if extraID != nil && dragging && dragMoved { return }
+        let total = sequence.reduce(0) { $0 + $1.1 }
+        guard total > 0, !sequence.isEmpty else { return }
+        animElapsed += dt
+        if loop {
+            if animElapsed >= total { animElapsed = animElapsed.truncatingRemainder(dividingBy: total) }
+        } else {
+            while animElapsed >= total && onceRepeatsLeft > 0 {
+                animElapsed -= total
+                onceRepeatsLeft -= 1
+            }
+            if onceRepeatsLeft <= 0 {
+                let next = chainedExtraKind
+                chainedExtraKind = nil
+                onceKind = ""; ambientOnce = false; ambientReason = nil; animKey = ""; animElapsed = 0
+                if let next = next, let clip = extraClips[next] {
+                    if !pendingOnce.isEmpty {
+                        // A held mouse may finish the old clip before dragEnded consumes its queue.
+                        chainedExtraKind = next
+                        show(row: 0, col: 0)
+                    } else {
+                        beginOnce(next, repeats: 1)
+                        if !dragging { showExtra(clip, col: 0) }
+                    }
+                } else if pendingOnce.isEmpty, let clicked = queuedClickKind {
+                    queuedClickKind = nil
+                    beginOnce(clicked, repeats: 1)
+                } else {
+                    show(row: 0, col: 0)
+                }
+                return
+            }
+        }
+        var elapsed = 0.0
+        var frame = sequence.last!.0
+        for (col, duration) in sequence {
+            elapsed += duration
+            if animElapsed < elapsed { frame = col; break }
+        }
+        if let id = extraID, let clip = extraClips[id] { showExtra(clip, col: frame) }
+        else { show(row: row, col: frame) }
+    }
+
+    private func automaticExtraActionIsUnblocked(now: CFTimeInterval) -> Bool {
+        !dragging && onceKind.isEmpty && pendingOnce.isEmpty && chainedExtraKind == nil
+            && now >= lookUntil && now >= glanceUntil
+    }
+
+    private func pollExtraActions(now: CFTimeInterval, dt: Double,
+                                  activityNow: TimeInterval = Date().timeIntervalSince1970) {
+        guard let behavior = extraBehavior, !extraClips.isEmpty, !petHidden,
+              systemActivity.canAnimateAutomatically else { return }
+        let working = aiBusy || workState == "working"
+        if working {
+            if ambientOnce && ambientReason != .work { cancelAmbientOnce() }
+            if nextExtraWorkActionAt == 0 { nextExtraWorkActionAt = now + Double.random(in: 24...45) }
+            // Keep every old work cycle; add practice only during a quiet input gap.
+            let boundary = ["busy", "work"].contains(animKey) && animElapsed + dt >= WORK_SEQ.reduce(0) { $0 + $1.1 }
+            if now >= nextExtraWorkActionAt, boundary, automaticExtraActionIsUnblocked(now: now),
+               (systemActivity.idleSeconds ?? 0) >= 3, extraClips[behavior.work] != nil {
+                beginOnce(contextAction(behavior.work, alternatives: [], context: "work"), repeats: 1, ambient: true, reason: .work)
+                nextExtraWorkActionAt = now + Double.random(in: 24...45)
+            }
+            return
+        }
+        nextExtraWorkActionAt = 0
+        guard automaticExtraActionIsUnblocked(now: now) else { return }
+        if systemActivity.pendingReturnSalute, extraClips[behavior.salute] != nil,
+           systemActivity.takeReturnSalute(at: activityNow) {
+            beginOnce(contextAction(behavior.salute, alternatives: ["wave"], context: "return"), repeats: 1, ambient: true, reason: .returnSalute)
+            return
+        }
+        if (systemActivity.idleSeconds ?? 0) >= (deterministicActionChecks ? 60 : nextIdleDelay), !systemActivity.idlePosePlayed,
+           extraClips[behavior.idle] != nil {
+            systemActivity.idlePosePlayed = true
+            nextIdleDelay = Double.random(in: 60...100)
+            beginOnce(contextAction(behavior.idle, alternatives: ["daily-focus"], context: "idle"), repeats: 1, ambient: true, reason: .idle)
+        }
+    }
+
     // ---------- 行为调度：打招呼 / 整点 / 闲聊 / 电池 ----------
     private func pollSchedules(now: CFTimeInterval, dt: Double) {
         // 打招呼
@@ -1083,13 +1537,24 @@ final class PetController: NSObject, NSApplicationDelegate {
             try? p.run()
             p.waitUntilExit()
             let s = String(data: out.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-            var level = -1
-            if let r = s.range(of: #"(\d+)%"#, options: .regularExpression) {
-                level = Int(s[r].dropLast()) ?? -1
+            if let status = PetController.parseBatteryStatus(s) {
+                DispatchQueue.main.async { self?.applyBattery(level: status.level, charging: status.charging) }
             }
-            let charging = s.contains("charging") || s.contains("charged") || s.contains("AC Power")
-            DispatchQueue.main.async { self?.applyBattery(level: level, charging: charging) }
         }
+    }
+
+    private static func parseBatteryStatus(_ text: String) -> (level: Int, charging: Bool)? {
+        guard let batteryLine = text.split(separator: "\n").first(where: { $0.contains("%") }),
+              let range = batteryLine.range(of: #"(\d+)%"#, options: .regularExpression),
+              let level = Int(batteryLine[range].dropLast()), (0...100).contains(level) else { return nil }
+        let states = batteryLine.split(separator: ";").dropFirst().map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        }
+        let charging: Bool
+        if states.contains("discharging") || states.contains("not charging") { charging = false }
+        else if states.contains("charging") || states.contains("charged") || states.contains("finishing charge") { charging = true }
+        else { charging = text.contains("'AC Power'") }
+        return (level, charging)
     }
 
     private func applyBattery(level: Int, charging: Bool) {
@@ -1153,6 +1618,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         var noticeTS = 0.0
         var doneTS = 0.0
         var doneSrc = ""
+        var workingSources = Set<String>()
 
         // 读取单个来源的状态文件（state\n时间戳），汇总为 working / notice / done
         func consider(_ src: String, _ file: String) {
@@ -1164,7 +1630,10 @@ final class PetController: NSObject, NSApplicationDelegate {
             let ts = lines.count > 1 ? (Double(lines[1]) ?? 0) : 0
             switch st {
             case "working":
-                if nowEpoch - ts < WORK_TIMEOUT_SECONDS { working = true }
+                if nowEpoch - ts >= 0 && nowEpoch - ts < WORK_TIMEOUT_SECONDS {
+                    working = true
+                    workingSources.insert(src)
+                }
             case "notice":
                 if nowEpoch - ts < 120 && ts > noticeTS { noticeTS = ts }
             case "done":
@@ -1185,6 +1654,9 @@ final class PetController: NSObject, NSApplicationDelegate {
         if d.bool(forKey: "roxyWatchCodex") {
             consider("codex", base + "state.codex")
         }
+        if d.object(forKey: "roxyWatchDsh") == nil ? true : d.bool(forKey: "roxyWatchDsh") {
+            consider("dsh", base + "state.dsh")
+        }
         if d.bool(forKey: "roxyWatchOpencode") {
             // opencode 无官方钩子：用运行中的 `opencode run` 进程做"进行中"信号
             let running = PetController.processRunning(match: "opencode run")
@@ -1193,10 +1665,14 @@ final class PetController: NSObject, NSApplicationDelegate {
                 ocWatchRunning = true
             } else if ocWatchRunning {
                 ocWatchRunning = false
-                if !aiBusy { triggerWave(); speak(randomOf(lines("done", DONE_LINES))) }
+                if !aiBusy { triggerCompletionReaction(); speak(randomOf(lines("done", DONE_LINES))) }
             }
         }
 
+        let nowMonotonic = CACurrentMediaTime()
+        // Read the finishing source's duration before clearing intervals no longer working.
+        let completedWorkDuration = completionWorkTiming.duration(for: doneSrc, at: nowMonotonic)
+        completionWorkTiming.update(workingSources: workingSources, at: nowMonotonic)
         workState = working ? "working" : "idle"
 
         if noticeTS > lastOnceTS {
@@ -1207,15 +1683,70 @@ final class PetController: NSObject, NSApplicationDelegate {
             lastOnceTS = doneTS
             if !aiBusy {
                 // 她转派的任务结果由 runClaudeTask 统一展示，避免重复
-                triggerWave()
+                triggerCompletionReaction(workDuration: completedWorkDuration)
                 speakDoneReport(from: doneSrc)
             }
         }
     }
 
+    // ---------- DeepSeek Harness（dsh）----------
+    // dsh-plugin-roxy 会把会话状态写到 state.dsh / last_reply.dsh，
+    // 把权限请求写到 dsh/approval.json；这里负责心跳与批准弹窗。
+    private func pollDshBridge(dt: Double) {
+        dshHeartbeatAcc += dt
+        if dshHeartbeatAcc >= 5 {
+            dshHeartbeatAcc = 0
+            let dir = NSHomeDirectory() + "/.roxy-pet/dsh"
+            try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+            try? String(Date().timeIntervalSince1970)
+                .write(toFile: dir + "/roxy-heartbeat", atomically: true, encoding: .utf8)
+        }
+
+        dshApprovalAcc += dt
+        if dshApprovalAcc < 0.6 { return }
+        dshApprovalAcc = 0
+        let dir = NSHomeDirectory() + "/.roxy-pet/dsh"
+        let file = dir + "/approval.json"
+        guard let data = FileManager.default.contents(atPath: file),
+              let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let id = obj["id"] as? String, !id.isEmpty, id != lastDshApprovalId else { return }
+        if let exp = obj["expiresAt"] as? Double, exp > 0, Date().timeIntervalSince1970 * 1000 > exp { return }
+
+        lastDshApprovalId = id
+        let tool = (obj["toolName"] as? String) ?? "工具"
+        let reason = (obj["reason"] as? String) ?? ""
+        let alert = NSAlert()
+        alert.messageText = "DeepSeek Harness 请求批准"
+        alert.informativeText = reason.isEmpty ? "工具：\(tool)" : "工具：\(tool)\n原因：\(reason)"
+        alert.addButton(withTitle: "允许一次")
+        alert.addButton(withTitle: "拒绝")
+        NSApp.activate(ignoringOtherApps: true)
+        let resp = alert.runModal()
+        let decision = resp == .alertFirstButtonReturn ? "allow" : "deny"
+        if let out = try? JSONSerialization.data(withJSONObject: ["id": id, "decision": decision]) {
+            try? out.write(to: URL(fileURLWithPath: dir + "/approval-reply.json"))
+        }
+        speak(decision == "allow" ? "好，这次我批准了。" : "这次我拒绝了。")
+    }
+
     // 完工播报：优先转述实际回复摘要（30 秒内新鲜的），否则用台词库
     private func speakDoneReport(from src: String) {
         let base = NSHomeDirectory() + "/.roxy-pet/"
+        if src == "dsh" {
+            let rp3 = base + "last_reply.dsh"
+            if let attrs = try? FileManager.default.attributesOfItem(atPath: rp3),
+               let mt = attrs[.modificationDate] as? Date,
+               Date().timeIntervalSince(mt) < 30,
+               let txt = try? String(contentsOfFile: rp3, encoding: .utf8) {
+                let t = txt.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !t.isEmpty {
+                    speak(t.count > 160 ? String(t.prefix(160)) + "…" : t, fullText: t)
+                    return
+                }
+            }
+            speak(randomOf(lines("done", DONE_LINES)))
+            return
+        }
         if src == "codex" {
             let rp2 = base + "last_reply.codex"
             if let attrs = try? FileManager.default.attributesOfItem(atPath: rp2),
@@ -1259,6 +1790,7 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     // ---------- 本地台词路由（情境/情绪；零 token，纯逻辑判断）----------
     private func onPetted(now: CFTimeInterval) {
+        acknowledgeDesktopReturn()
         lastInteractAt = now
         if now - lastPetAt > 120 { petStreak = 0 }
         lastPetAt = now
@@ -1666,20 +2198,35 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     // ---------- 单击她：随机说一句本地台词（零 token 消耗）；吩咐任务走右键菜单「吩咐洛琪希…」----------
     func petClicked() {
+        acknowledgeDesktopReturn()
         speakLocalLine()
         clickReaction()
     }
 
-    // 单击动作：马尔可夫式交替——首次点击必挥手；之后大概率换另一个动作，小概率重复同款
-    private func clickReaction() {
-        let next: String
-        switch lastClickAction {
-        case "wave": next = Double.random(in: 0..<1) < CLICK_SWITCH_PROB ? "jump" : "wave"
-        case "jump": next = Double.random(in: 0..<1) < CLICK_SWITCH_PROB ? "wave" : "jump"
-        default:     next = "wave"   // 第一次点击：一定是挥手
+    // Shuffle a complete per-costume round so new clips cannot be starved by old reactions.
+    private func nextClickAction() -> String {
+        if lastClickAction == nil { lastClickAction = "wave"; return "wave" }
+        if clickActionBag.isEmpty {
+            clickActionBag = (["wave", "jump"] + extraClips.keys.sorted()).shuffled()
+            if clickActionBag.first == lastClickAction,
+               let index = clickActionBag.firstIndex(where: { $0 != lastClickAction }) {
+                clickActionBag.swapAt(0, index)
+            }
         }
+        let next = clickActionBag.removeFirst()
         lastClickAction = next
-        if next == "jump" { triggerJump() } else { triggerWaveOnce() }
+        return next
+    }
+
+    private func clickReaction() {
+        // Repeated fast clicks request one next animation instead of restarting frame zero.
+        guard queuedClickKind == nil else { return }
+        let next = nextClickAction()
+        if (!ambientOnce && !onceKind.isEmpty) || !pendingOnce.isEmpty || chainedExtraKind != nil {
+            queuedClickKind = next
+        } else {
+            beginOnce(next, repeats: 1)
+        }
     }
 
     @objc private func askClaudeCode() {
@@ -1718,7 +2265,7 @@ final class PetController: NSObject, NSApplicationDelegate {
     }
 
     @objc private func pickHarness(_ sender: NSMenuItem) {
-        let names = ["claude", "codex", "opencode", "chat"]
+        let names = ["claude", "codex", "opencode", "dsh", "chat"]
         guard sender.tag >= 0 && sender.tag < names.count else { return }
         let h = names[sender.tag]
         UserDefaults.standard.set(h, forKey: "roxyHarness")
@@ -1728,6 +2275,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         case "claude": label = "Claude Code"
         case "codex": label = "Codex"
         case "opencode": label = "opencode"
+        case "dsh": label = "DeepSeek Harness"
         default: label = "「仅对话」模式"
         }
         speak(h == "chat" ? "好，以后就只聊天，不动手了。" : "好，以后「动手做」就交给 \(label) 啦。")
@@ -1750,6 +2298,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         let deadline = Date().addingTimeInterval(300)
         while p.isRunning && Date() < deadline { Thread.sleep(forTimeInterval: 0.2) }
         if p.isRunning { p.terminate(); return nil }
+        guard p.terminationReason == .exit && p.terminationStatus == 0 else { return nil }
         let raw = String(data: out.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
         var finalText: String? = nil
         for line in raw.split(separator: "\n") {
@@ -1790,12 +2339,36 @@ final class PetController: NSObject, NSApplicationDelegate {
         let deadline = Date().addingTimeInterval(300)
         while p.isRunning && Date() < deadline { Thread.sleep(forTimeInterval: 0.2) }
         if p.isRunning { p.terminate(); return nil }
+        guard p.terminationReason == .exit && p.terminationStatus == 0 else { return nil }
         let raw = String(data: out.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
         let cleaned = stripANSI(raw).split(separator: "\n").map(String.init)
             .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
             .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix(">") }
             .joined(separator: "\n")
         if continueRoxy && !started && !cleaned.isEmpty { d.set(true, forKey: "roxyOpencodeStarted") }
+        return cleaned.isEmpty ? nil : cleaned
+    }
+
+    /// DeepSeek Harness 无头模式：跑一次任务，打印最终答复后退出。
+    private static func runDsh(prompt: String) -> String? {
+        guard let bin = harnessPaths["dsh"] else { return nil }
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: bin)
+        p.arguments = ["--profile", "headless", prompt]
+        p.currentDirectoryURL = URL(fileURLWithPath: NSHomeDirectory())
+        var env = ProcessInfo.processInfo.environment
+        env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:" + (env["PATH"] ?? "/usr/bin:/bin")
+        p.environment = env
+        let out = Pipe()
+        p.standardOutput = out
+        p.standardError = FileHandle.nullDevice
+        do { try p.run() } catch { return nil }
+        let deadline = Date().addingTimeInterval(300)
+        while p.isRunning && Date() < deadline { Thread.sleep(forTimeInterval: 0.2) }
+        if p.isRunning { p.terminate(); return nil }
+        guard p.terminationReason == .exit && p.terminationStatus == 0 else { return nil }
+        let raw = String(data: out.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        let cleaned = stripANSI(raw).trimmingCharacters(in: .whitespacesAndNewlines)
         return cleaned.isEmpty ? nil : cleaned
     }
 
@@ -1808,6 +2381,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             return
         }
         aiBusy = true
+        directWorkTiming = chatMode ? nil : DirectWorkTiming(startedAt: CACurrentMediaTime(), costumeID: character.id)
         speak(chatMode ? "嗯，我听着呢。" : "嗯……交给我吧。", seconds: 6)
         appendHistory(role: "user", text: text)
         if chatMode {
@@ -1835,6 +2409,13 @@ final class PetController: NSObject, NSApplicationDelegate {
             }
             return
         }
+        if harness == "dsh" {
+            DispatchQueue.global().async { [weak self] in
+                let r = PetController.runDsh(prompt: fullPrompt)
+                DispatchQueue.main.async { self?.deliverTaskResult(r, sid: nil) }
+            }
+            return
+        }
         let d = UserDefaults.standard
         let key = character.isRoxy ? "roxySessionId" : "petSessionId." + character.characterID
         let sid: String
@@ -1854,6 +2435,8 @@ final class PetController: NSObject, NSApplicationDelegate {
     }
 
     private func deliverTaskResult(_ line: String?, sid: String?) {
+        let successful = !(line?.isEmpty ?? true)
+        let workDuration = takeDirectWorkDuration(successful: successful)
         aiBusy = false
         if let line = line, !line.isEmpty {
             let pb = NSPasteboard.general
@@ -1862,11 +2445,51 @@ final class PetController: NSObject, NSApplicationDelegate {
             appendHistory(role: "roxy", text: line)
             let summary = line.count > 110 ? String(line.prefix(110)) + "…（点击气泡可复制全文 / 接续会话）" : line
             speak(summary, seconds: 25, fullText: line, resumeSid: sid)
+            appendReplyExtraAction(workDuration: workDuration)
         } else {
             let fail = randomOf(lines("ai_fail", AI_FAIL))
             appendHistory(role: "roxy", text: "（\(fail)）")
             speak(fail)
         }
+    }
+
+    private func takeDirectWorkDuration(successful: Bool, at now: CFTimeInterval = CACurrentMediaTime()) -> Double? {
+        defer { directWorkTiming = nil }
+        return directWorkTiming?.duration(for: character.id, at: now, successful: successful)
+    }
+
+    // ---------- DeepSeek 余额 ----------
+    @objc private func queryDeepSeekBalance() {
+        guard let (_, key, _) = PetController.apiConfig() else {
+            speak("还没配置 API，查不了余额哦。")
+            promptForAPISettings()
+            return
+        }
+        speak("我去看看账上还剩多少……", seconds: 4)
+        var req = URLRequest(url: URL(string: "https://api.deepseek.com/user/balance")!)
+        req.setValue("Bearer " + key, forHTTPHeaderField: "Authorization")
+        req.timeoutInterval = 20
+        URLSession.shared.dataTask(with: req) { [weak self] data, _, err in
+            var text = "余额查询失败了，稍后再试试吧。"
+            if err == nil, let data = data,
+               let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] {
+                let infos = obj["balance_infos"] as? [[String: Any]] ?? []
+                let parts: [String] = infos.compactMap { info in
+                    let cur = (info["currency"] as? String) ?? ""
+                    let sym = cur == "CNY" ? "¥" : (cur == "USD" ? "$" : cur + " ")
+                    guard let total = info["total_balance"] as? String else { return nil }
+                    let granted = (info["granted_balance"] as? String) ?? "0"
+                    let topped = (info["topped_up_balance"] as? String) ?? "0"
+                    return "\(sym)\(total)（赠送 \(sym)\(granted)、充值 \(sym)\(topped)）"
+                }
+                if !parts.isEmpty {
+                    text = "余额：" + parts.joined(separator: "；")
+                } else if let available = obj["is_available"] as? Bool, !available {
+                    text = "接口说当前账户不可用，可能余额不足或 Key 无效。"
+                }
+            }
+            DispatchQueue.main.async { self?.speak(text) }
+        }.resume()
     }
 
     // ---------- AI 点选发言（默认不用；点选才消耗大模型额度）----------
@@ -1963,6 +2586,7 @@ final class PetController: NSObject, NSApplicationDelegate {
             p.terminate()
             return nil
         }
+        guard p.terminationReason == .exit && p.terminationStatus == 0 else { return nil }
         let raw = String(data: out.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
         // 过滤 CLI 诊断行（如 [claude-code:unrecognized_model] …），保留完整正文
         let valid = raw.split(separator: "\n")
@@ -1974,10 +2598,22 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     // ---------- 显示 ----------
     private func show(row: Int, col: Int) {
-        if row == currentRow && col == currentCol { return }
+        if currentSheetKey == "base" && row == currentRow && col == currentCol { return }
+        currentSheetKey = "base"
         currentRow = row
         currentCol = col
         currentImage = frames[row][col]
+        petView?.needsDisplay = true
+    }
+
+    private func showExtra(_ clip: ExtraClip, col: Int) {
+        guard clip.frames.indices.contains(col) else { return }
+        let key = "extra:" + character.id + ":" + clip.description.id
+        if currentSheetKey == key && currentCol == col { return }
+        currentSheetKey = key
+        currentRow = clip.description.row
+        currentCol = col
+        currentImage = clip.frames[col]
         petView?.needsDisplay = true
     }
 
@@ -2115,7 +2751,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         status.textColor = .secondaryLabelColor
         status.lineBreakMode = .byTruncatingMiddle
 
-        let hDefs: [(String, String)] = [("claude", "Claude Code"), ("codex", "Codex"), ("opencode", "opencode"), ("chat", "仅对话（不执行命令）")]
+        let hDefs: [(String, String)] = [("claude", "Claude Code"), ("codex", "Codex"), ("opencode", "opencode"), ("dsh", "DeepSeek Harness"), ("chat", "仅对话（不执行命令）")]
         var radios: [NSButton] = []
         for (i, hd) in hDefs.enumerated() {
             let missing = (hd.0 != "chat" && PetController.harnessPaths[hd.0] == nil)
@@ -2130,7 +2766,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         radioStack.alignment = .leading
         radioStack.spacing = 5
 
-        let watchDefs: [(String, String)] = [("claude", "Claude Code —— 干活跑动 · 完工挥手 · 等待提醒"), ("codex", "Codex —— 完工挥手（含回复转述）"), ("opencode", "opencode —— 进程检测：运行中跑动 · 结束挥手")]
+        let watchDefs: [(String, String)] = [("claude", "Claude Code —— 干活跑动 · 完工挥手 · 等待提醒"), ("codex", "Codex —— 完工挥手（含回复转述）"), ("opencode", "opencode —— 进程检测：运行中跑动 · 结束挥手"), ("dsh", "DeepSeek Harness —— 干活跑动 · 完工挥手 · 权限批准")]
         var watches: [NSButton] = []
         for (i, wd) in watchDefs.enumerated() {
             let cb = NSButton(checkboxWithTitle: wd.1, target: nil, action: nil)
@@ -2202,14 +2838,15 @@ final class PetController: NSObject, NSApplicationDelegate {
         swBaseField?.stringValue = d.string(forKey: "roxyApiBase") ?? ""
         swKeyField?.stringValue = d.string(forKey: "roxyApiKey") ?? ""
         swModelBox?.stringValue = d.string(forKey: "roxyApiModel") ?? ""
-        let names = ["claude", "codex", "opencode", "chat"]
+        let names = ["claude", "codex", "opencode", "dsh", "chat"]
         let cur = PetController.currentHarness()
         if let idx = names.firstIndex(of: cur) {
             for (i, rb) in swHarnessRadios.enumerated() { rb.state = (i == idx) ? .on : .off }
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
+        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode", "roxyWatchDsh"]
+        let watchDefaults = [true, false, false, true]
         for (i, cb) in swWatchBoxes.enumerated() {
-            let on = d.object(forKey: watchKeys[i]) == nil ? (i == 0) : d.bool(forKey: watchKeys[i])
+            let on = d.object(forKey: watchKeys[i]) == nil ? watchDefaults[i] : d.bool(forKey: watchKeys[i])
             cb.state = on ? .on : .off
         }
         if let cfg = PetController.apiConfig() {
@@ -2230,14 +2867,15 @@ final class PetController: NSObject, NSApplicationDelegate {
         if tv(swBaseField) != (d.string(forKey: "roxyApiBase") ?? "") { return false }
         if tv(swKeyField) != (d.string(forKey: "roxyApiKey") ?? "") { return false }
         if tv(swModelBox) != (d.string(forKey: "roxyApiModel") ?? "") { return false }
-        let names = ["claude", "codex", "opencode", "chat"]
+        let names = ["claude", "codex", "opencode", "dsh", "chat"]
         if let on = swHarnessRadios.first(where: { $0.state == .on }),
            names[on.tag] != (d.string(forKey: "roxyHarness") ?? "claude") {
             return false
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
+        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode", "roxyWatchDsh"]
+        let watchDefaults = [true, false, false, true]
         for (i, cb) in swWatchBoxes.enumerated() {
-            let cur = d.object(forKey: watchKeys[i]) == nil ? (i == 0) : d.bool(forKey: watchKeys[i])
+            let cur = d.object(forKey: watchKeys[i]) == nil ? watchDefaults[i] : d.bool(forKey: watchKeys[i])
             if (cb.state == .on) != cur { return false }
         }
         return true
@@ -2260,11 +2898,11 @@ final class PetController: NSObject, NSApplicationDelegate {
         d.set((swBaseField?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines), forKey: "roxyApiBase")
         d.set((swKeyField?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines), forKey: "roxyApiKey")
         d.set((swModelBox?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines), forKey: "roxyApiModel")
-        let names = ["claude", "codex", "opencode", "chat"]
+        let names = ["claude", "codex", "opencode", "dsh", "chat"]
         if let on = swHarnessRadios.first(where: { $0.state == .on }) {
             d.set(names[on.tag], forKey: "roxyHarness")
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
+        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode", "roxyWatchDsh"]
         for (i, cb) in swWatchBoxes.enumerated() {
             d.set(cb.state == .on, forKey: watchKeys[i])
         }
@@ -2410,6 +3048,9 @@ final class PetController: NSObject, NSApplicationDelegate {
         let hist = NSMenuItem(title: "查看\(character.historyTitle)", action: #selector(showTaskHistory), keyEquivalent: "")
         hist.target = self
         menu.addItem(hist)
+        let bal = NSMenuItem(title: "查询 DeepSeek 余额", action: #selector(queryDeepSeekBalance), keyEquivalent: "")
+        bal.target = self
+        menu.addItem(bal)
         let reset = NSMenuItem(title: "回到屏幕右下角", action: #selector(resetPosition), keyEquivalent: "")
         reset.target = self
         menu.addItem(reset)
@@ -2441,13 +3082,18 @@ final class PetController: NSObject, NSApplicationDelegate {
             if announce { speak("角色图片无法读取，请检查素材文件。") }
             return false
         }
-        currentRow = -1; currentCol = -1
+        currentRow = -1; currentCol = -1; currentSheetKey = ""
         animKey = ""; animElapsed = 0
         onceKind = ""; onceRepeatsLeft = 0; pendingOnce = ""; pendingOnceRepeats = nil
+        ambientOnce = false; ambientReason = nil; chainedExtraKind = nil
+        nextExtraWorkActionAt = 0
+        completionWorkTiming.reset()
+        directWorkTiming = nil
+        systemActivity.resetForCostumeChange()
         dragging = false; dragMoved = false; wasHovering = false
         lookUntil = 0; lastLookDir = -1
         blinkAt = 0; blinkUntil = 0; blinkDoubleAt = 0; glanceAt = 0; glanceUntil = 0
-        lastClickAction = nil; lastSpokenLine = ""; lastDirSpokenSlot = -1
+        lastClickAction = nil; clickActionBag.removeAll(); queuedClickKind = nil; lastSpokenLine = ""; lastDirSpokenSlot = -1
         mood = .calm; moodUntil = 0; petStreak = 0; lastPetAt = 0
         bubbleVisible = false; bubbleWindow?.orderOut(nil)
         show(row: 0, col: 0)
@@ -2490,6 +3136,19 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     /// Offline integration checks against the packaged resources. No preferences, files or network changed.
     func runCharacterChecks() {
+        deterministicActionChecks = true
+        defer { deterministicActionChecks = false }
+        var seen = Set<String>()
+        var prior: String? = nil
+        for entropy in 0..<100 {
+            let choice = Self.variedChoice(["rest", "focus", "greet"], previous: prior, entropy: UInt(entropy / 3))
+            precondition(choice != prior && ["rest", "focus", "greet"].contains(choice))
+            seen.insert(choice); prior = choice
+        }
+        precondition(seen.count == 3 && Self.variedChoice(["only"], previous: "only", entropy: 99) == "only")
+        print("PASS: context-scoped random selection, no immediate repeats, all eligible variants reachable and single-action fallback.")
+        Self.runSystemActivityChecks()
+        Self.runCompletionWorkTimingChecks()
         precondition(Set(characters.map(\.id)).isSuperset(of: ["roxy", "roxy-nohat", "eris-short", "eris-long", "sylphie-adult", "sylphie-chibi"]))
         let roxyBase = characters.first { $0.id == "roxy" }!
         let roxyNohat = characters.first { $0.id == "roxy-nohat" }!
@@ -2503,6 +3162,10 @@ final class PetController: NSObject, NSApplicationDelegate {
                 precondition(switchCharacter(to: profile, announce: false, persist: false), "Atlas failed: \(profile.id)")
                 precondition(frames.count == 11 && masks.count == 11 && frames.allSatisfy { $0.count == 8 })
                 precondition(currentImage != nil && currentRow == 0 && currentCol == 0)
+                precondition(currentSheetKey == "base")
+                if ["roxy-nohat", "sylphie-adult", "sylphie-chibi"].contains(profile.id) {
+                    precondition(Set(extraClips.keys) == Set(["daily-rest", "daily-focus", "daily-greet"]), "Daily actions missing or costume clips mixed")
+                }
                 if ["roxy-nohat", "eris-short", "eris-long", "sylphie-adult", "sylphie-chibi"].contains(profile.id) {
                     let bitmap = frames[0][0].cgImage(forProposedRect: nil, context: nil, hints: nil)!
                     precondition(bitmap.width == 384 && bitmap.height == 416, "Retina pixels lost: \(profile.id)")
@@ -2516,6 +3179,9 @@ final class PetController: NSObject, NSApplicationDelegate {
                     precondition(menu.items.contains { $0.title == "\(profile.actionTitle)（聊天 / 做事）" })
                     precondition(menu.items.contains { $0.title == "退出\(profile.name)" })
                     precondition(menu.items.contains { $0.title == "查看\(profile.historyTitle)" })
+                    let extraTitles = Set(extraClips.values.map { $0.description.title })
+                    precondition(!menu.items.contains { extraTitles.contains($0.title) },
+                                 "State-driven character actions must not appear as menu commands")
                     let picker = menu.items.first!.submenu!
                     precondition(picker.items.filter { $0.state == .on }.count == 1)
                     precondition(picker.items.first { $0.state == .on }?.representedObject as? String == profile.id)
@@ -2546,6 +3212,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                 }
             }
         }
+        runExtraActionChecks()
         let originalID = character.id
         var broken = character
         broken.atlasURL = URL(fileURLWithPath: "/nonexistent-eris-atlas.png")
@@ -2557,7 +3224,566 @@ final class PetController: NSObject, NSApplicationDelegate {
         taskHistory.append(TaskRecord(t: 2, role: "roxy", text: "希露菲记录", characterID: "sylphie", characterName: "希露菲"))
         let html = historyHTML()
         precondition(html.contains("洛琪希") && html.contains("艾丽丝") && html.contains("希露菲"))
-        print("PASS: \(characters.count) appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history.")
+        print("PASS: \(characters.count) appearances, 3 switching cycles, all used animation frames, native Retina pixels, both menus, isolated corpus/persona, failed-image rollback, legacy/new history, optional costume clips and fallback.")
+    }
+
+    private static func runSystemActivityChecks() {
+        var activity = SystemActivityState()
+        activity.sample(idleSeconds: 0.1, at: 0)
+        precondition(!activity.pendingReturnSalute, "The first startup input must not invent an absence")
+        activity.sample(idleSeconds: 181, at: 200)
+        activity.sample(idleSeconds: 0.1, at: 201)
+        precondition(activity.pendingReturnSalute && activity.takeReturnSalute(at: 201))
+        activity.peakIdleSeconds = 181
+        activity.sample(idleSeconds: 2.9, at: 320.9)
+        precondition(!activity.pendingReturnSalute, "Return salutes require a full 120-second cooldown")
+        activity.peakIdleSeconds = 181
+        activity.sample(idleSeconds: 0, at: 321)
+        precondition(activity.pendingReturnSalute && activity.takeReturnSalute(at: 321))
+        activity.sample(idleSeconds: .infinity, at: 322)
+        precondition(!activity.canAnimateAutomatically, "Unavailable idle measurements must disable automatic actions")
+
+        var wake = SystemActivityState()
+        wake.receive(.willSleep)
+        wake.receive(.screensDidSleep)
+        wake.receive(.sessionDidResignActive)
+        wake.sample(idleSeconds: 0.1, at: 10) // The wake key arrived before the workspace finished resuming.
+        precondition(wake.isPaused && !wake.pendingReturnSalute)
+        wake.receive(.didWake)
+        wake.receive(.sessionDidBecomeActive)
+        precondition(wake.isPaused)
+        wake.receive(.screensDidWake)
+        precondition(!wake.isPaused && wake.awaitingWakeInput && wake.idleSeconds == nil)
+        wake.sample(idleSeconds: 1.1, at: 11) // No second key or mouse event is needed.
+        precondition(wake.pendingReturnSalute && wake.takeReturnSalute(at: 11))
+        for signal in [WorkspaceActivitySignal.didWake, .screensDidWake, .sessionDidBecomeActive] { wake.receive(signal) }
+        wake.sample(idleSeconds: 2.1, at: 12)
+        precondition(!wake.awaitingWakeInput && !wake.pendingReturnSalute, "Resume notifications must coalesce after one return")
+        wake.receive(.willSleep); wake.receive(.didWake)
+        wake.sample(idleSeconds: 0.1, at: 20)
+        precondition(!wake.pendingReturnSalute, "Repeated wakes during cooldown must stay quiet")
+        wake.receive(.willSleep); wake.receive(.didWake)
+        wake.sample(idleSeconds: 0.1, at: 131)
+        precondition(wake.pendingReturnSalute && wake.takeReturnSalute(at: 131))
+        wake.sample(idleSeconds: 181, at: 400)
+        wake.sample(idleSeconds: 0.1, at: 401)
+        precondition(wake.pendingReturnSalute, "Input-idle return must also work without session notifications")
+        wake.idlePosePlayed = true
+        wake.resetForCostumeChange()
+        precondition(!wake.pendingReturnSalute && !wake.idlePosePlayed && wake.idleSeconds == nil)
+
+        var acknowledged = SystemActivityState()
+        acknowledged.sample(idleSeconds: 181, at: 500)
+        acknowledged.acknowledgeReturn(at: 501)
+        acknowledged.sample(idleSeconds: 0.1, at: 501)
+        precondition(!acknowledged.pendingReturnSalute, "A response before the next idle sample already acknowledges the return")
+        acknowledged.pendingReturnSalute = true
+        acknowledged.acknowledgeReturn(at: 502)
+        precondition(!acknowledged.pendingReturnSalute && !acknowledged.takeReturnSalute(at: 503))
+
+        let discharging = "Now drawing from 'Battery Power'\n -InternalBattery-0 64%; discharging; 3:00 remaining"
+        let charging = "Now drawing from 'AC Power'\n -InternalBattery-0 64%; charging; 1:00 remaining"
+        let charged = "Now drawing from 'AC Power'\n -InternalBattery-0 100%; charged; 0:00 remaining"
+        let notCharging = "Now drawing from 'AC Power'\n -InternalBattery-0 64%; AC attached; not charging"
+        precondition(parseBatteryStatus(discharging)?.charging == false && parseBatteryStatus(discharging)?.level == 64)
+        precondition(parseBatteryStatus(charging)?.charging == true && parseBatteryStatus(charged)?.charging == true)
+        precondition(parseBatteryStatus(notCharging)?.charging == false)
+        precondition(parseBatteryStatus("Now drawing from 'AC Power'\n -InternalBattery-0 64%; discharging;")?.charging == false)
+        precondition(parseBatteryStatus("No batteries available") == nil)
+        precondition(parseBatteryStatus("Battery 120%; charging;") == nil)
+        print("PASS: pure aggregate-idle return/cooldown, wake-key ordering and deduplication, costume reset, exact battery status parsing.")
+    }
+
+    private func runExtraActionChecks() {
+        let previous = character
+        let expectedByCostume: [(String, [String: Int])] = [
+            ("roxy", ["staff-idle": 8, "staff-channel": 8, "water-cast": 8, "staff-salute": 6, "cumulonimbus": 8]),
+            ("eris-short", ["sword-idle": 8, "sword-practice": 8, "sword-salute": 6]),
+            ("eris-long", ["sword-idle": 8, "sword-practice": 8, "sword-salute": 6]),
+            ("roxy-nohat", ["daily-rest": 4, "daily-focus": 4, "daily-greet": 4]),
+            ("sylphie-adult", ["daily-rest": 4, "daily-focus": 4, "daily-greet": 4]),
+            ("sylphie-chibi", ["daily-rest": 4, "daily-focus": 4, "daily-greet": 4]),
+        ]
+        var practiceFrames: [String: NSImage] = [:]
+        var checked = 0
+        for (id, expected) in expectedByCostume {
+            let profile = characters.first { $0.id == id }!
+            precondition(switchCharacter(to: profile, announce: false, persist: false))
+            precondition(onceKind.isEmpty && pendingOnce.isEmpty && chainedExtraKind == nil && !dragging
+                         && currentSheetKey == "base" && currentImage === frames[0][0],
+                         "Switching costume must clear the previous extra action and its queue")
+            guard let directory = extraActionsDirectory(),
+                  FileManager.default.fileExists(atPath: directory.appendingPathComponent("manifest.json").path) else {
+                precondition(extraClips.isEmpty)
+                precondition(Self.decodeExtraClips(data: nil, image: nil).isEmpty)
+                continue
+            }
+            if id != "roxy" {
+                precondition(directory == profile.atlasURL?.deletingLastPathComponent().appendingPathComponent("actions", isDirectory: true),
+                             "Costume extras must load beside that costume's own atlas")
+            }
+            checkExtraPlayback(expected: expected, behavior: extraBehavior!, directory: directory)
+            if let frame = extraClips["sword-practice"]?.frames.first { practiceFrames[id] = frame }
+            let behavior = extraBehavior!
+            startOnce(behavior.idle, repeats: 1)
+            showExtra(extraClips[behavior.idle]!, col: 0)
+            dragStarted(atMouseX: 0, atMouseY: 0)
+            startOnce("wave", repeats: 1)
+            chainedExtraKind = behavior.done // Exercise switching while an extra and a queue are active.
+            checked += 1
+        }
+        if let short = practiceFrames["eris-short"], let long = practiceFrames["eris-long"] {
+            precondition(short !== long, "Eris appearances must not share the same cached sword frame")
+            let shortPixels = short.tiffRepresentation
+            let longPixels = long.tiffRepresentation
+            precondition(shortPixels != nil && longPixels != nil && shortPixels != longPixels,
+                         "Eris sword-practice frames must come from their independent costume artwork")
+        }
+        for id in ["roxy-nohat", "sylphie-adult", "sylphie-chibi"] {
+            let profile = characters.first { $0.id == id }!
+            precondition(switchCharacter(to: profile, announce: false, persist: false))
+            precondition(Set(extraClips.keys) == Set(["daily-rest", "daily-focus", "daily-greet"]) && currentSheetKey == "base" && onceKind.isEmpty && pendingOnce.isEmpty
+                         && chainedExtraKind == nil && !dragging,
+                         "Optional clips or playback state leaked across costume switching")
+        }
+        precondition(switchCharacter(to: previous, announce: false, persist: false))
+        print("PASS: \(checked) optional costume sidecars, independent Eris sword artwork, strict metadata fallback, base/extra cache, native pixels, old reactions and reply ordering, drag queue, idle interruption, work-cycle boundary.")
+    }
+
+    private func checkExtraPlayback(expected: [String: Int], behavior: ExtraBehavior, directory: URL) {
+        precondition(Set(extraClips.keys).isSuperset(of: Set(expected.keys)), "Bundled costume clips are incomplete")
+        for (id, count) in expected {
+            let clip = extraClips[id]!
+            precondition(clip.frames.count == count)
+            for frame in clip.frames {
+                let cg = frame.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+                precondition(cg.width == 384 && cg.height == 416, "Extra clip lost native Retina pixels")
+            }
+        }
+        let data = try! Data(contentsOf: directory.appendingPathComponent("manifest.json"))
+        let image = NSImage(contentsOf: directory.appendingPathComponent("spritesheet.png"))!
+        let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+        precondition(Self.decodeExtraClips(data: nil, image: cg).isEmpty)
+        precondition(Self.decodeExtraClips(data: data, image: nil).isEmpty)
+        precondition(Self.decodeExtraClips(data: Data("{".utf8), image: cg).isEmpty)
+        var invalid = try! JSONSerialization.jsonObject(with: data) as! [String: Any]
+        invalid["rows"] = 0
+        precondition(Self.decodeExtraClips(data: try! JSONSerialization.data(withJSONObject: invalid), image: cg).isEmpty)
+        invalid = try! JSONSerialization.jsonObject(with: data) as! [String: Any]
+        var entries = invalid["actions"] as! [[String: Any]]
+        entries[1]["id"] = entries[0]["id"]
+        invalid["actions"] = entries
+        precondition(Self.decodeExtraClips(data: try! JSONSerialization.data(withJSONObject: invalid), image: cg).isEmpty)
+        invalid = try! JSONSerialization.jsonObject(with: data) as! [String: Any]
+        entries = invalid["actions"] as! [[String: Any]]
+        entries[0]["frameDuration"] = 0
+        invalid["actions"] = entries
+        precondition(Self.decodeExtraClips(data: try! JSONSerialization.data(withJSONObject: invalid), image: cg).isEmpty)
+
+        let stableMask = hoverMask
+        let idle = extraClips[behavior.idle]!
+        show(row: 0, col: 0)
+        showExtra(idle, col: 0)
+        precondition(currentSheetKey == "extra:" + character.id + ":" + behavior.idle && currentImage === idle.frames[0])
+        precondition(hoverMask == stableMask, "Transient magic effects must not enlarge hit testing")
+        show(row: 0, col: 0)
+        precondition(currentSheetKey == "base" && currentImage === frames[0][0], "Base/extra frame 0 cache collision")
+        startOnce(behavior.idle, repeats: 1)
+        animElapsed = 1
+        startOnce(behavior.idle, repeats: 1)
+        precondition(animElapsed == 0 && onceRepeatsLeft == 1, "Same action must restart")
+
+        triggerCompletionReaction()
+        precondition(onceKind == "wave" && onceRepeatsLeft == WAVE_REPEAT && chainedExtraKind == behavior.done)
+        advanceSequence(row: 3, sequence: WAVE_SEQ, loop: false, extraID: nil,
+                        dt: WAVE_SEQ.reduce(0) { $0 + $1.1 } * Double(WAVE_REPEAT) + 0.01)
+        precondition(onceKind == behavior.done, "Original completion wave must finish before the appended finish")
+        let finish = extraClips[behavior.done]!
+        advanceSequence(row: 0, sequence: finish.sequence, loop: false, extraID: behavior.done,
+                        dt: finish.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+        precondition(onceKind.isEmpty && currentSheetKey == "base" && currentImage === frames[0][0])
+
+        for kind in ["wave", "jump"] {
+            let repeats = kind == "wave" ? WAVE_REPEAT : 1
+            startOnce(kind, repeats: repeats)
+            animKey = "once-" + kind
+            animElapsed = 0.1
+            appendReplyExtraAction()
+            precondition(onceKind == kind && onceRepeatsLeft == repeats && animElapsed == 0.1,
+                         "A reply finish must preserve the user's current reaction and progress")
+            precondition(animKey == "once-" + kind && chainedExtraKind == behavior.done)
+            let old = oncePlayback(for: kind)!
+            advanceSequence(row: old.row, sequence: old.sequence, loop: false, extraID: nil,
+                            dt: old.sequence.reduce(0) { $0 + $1.1 } * Double(repeats) - 0.1 + 0.01)
+            precondition(onceKind == behavior.done, "The finish must follow the completed user reaction")
+            advanceSequence(row: 0, sequence: finish.sequence, loop: false, extraID: behavior.done,
+                            dt: finish.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+        }
+
+        startOnce("jump", repeats: 1)
+        animElapsed = 0.1
+        dragStarted(atMouseX: 0, atMouseY: 0)
+        dragMoved = true
+        startOnce("wave", repeats: WAVE_REPEAT)
+        appendReplyExtraAction()
+        precondition(onceKind == "jump" && animElapsed == 0.1 && pendingOnce == "wave"
+                     && pendingOnceRepeats == WAVE_REPEAT && chainedExtraKind == behavior.done,
+                     "A reply finish must not overwrite drag-paused or drag-queued user actions")
+        dragEnded()
+        precondition(onceKind == "wave" && onceRepeatsLeft == WAVE_REPEAT && chainedExtraKind == behavior.done)
+        advanceSequence(row: 3, sequence: WAVE_SEQ, loop: false, extraID: nil,
+                        dt: WAVE_SEQ.reduce(0) { $0 + $1.1 } * Double(WAVE_REPEAT) + 0.01)
+        precondition(onceKind == behavior.done)
+        advanceSequence(row: 0, sequence: finish.sequence, loop: false, extraID: behavior.done,
+                        dt: finish.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+
+        startOnce("jump", repeats: 1)
+        dragStarted(atMouseX: 0, atMouseY: 0) // Mouse held without moving: the old jump can still finish.
+        startOnce("wave", repeats: 1)
+        appendReplyExtraAction()
+        advanceSequence(row: 4, sequence: JUMP_SEQ, loop: false, extraID: nil,
+                        dt: JUMP_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        precondition(onceKind.isEmpty && pendingOnce == "wave" && chainedExtraKind == behavior.done,
+                     "Finishing a clip during a held press must not replace the pending old action")
+        dragEnded()
+        precondition(onceKind == "wave" && chainedExtraKind == behavior.done)
+        advanceSequence(row: 3, sequence: WAVE_SEQ, loop: false, extraID: nil,
+                        dt: WAVE_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        precondition(onceKind == behavior.done)
+        advanceSequence(row: 0, sequence: finish.sequence, loop: false, extraID: behavior.done,
+                        dt: finish.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+        beginOnce(behavior.idle, repeats: 1, ambient: true)
+        appendReplyExtraAction()
+        precondition(onceKind == behavior.done && !ambientOnce, "A reply may replace only an ambient pose")
+        advanceSequence(row: 0, sequence: finish.sequence, loop: false, extraID: behavior.done,
+                        dt: finish.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+
+        startOnce(behavior.done, repeats: 1)
+        dragStarted(atMouseX: 0, atMouseY: 0)
+        dragMoved = true
+        show(row: 1, col: 0)
+        let pausedElapsed = animElapsed
+        advanceSequence(row: 0, sequence: finish.sequence, loop: false, extraID: behavior.done, dt: 0.2)
+        precondition(animElapsed == pausedElapsed && currentSheetKey == "base" && currentRow == 1)
+        startOnce(behavior.salute, repeats: 1)
+        precondition(pendingOnce == behavior.salute, "New requests during dragging must remain queued")
+        dragEnded()
+        precondition(onceKind == behavior.salute && pendingOnce.isEmpty)
+        beginOnce(behavior.idle, repeats: 1, ambient: true)
+        dragStarted(atMouseX: 0, atMouseY: 0)
+        precondition(onceKind.isEmpty, "Dragging must interrupt optional idle poses")
+        dragEnded()
+        beginOnce(behavior.idle, repeats: 1, ambient: true)
+        triggerJump()
+        precondition(onceKind == "jump" && !ambientOnce, "Existing touch reactions must interrupt optional idle poses")
+        checkClickActions(behavior: behavior)
+
+        checkSystemDrivenExtras(behavior: behavior)
+        checkSignatureCompletion(behavior: behavior)
+    }
+
+    private func checkClickActions(behavior: ExtraBehavior) {
+        lastClickAction = nil; clickActionBag = []; queuedClickKind = nil
+        precondition(nextClickAction() == "wave")
+        let expected = Set(["wave", "jump"] + extraClips.keys.sorted())
+        var prior = "wave"
+        for _ in 0..<4 {
+            var seen = Set<String>()
+            for _ in 0..<expected.count {
+                let chosen = nextClickAction()
+                precondition(chosen != prior && oncePlayback(for: chosen) != nil)
+                seen.insert(chosen); prior = chosen
+            }
+            precondition(seen == expected, "Every old/new click action must appear once in each shuffled round")
+        }
+        lastClickAction = nil; clickActionBag = []; queuedClickKind = nil
+        onceKind = ""; pendingOnce = ""; chainedExtraKind = nil; dragging = false
+        clickReaction()
+        precondition(onceKind == "wave" && onceRepeatsLeft == 1)
+        animElapsed = 0.12
+        clickReaction()
+        let queued = queuedClickKind!
+        let remaining = clickActionBag.count
+        for _ in 0..<50 { clickReaction() }
+        precondition(onceKind == "wave" && animElapsed == 0.12 && queuedClickKind == queued
+                     && clickActionBag.count == remaining, "Fast clicks must coalesce without restarting or consuming more actions")
+        chainedExtraKind = behavior.done
+        advanceSequence(row: 3, sequence: WAVE_SEQ, loop: false, extraID: nil,
+                        dt: WAVE_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        precondition(onceKind == behavior.done && queuedClickKind == queued, "Completion chain must precede queued clicks")
+        let finish = extraClips[behavior.done]!
+        advanceSequence(row: 0, sequence: finish.sequence, loop: false, extraID: behavior.done,
+                        dt: finish.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+        precondition(onceKind == queued && queuedClickKind == nil)
+        let playback = oncePlayback(for: queued)!
+        advanceSequence(row: playback.row, sequence: playback.sequence, loop: false, extraID: playback.extraID,
+                        dt: playback.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+        precondition(onceKind.isEmpty)
+        let saved = extraClips
+        extraClips = [:]; lastClickAction = nil; clickActionBag = []
+        precondition(nextClickAction() == "wave")
+        precondition(Set((0..<2).map { _ in nextClickAction() }) == Set(["wave", "jump"]))
+        extraClips = saved; lastClickAction = nil; clickActionBag = []; queuedClickKind = nil
+        print("PASS: \(character.id) complete shuffled click rounds, no immediate repeats, rapid-click coalescing, completion-chain priority and missing-pack fallback.")
+    }
+
+    private static func runCompletionWorkTimingChecks() {
+        var timing = CompletionWorkTiming()
+        timing.update(workingSources: ["claude"], at: 10)
+        timing.update(workingSources: ["claude", "codex"], at: 129.99)
+        precondition(abs(timing.duration(for: "claude", at: 129.99)! - 119.99) < 0.0001)
+        precondition(timing.duration(for: "codex", at: 129.99) == 0)
+        precondition(timing.duration(for: "unobserved", at: 130) == nil,
+                     "A fresh done event must not borrow another source's work interval")
+        precondition(timing.duration(for: "claude", at: 130) == CompletionWorkTiming.signatureThreshold)
+        timing.update(workingSources: ["codex"], at: 130)
+        precondition(timing.duration(for: "claude", at: 131) == nil,
+                     "Completed/notice/missing/stale/cancelled sources must clear their work interval")
+        timing.update(workingSources: [], at: 500)
+        timing.update(workingSources: ["claude"], at: 600)
+        precondition(timing.duration(for: "claude", at: 601) == 1,
+                     "A later task cannot inherit elapsed time from a previous task or idle period")
+        timing.reset()
+        precondition(timing.startedAtBySource.isEmpty)
+        let direct = DirectWorkTiming(startedAt: 10, costumeID: "roxy")
+        precondition(direct.duration(for: "roxy", at: 130, successful: true) == 120)
+        precondition(direct.duration(for: "roxy", at: 130, successful: false) == nil)
+        precondition(direct.duration(for: "eris-short", at: 130, successful: true) == nil)
+        precondition(direct.duration(for: "roxy", at: .nan, successful: true) == nil)
+        print("PASS: per-source continuous work duration, 120-second boundary, unrelated-task isolation, interrupted-work reset and failed direct-task exclusion.")
+    }
+
+    private func checkSignatureCompletion(behavior: ExtraBehavior) {
+        precondition(completionExtraID(workDuration: nil) == behavior.done)
+        precondition(completionExtraID(workDuration: 119.999) == behavior.done)
+        precondition(completionExtraID(workDuration: .infinity) == behavior.done)
+        precondition(completionExtraID(workDuration: -1) == behavior.done)
+        if character.id != "roxy" {
+            precondition(completionExtraID(workDuration: 500) == behavior.done,
+                         "Long tasks must keep each Eris appearance's existing sword finish")
+            return
+        }
+        guard let storm = extraClips["cumulonimbus"] else {
+            precondition(completionExtraID(workDuration: 120) == behavior.done)
+            return
+        }
+        precondition(storm.frames.count == 8 && completionExtraID(workDuration: 120) == "cumulonimbus")
+        extraClips.removeValue(forKey: "cumulonimbus")
+        precondition(completionExtraID(workDuration: 500) == behavior.done,
+                     "An old optional action pack must safely fall back to its existing water spell")
+        extraClips["cumulonimbus"] = storm
+        triggerCompletionReaction(workDuration: 120)
+        precondition(onceKind == "wave" && onceRepeatsLeft == WAVE_REPEAT && chainedExtraKind == "cumulonimbus")
+        advanceSequence(row: 3, sequence: WAVE_SEQ, loop: false, extraID: nil,
+                        dt: WAVE_SEQ.reduce(0) { $0 + $1.1 } * Double(WAVE_REPEAT) + 0.01)
+        precondition(onceKind == "cumulonimbus", "The signature spell must follow the complete original wave")
+        advanceSequence(row: 0, sequence: storm.sequence, loop: false, extraID: "cumulonimbus",
+                        dt: storm.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+        precondition(onceKind.isEmpty && currentSheetKey == "base")
+        startOnce("jump", repeats: 1)
+        animElapsed = 0.1
+        appendReplyExtraAction(workDuration: 120)
+        precondition(onceKind == "jump" && animElapsed == 0.1 && chainedExtraKind == "cumulonimbus",
+                     "A long task reply must preserve an unfinished original user reaction")
+        advanceSequence(row: 4, sequence: JUMP_SEQ, loop: false, extraID: nil,
+                        dt: JUMP_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        precondition(onceKind == "cumulonimbus")
+        advanceSequence(row: 0, sequence: storm.sequence, loop: false, extraID: "cumulonimbus",
+                        dt: storm.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+
+        directWorkTiming = DirectWorkTiming(startedAt: 10, costumeID: character.id)
+        precondition(takeDirectWorkDuration(successful: false, at: 500) == nil && directWorkTiming == nil,
+                     "Failed tasks must consume and clear their timing without a success spell")
+        precondition(takeDirectWorkDuration(successful: true, at: 600) == nil,
+                     "A later reply cannot reuse a failed task's timing")
+        completionWorkTiming.update(workingSources: ["claude"], at: 10)
+        directWorkTiming = DirectWorkTiming(startedAt: 10, costumeID: character.id)
+        let sameCostume = character
+        precondition(switchCharacter(to: sameCostume, announce: false, persist: false))
+        precondition(completionWorkTiming.startedAtBySource.isEmpty && directWorkTiming == nil
+                     && chainedExtraKind == nil && onceKind.isEmpty,
+                     "Costume reload/switch must clear old task timing and pending storm playback")
+        print("PASS: optional cumulonimbus threshold/fallback, original-wave/reply ordering, failed-task consumption and costume timing reset.")
+    }
+
+    private func checkSystemDrivenExtras(behavior: ExtraBehavior) {
+        onceKind = ""; onceRepeatsLeft = 0; chainedExtraKind = nil; ambientOnce = false; ambientReason = nil
+        pendingOnce = ""; pendingOnceRepeats = nil; dragging = false; dragMoved = false
+        lookUntil = 0; glanceUntil = 0; workState = "idle"; petHidden = false
+        nextExtraWorkActionAt = 0
+        systemActivity = SystemActivityState()
+        let interactionBefore = lastInteractAt
+        func drive(_ seconds: Double, at time: Double) {
+            acceptSystemActivity(idleSeconds: seconds, at: time)
+            pollExtraActions(now: time, dt: 0.01, activityNow: time)
+        }
+        func finishExtra(_ id: String) {
+            let clip = extraClips[id]!
+            advanceSequence(row: 0, sequence: clip.sequence, loop: false, extraID: id,
+                            dt: clip.sequence.reduce(0) { $0 + $1.1 } + 0.01)
+        }
+        for second in 0...90 {
+            drive(0.1, at: Double(second))
+            precondition(onceKind.isEmpty, "Active computer input must not randomly draw a weapon")
+        }
+        drive(59.9, at: 150)
+        precondition(onceKind.isEmpty)
+        drive(60, at: 150.1)
+        precondition(onceKind == behavior.idle && ambientReason == .idle && systemActivity.idlePosePlayed)
+        finishExtra(behavior.idle)
+        drive(70, at: 160.1)
+        precondition(onceKind.isEmpty, "One continuous idle episode permits only one idle pose")
+        drive(0.1, at: 161.1)
+        precondition(!systemActivity.idlePosePlayed)
+        drive(60, at: 221.1)
+        precondition(onceKind == behavior.idle)
+        drive(0.1, at: 222.1)
+        precondition(onceKind.isEmpty, "Returning computer input must cancel an idle weapon pose")
+
+        systemActivity = SystemActivityState()
+        acceptSystemActivity(idleSeconds: 60, at: 300)
+        startOnce("wave", repeats: 1)
+        pollExtraActions(now: 300, dt: 0.01, activityNow: 300)
+        precondition(onceKind == "wave" && !systemActivity.idlePosePlayed)
+        advanceSequence(row: 3, sequence: WAVE_SEQ, loop: false, extraID: nil,
+                        dt: WAVE_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        dragging = true
+        startOnce("jump", repeats: 1)
+        pollExtraActions(now: 300, dt: 0.01, activityNow: 300)
+        precondition(pendingOnce == "jump" && !systemActivity.idlePosePlayed)
+        dragEnded()
+        advanceSequence(row: 4, sequence: JUMP_SEQ, loop: false, extraID: nil,
+                        dt: JUMP_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        chainedExtraKind = behavior.done
+        pollExtraActions(now: 300, dt: 0.01, activityNow: 300)
+        precondition(chainedExtraKind == behavior.done && !systemActivity.idlePosePlayed)
+        chainedExtraKind = nil
+        lookUntil = 305
+        pollExtraActions(now: 300, dt: 0.01, activityNow: 300)
+        precondition(onceKind.isEmpty && !systemActivity.idlePosePlayed)
+        lookUntil = 0
+        workState = "working"; nextExtraWorkActionAt = 500
+        pollExtraActions(now: 300, dt: 0.01, activityNow: 300)
+        precondition(onceKind.isEmpty && !systemActivity.idlePosePlayed)
+        workState = "idle"
+        pollExtraActions(now: 300, dt: 0.01, activityNow: 300)
+        precondition(onceKind == behavior.idle)
+        cancelAmbientOnce()
+
+        systemActivity = SystemActivityState()
+        acceptSystemActivity(idleSeconds: 181, at: 500)
+        startOnce("wave", repeats: 1)
+        drive(0.1, at: 501)
+        precondition(systemActivity.pendingReturnSalute && onceKind == "wave")
+        advanceSequence(row: 3, sequence: WAVE_SEQ, loop: false, extraID: nil,
+                        dt: WAVE_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        workState = "working"; nextExtraWorkActionAt = 1000
+        pollExtraActions(now: 501, dt: 0.01, activityNow: 501)
+        precondition(onceKind.isEmpty && systemActivity.pendingReturnSalute)
+        workState = "idle"; lookUntil = 510
+        pollExtraActions(now: 501, dt: 0.01, activityNow: 501)
+        precondition(onceKind.isEmpty && systemActivity.pendingReturnSalute)
+        lookUntil = 0; dragging = true
+        startOnce("jump", repeats: 1)
+        pollExtraActions(now: 501, dt: 0.01, activityNow: 501)
+        precondition(pendingOnce == "jump" && systemActivity.pendingReturnSalute && chainedExtraKind == nil)
+        dragEnded()
+        advanceSequence(row: 4, sequence: JUMP_SEQ, loop: false, extraID: nil,
+                        dt: JUMP_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        pollExtraActions(now: 501.1, dt: 0.01, activityNow: 501.1)
+        precondition(onceKind == behavior.salute && ambientReason == .returnSalute
+                     && !systemActivity.pendingReturnSalute && chainedExtraKind == nil)
+        drive(0.1, at: 502.1)
+        precondition(onceKind == behavior.salute, "One return greeting may finish while typing continues")
+        finishExtra(behavior.salute)
+        pollExtraActions(now: 502.1, dt: 0.01, activityNow: 502.1)
+        precondition(onceKind.isEmpty)
+
+        systemActivity = SystemActivityState()
+        acceptSystemActivity(idleSeconds: 181, at: 700)
+        acceptSystemActivity(idleSeconds: 0.1, at: 701)
+        precondition(systemActivity.pendingReturnSalute)
+        triggerCompletionReaction(activityNow: 701)
+        precondition(!systemActivity.pendingReturnSalute && onceKind == "wave" && chainedExtraKind == behavior.done)
+        advanceSequence(row: 3, sequence: WAVE_SEQ, loop: false, extraID: nil,
+                        dt: WAVE_SEQ.reduce(0) { $0 + $1.1 } * Double(WAVE_REPEAT) + 0.01)
+        precondition(onceKind == behavior.done)
+        finishExtra(behavior.done)
+        drive(0.1, at: 702)
+        precondition(onceKind.isEmpty && !systemActivity.pendingReturnSalute,
+                     "Completion feedback must not be followed by a duplicate return salute")
+
+        systemActivity = SystemActivityState()
+        acceptSystemActivity(idleSeconds: 181, at: 710)
+        startOnce("jump", repeats: 1)
+        appendReplyExtraAction(activityNow: 711)
+        drive(0.1, at: 711)
+        precondition(onceKind == "jump" && chainedExtraKind == behavior.done && !systemActivity.pendingReturnSalute,
+                     "A reply before the activity sample must preserve the old reaction without a second welcome")
+        advanceSequence(row: 4, sequence: JUMP_SEQ, loop: false, extraID: nil,
+                        dt: JUMP_SEQ.reduce(0) { $0 + $1.1 } + 0.01)
+        finishExtra(behavior.done)
+        systemActivity = SystemActivityState()
+        acceptSystemActivity(idleSeconds: 181, at: 720)
+        acknowledgeDesktopReturn(at: 721)
+        drive(0.1, at: 721)
+        precondition(onceKind.isEmpty && !systemActivity.pendingReturnSalute,
+                     "Direct pet interaction acknowledges returning input before the 1Hz sample")
+
+        systemActivity = SystemActivityState()
+        beginOnce(behavior.idle, repeats: 1, ambient: true, reason: .idle)
+        receiveWorkspaceActivity(.willSleep)
+        receiveWorkspaceActivity(.screensDidSleep)
+        receiveWorkspaceActivity(.sessionDidResignActive)
+        precondition(onceKind.isEmpty && systemActivity.isPaused)
+        acceptSystemActivity(idleSeconds: 0.1, at: 600)
+        receiveWorkspaceActivity(.didWake)
+        receiveWorkspaceActivity(.sessionDidBecomeActive)
+        petHidden = true
+        receiveWorkspaceActivity(.screensDidWake)
+        drive(1.1, at: 601)
+        precondition(petHidden && onceKind.isEmpty && systemActivity.pendingReturnSalute)
+        petHidden = false
+        pollExtraActions(now: 601, dt: 0.01, activityNow: 601)
+        precondition(onceKind == behavior.salute && !systemActivity.pendingReturnSalute)
+        receiveWorkspaceActivity(.didWake)
+        receiveWorkspaceActivity(.screensDidWake)
+        receiveWorkspaceActivity(.sessionDidBecomeActive)
+        precondition(onceKind == behavior.salute, "Duplicate resume notifications must not cut or replay a greeting")
+        finishExtra(behavior.salute)
+        drive(2.1, at: 602)
+        precondition(onceKind.isEmpty && !systemActivity.pendingReturnSalute)
+
+        systemActivity = SystemActivityState()
+        workState = "working"; nextExtraWorkActionAt = 799
+        animKey = "work"; animElapsed = WORK_SEQ.reduce(0) { $0 + $1.1 } - 0.005
+        drive(2.99, at: 800)
+        precondition(onceKind.isEmpty, "Continuous input must postpone automatic practice")
+        drive(3, at: 800.01)
+        precondition(onceKind == behavior.work && ambientReason == .work)
+        drive(0.1, at: 801)
+        precondition(onceKind.isEmpty, "Input resumption must cancel automatic work gestures")
+        nextExtraWorkActionAt = 803; animKey = "work"; animElapsed = 0.1
+        drive(3, at: 804)
+        precondition(onceKind.isEmpty, "A quiet gap still must not truncate an old work cycle")
+        animElapsed = WORK_SEQ.reduce(0) { $0 + $1.1 } - 0.005
+        pollExtraActions(now: 804, dt: 0.01, activityNow: 804)
+        precondition(onceKind == behavior.work)
+        cancelAmbientOnce()
+        acceptSystemActivity(idleSeconds: 0.1, at: 805)
+        startOnce(behavior.work, repeats: 1)
+        pollExtraActions(now: 805, dt: 0.01, activityNow: 805)
+        precondition(onceKind == behavior.work && !ambientOnce, "Event-triggered one-shots must not be treated as idle ambience")
+        workState = "idle"
+        systemActivity.idlePosePlayed = true
+        systemActivity.pendingReturnSalute = true
+        systemActivity.awaitingWakeInput = true
+        let sameCostume = character
+        precondition(switchCharacter(to: sameCostume, announce: false, persist: false))
+        precondition(!systemActivity.idlePosePlayed && !systemActivity.pendingReturnSalute
+                     && !systemActivity.awaitingWakeInput && systemActivity.idleSeconds == nil)
+        precondition(lastInteractAt == interactionBefore, "System activity must not redefine pet-interaction moods")
+        print("PASS: \(character.id) causal idle/return/wake actions, old-chain priority, hidden state, quiet-work boundary and event-trigger priority.")
     }
 
     // ---------- 右键菜单 ----------

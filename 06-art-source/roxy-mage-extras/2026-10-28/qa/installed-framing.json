@@ -1,0 +1,18 @@
+{
+  "atlas_size": [
+    1536,
+    2288
+  ],
+  "cell_size": [
+    192,
+    208
+  ],
+  "idle0_bounds": [
+    40,
+    5,
+    152,
+    203
+  ],
+  "logical_bottom_y_from_top": 0.9759615384615384,
+  "logical_top_y_from_top": 0.02403846153846154
+}
