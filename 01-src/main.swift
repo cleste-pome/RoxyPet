@@ -1886,7 +1886,14 @@ final class PetController: NSObject, NSApplicationDelegate {
         alert.addButton(withTitle: "拒绝")
         NSApp.activate(ignoringOtherApps: true)
         NSSound.beep()
+        // 35 秒没人回答就自动关掉，回退终端；避免桌宠被模态框永久卡住。
+        let watchdog = Timer(timeInterval: 36, repeats: false) { _ in
+            NSApp.abortModal()
+            alert.window.orderOut(nil)
+        }
+        RunLoop.current.add(watchdog, forMode: .common)
         let resp = alert.runModal()
+        watchdog.invalidate()
         let decision = resp == .alertFirstButtonReturn ? "allow" : "deny"
         try? FileManager.default.createDirectory(atPath: repDir, withIntermediateDirectories: true)
         let reply: [String: Any] = ["id": id, "decision": decision]
