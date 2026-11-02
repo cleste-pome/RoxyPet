@@ -155,7 +155,8 @@ class Bridge {
     this.status = status
     const now = Date.now()
     try {
-      await atomicWrite(STATE_TXT, `${status}\n${now}\n`)
+      // 桌宠按秒比较时间；这里不能写 Date.now()（毫秒），否则状态会被当成“永远新鲜”。
+      await atomicWrite(STATE_TXT, `${status}\n${Math.floor(now / 1000)}\n`)
       await atomicWrite(DETAIL_JSON, JSON.stringify({
         status,
         sessionId: this.sessionId,

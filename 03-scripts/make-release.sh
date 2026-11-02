@@ -39,3 +39,7 @@ fi
 
 # 继承旧镜像布局、只读校验、逐文件比对、验签后原子替换；不调用 Finder。
 python3 "$SCRIPT_DIR/package-dmg.py" "$PROJECT_ROOT/Roxy.app" "$PROJECT_ROOT/Roxy.dmg" "${PACKAGE_ARGS[@]}"
+
+# iCloud / 同步工具偶尔会给新生成的 DMG 重新打上隐藏位，Finder 里就看不到它。
+# 发布流水线最后统一清掉；失败也不影响已经校验通过的安装包。
+chflags nohidden "$PROJECT_ROOT/Roxy.dmg" 2>/dev/null || true

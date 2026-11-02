@@ -177,7 +177,13 @@ final class PetView: NSView {
     }
 
     override func mouseUp(with event: NSEvent) {
-        if !dragged { controller?.petClicked() }
+        if !dragged {
+            if event.clickCount >= 2 {
+                controller?.petDoubleClicked()
+            } else {
+                controller?.petClicked()
+            }
+        }
         controller?.dragEnded()
     }
 
@@ -471,6 +477,7 @@ final class PetController: NSObject, NSApplicationDelegate {
     // Claude Code 状态
     private var workState = "idle"
     private var lastOnceTS = 0.0
+    private var lastDoneTS = 0.0
     private var statePollAcc = 0.0
 
     // DeepSeek Harness 桥（dsh-plugin-roxy）
@@ -1318,11 +1325,14 @@ final class PetController: NSObject, NSApplicationDelegate {
         let hovering = isHovering()
         if hovering && !wasHovering {
             onPetted(now: now)
-            // 鼠标放上来：跳 / 挥手交替出现（保证两种反应都常见到）；
-            // "转头跟随"期间鼠标在旁边划进划出不算新触碰，不打断
-            if now >= lookUntil {
-                if nextTouchIsJump { triggerJump() } else { triggerWaveOnce() }
-                nextTouchIsJump.toggle()
+            // 鼠标放上来：跳 / 挥手交替出现。跳跃不再受"刚移开又移回"的注视窗口限制，
+            // 想让它跳时移上去就会跳；挥手仍保留窗口，避免频繁进出时一直挥手。
+            if nextTouchIsJump {
+                triggerJump()
+                nextTouchIsJump = false
+            } else if now >= lookUntil {
+                triggerWaveOnce()
+                nextTouchIsJump = true
             }
         }
         if wasHovering && !hovering {
@@ -1685,6 +1695,7 @@ final class PetController: NSObject, NSApplicationDelegate {
 
         var working = false
         var noticeTS = 0.0
+        var noticeSrc = ""
         var doneTS = 0.0
         var doneSrc = ""
         var workingSources = Set<String>()
@@ -1696,17 +1707,20 @@ final class PetController: NSObject, NSApplicationDelegate {
             let lines = text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
             guard !lines.isEmpty else { return }
             let st = lines[0]
-            let ts = lines.count > 1 ? (Double(lines[1]) ?? 0) : 0
+            var ts = lines.count > 1 ? (Double(lines[1]) ?? 0) : 0
+            // dsh 插件早期写的是毫秒；毫秒值当成秒会让事件永远新鲜、并挤掉 Claude 的完成提醒。
+            if ts > 100_000_000_000 { ts /= 1000 }
+            let age = nowEpoch - ts
             switch st {
             case "working":
-                if nowEpoch - ts >= 0 && nowEpoch - ts < WORK_TIMEOUT_SECONDS {
+                if age >= -5 && age < WORK_TIMEOUT_SECONDS {
                     working = true
                     workingSources.insert(src)
                 }
             case "notice":
-                if nowEpoch - ts < 120 && ts > noticeTS { noticeTS = ts }
+                if age >= -5 && age < 120 && ts > noticeTS { noticeTS = ts; noticeSrc = src }
             case "done":
-                if nowEpoch - ts < 120 && ts > doneTS { doneTS = ts; doneSrc = src }
+                if age >= -5 && age < 120 && ts > doneTS { doneTS = ts; doneSrc = src }
             default: break
             }
         }
@@ -1718,6 +1732,13 @@ final class PetController: NSObject, NSApplicationDelegate {
                 consider("claude", base + "state.claude")
             } else {
                 consider("claude", base + "state")   // 兼容旧版单文件
+            }
+            // 每个会话单独一份状态：别的会话写 working / notice 时，
+            // 不会把这一会话刚写下的 done 覆盖掉（多开 Claude Code 时尤其明显）。
+            if let names = try? FileManager.default.contentsOfDirectory(atPath: base) {
+                for n in names where n.hasPrefix("state.claude.") {
+                    consider("claude", base + n)
+                }
             }
         }
         if d.bool(forKey: "roxyWatchCodex") {
@@ -1747,9 +1768,12 @@ final class PetController: NSObject, NSApplicationDelegate {
         if noticeTS > lastOnceTS {
             lastOnceTS = noticeTS
             triggerWave()
-            speak(randomOf(lines("notice", NOTICE_LINES)))
-        } else if doneTS > lastOnceTS {
-            lastOnceTS = doneTS
+            speakNoticeReport(from: noticeSrc)
+        }
+        // 完成提醒与等待提醒分开计时：别的会话刚发过 notice，也不能把这里的 done 吃掉。
+        if doneTS > lastDoneTS {
+            lastDoneTS = doneTS
+            NSLog("Roxy: done src=%@ ts=%.0f", doneSrc, doneTS)
             if !aiBusy {
                 // 她转派的任务结果由 runClaudeTask 统一展示，避免重复
                 triggerCompletionReaction(workDuration: completedWorkDuration)
@@ -1882,6 +1906,7 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     // 完工播报：优先转述实际回复摘要（30 秒内新鲜的），否则用台词库
     private func speakDoneReport(from src: String) {
+        NSLog("Roxy: report src=%@", src)
         let base = NSHomeDirectory() + "/.roxy-pet/"
         if src == "dsh" {
             let rp3 = base + "last_reply.dsh"
@@ -1891,11 +1916,11 @@ final class PetController: NSObject, NSApplicationDelegate {
                let txt = try? String(contentsOfFile: rp3, encoding: .utf8) {
                 let t = txt.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !t.isEmpty {
-                    speak(t.count > 160 ? String(t.prefix(160)) + "…" : t, fullText: t)
+                    speak(t.count > 160 ? String(t.prefix(160)) + "…" : t, seconds: 12, fullText: t)
                     return
                 }
             }
-            speak(randomOf(lines("done", DONE_LINES)))
+            speak(randomOf(lines("done", DONE_LINES)), seconds: 12)
             return
         }
         if src == "codex" {
@@ -1906,11 +1931,11 @@ final class PetController: NSObject, NSApplicationDelegate {
                let txt = try? String(contentsOfFile: rp2, encoding: .utf8) {
                 let t = txt.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !t.isEmpty {
-                    speak(t.count > 160 ? String(t.prefix(160)) + "…" : t, fullText: t)
+                    speak(t.count > 160 ? String(t.prefix(160)) + "…" : t, seconds: 12, fullText: t)
                     return
                 }
             }
-            speak(randomOf(lines("done", DONE_LINES)))
+            speak(randomOf(lines("done", DONE_LINES)), seconds: 12)
             return
         }
         let rp = base + "last_reply"
@@ -1925,6 +1950,7 @@ final class PetController: NSObject, NSApplicationDelegate {
                     let s = sd.split(separator: "\n").first.map { $0.trimmingCharacters(in: .whitespaces) } ?? ""
                     if !s.isEmpty { sid = s }
                 }
+                NSLog("Roxy: report last_reply len=%d age=%.1f", t.count, Date().timeIntervalSince(mt))
                 var tty: String?
                 var term: String?
                 if let td = try? String(contentsOfFile: NSHomeDirectory() + "/.roxy-pet/last_tty", encoding: .utf8) {
@@ -1932,11 +1958,44 @@ final class PetController: NSObject, NSApplicationDelegate {
                     if ls.count > 0, !ls[0].isEmpty, ls[0] != "??" { tty = ls[0] }
                     if ls.count > 1, !ls[1].isEmpty { term = ls[1] }
                 }
-                speak(t.count > 160 ? String(t.prefix(160)) + "…" : t, fullText: t, resumeSid: sid, resumeTty: tty, resumeTerm: term)
+                speak(t.count > 160 ? String(t.prefix(160)) + "…" : t, seconds: 12, fullText: t, resumeSid: sid, resumeTty: tty, resumeTerm: term)
                 return
             }
         }
-        speak(randomOf(lines("done", DONE_LINES)))
+        speak(randomOf(lines("done", DONE_LINES)), seconds: 12)
+    }
+
+    // 等待 / 权限提醒：优先显示 Claude Code 传下来的原始提示文字，不再只说通用句。
+    private func speakNoticeReport(from src: String) {
+        NSLog("Roxy: notice src=%@", src)
+        let base = NSHomeDirectory() + "/.roxy-pet/"
+        if src != "dsh" && src != "codex" {
+            let np = base + "last_notice"
+            if let attrs = try? FileManager.default.attributesOfItem(atPath: np),
+               let mt = attrs[.modificationDate] as? Date,
+               Date().timeIntervalSince(mt) < 120,
+               let txt = try? String(contentsOfFile: np, encoding: .utf8) {
+                let t = txt.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !t.isEmpty {
+                    var sid: String?
+                    if let sd = try? String(contentsOfFile: base + "last_session", encoding: .utf8) {
+                        let s = sd.split(separator: "\n").first.map { $0.trimmingCharacters(in: .whitespaces) } ?? ""
+                        if !s.isEmpty { sid = s }
+                    }
+                    var tty: String?
+                    var term: String?
+                    if let td = try? String(contentsOfFile: base + "last_tty", encoding: .utf8) {
+                        let ls = td.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
+                        if ls.count > 0, !ls[0].isEmpty, ls[0] != "??" { tty = ls[0] }
+                        if ls.count > 1, !ls[1].isEmpty { term = ls[1] }
+                    }
+                    speak(t.count > 160 ? String(t.prefix(160)) + "…" : t, seconds: 12, fullText: t,
+                          resumeSid: sid, resumeTty: tty, resumeTerm: term)
+                    return
+                }
+            }
+        }
+        speak(randomOf(lines("notice", NOTICE_LINES)), seconds: 12)
     }
 
     // ---------- 本地台词路由（情境/情绪；零 token，纯逻辑判断）----------
@@ -2037,6 +2096,19 @@ final class PetController: NSObject, NSApplicationDelegate {
     @objc private func sayLocal() {        // 菜单「说句话（本地台词）」入口：说一句 + 挥一遍手
         speakLocalLine()
         triggerWaveOnce()
+    }
+
+    @objc private func jumpNow() {         // 菜单「跳一下」：随时手动触发跳跃
+        setPetHidden(false)
+        triggerJump()
+    }
+
+    @objc private func toggleClaudeWatch() {
+        let d = UserDefaults.standard
+        let cur = d.object(forKey: "roxyWatchClaude") == nil ? true : d.bool(forKey: "roxyWatchClaude")
+        d.set(!cur, forKey: "roxyWatchClaude")
+        statusItem?.menu = makeMenu(forStatusBar: true)
+        speak(!cur ? "Claude Code 的提醒已经打开啦。" : "Claude Code 的提醒先关掉了。")
     }
 
     private func speakLocalLine() {
@@ -2352,6 +2424,12 @@ final class PetController: NSObject, NSApplicationDelegate {
         acknowledgeDesktopReturn()
         speakLocalLine()
         clickReaction()
+    }
+
+    // 双击她：直接跳一下，不再等点击动作轮盘转到跳跃。
+    func petDoubleClicked() {
+        acknowledgeDesktopReturn()
+        triggerJump()
     }
 
     // Shuffle a complete per-costume round so new clips cannot be starved by old reactions.
@@ -3058,9 +3136,14 @@ final class PetController: NSObject, NSApplicationDelegate {
             radios.append(rb)
         }
         let radioStack = vstack(radios, spacing: 5)
+        let harnessNote = NSTextField(labelWithString: "这里只决定「吩咐她做事」交给谁；哪些 CLI 的干活、完工和权限提示会传到桌宠，在下面的「状态联动」里勾选。")
+        harnessNote.font = NSFont.systemFont(ofSize: 11)
+        harnessNote.textColor = .secondaryLabelColor
+        harnessNote.lineBreakMode = .byWordWrapping
+        harnessNote.preferredMaxLayoutWidth = 520
 
         // ---- 状态联动（其它 CLI）----
-        let watchDefs: [(String, String)] = [("claude", "Claude Code —— 干活跑动 · 完工挥手 · 等待提醒"), ("codex", "Codex —— 完工挥手（含回复转述）"), ("opencode", "opencode —— 进程检测：运行中跑动 · 结束挥手")]
+        let watchDefs: [(String, String)] = [("claude", "Claude Code —— 干活跑动 · 完工回复 · 权限/等待提示"), ("codex", "Codex —— 完工挥手（含回复转述）"), ("opencode", "opencode —— 进程检测：运行中跑动 · 结束挥手")]
         var watches: [NSButton] = []
         for (i, wd) in watchDefs.enumerated() {
             let cb = NSButton(checkboxWithTitle: wd.1, target: nil, action: nil)
@@ -3084,7 +3167,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         let root = vstack([
             groupTitle("对话"), chatGrid, separatorLine(),
             groupTitle("Harness"), dshStatus, dshButtons, dshToggles, dshHint, separatorLine(),
-            groupTitle("任务执行器"), radioStack, separatorLine(),
+            groupTitle("任务执行器"), radioStack, harnessNote, separatorLine(),
             groupTitle("状态联动"), watchStack, watchNote, btns,
         ], spacing: 8)
         root.translatesAutoresizingMaskIntoConstraints = false
@@ -3378,6 +3461,9 @@ final class PetController: NSObject, NSApplicationDelegate {
         let say = NSMenuItem(title: "说句话（本地台词）", action: #selector(sayLocal), keyEquivalent: "")
         say.target = self
         menu.addItem(say)
+        let jump = NSMenuItem(title: "跳一下", action: #selector(jumpNow), keyEquivalent: "")
+        jump.target = self
+        menu.addItem(jump)
         let ai = NSMenuItem(title: "说句话（大模型）", action: #selector(askAI), keyEquivalent: "")
         ai.target = self
         menu.addItem(ai)
@@ -3388,6 +3474,11 @@ final class PetController: NSObject, NSApplicationDelegate {
         let look = NSMenuItem(title: character.screenTitle, action: #selector(lookAtScreen), keyEquivalent: "")
         look.target = self
         menu.addItem(look)
+        let claudeWatch = NSMenuItem(title: "Claude Code 提醒（干活 / 完工 / 权限）", action: #selector(toggleClaudeWatch), keyEquivalent: "")
+        claudeWatch.target = self
+        let cw = UserDefaults.standard.object(forKey: "roxyWatchClaude") == nil ? true : UserDefaults.standard.bool(forKey: "roxyWatchClaude")
+        claudeWatch.state = cw ? .on : .off
+        menu.addItem(claudeWatch)
         menu.addItem(.separator())
         let hist = NSMenuItem(title: "查看\(character.historyTitle)", action: #selector(showTaskHistory), keyEquivalent: "")
         hist.target = self
