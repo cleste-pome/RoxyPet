@@ -1878,12 +1878,17 @@ final class PetController: NSObject, NSApplicationDelegate {
         var summary = obj["summary"] as? String ?? ""
         if summary.count > 600 { summary = String(summary.prefix(600)) + "…" }
         if summary.isEmpty { summary = "（没有可显示的参数）" }
+        let hasSession = obj["hasSuggestions"] as? Bool ?? false
         setPetHidden(false)
         let alert = NSAlert()
         alert.messageText = "Claude Code 请求批准"
-        alert.informativeText = "工具：\(tool)\n\(summary)"
+        alert.informativeText = "工具：\(tool)\n\(summary)\n\n选择「去终端选择…」可使用终端里的全部权限选项。"
         alert.addButton(withTitle: "允许一次")
+        if hasSession {
+            alert.addButton(withTitle: "本会话允许")
+        }
         alert.addButton(withTitle: "拒绝")
+        alert.addButton(withTitle: "去终端选择…")
         NSApp.activate(ignoringOtherApps: true)
         NSSound.beep()
         // 35 秒没人回答就自动关掉，回退终端；避免桌宠被模态框永久卡住。
@@ -1894,13 +1899,16 @@ final class PetController: NSObject, NSApplicationDelegate {
         RunLoop.current.add(watchdog, forMode: .common)
         let resp = alert.runModal()
         watchdog.invalidate()
-        let decision = resp == .alertFirstButtonReturn ? "allow" : "deny"
+        let first = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+        let idx = resp.rawValue - first
+        let decisions = hasSession ? ["allow", "allow_session", "deny", "ask"] : ["allow", "deny", "ask"]
+        let decision = (idx >= 0 && idx < decisions.count) ? decisions[idx] : "deny"
         try? FileManager.default.createDirectory(atPath: repDir, withIntermediateDirectories: true)
         let reply: [String: Any] = ["id": id, "decision": decision]
         if let d = try? JSONSerialization.data(withJSONObject: reply) {
             try? d.write(to: URL(fileURLWithPath: repDir + "/" + id + ".json"), options: .atomic)
         }
-        try? FileManager.default.removeItem(atPath: path)
+        // 请求文件交给钩子脚本读取 suggestions 后删除；这里保留，钩子 35 秒超时会自己清理。
     }
 
     // ---------- DeepSeek Harness（dsh）----------

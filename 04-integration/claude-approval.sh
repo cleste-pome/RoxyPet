@@ -15,7 +15,8 @@ pgrep -f 'MacOS/Roxy' >/dev/null 2>&1 || exit 0
 h="$(defaults read local.roxypet.desktop roxyHarness 2>/dev/null || echo claude)"
 [ "$h" = "claude" ] || exit 0
 
-# 清掉十分钟前的旧回复，避免目录堆积
+# 清掉十分钟前的旧请求/回复，避免目录堆积
+find "$reqdir" -type f -name '*.json' -mmin +10 -delete 2>/dev/null || true
 find "$repdir" -type f -name '*.json' -mmin +10 -delete 2>/dev/null || true
 
 id="$(printf '%s' "$input" | python3 -c '
@@ -38,10 +39,20 @@ else:
     except Exception:
         s = str(ti)
 s = str(s).strip()[:800]
+# 终端里“以后别再问”的建议规则；只接受允许类规则，并限制数量。
+raw = d.get("permission_suggestions") or []
+sugg = []
+for item in raw:
+    if (isinstance(item, dict)
+            and item.get("type") in ("addRules", "replaceRules", "removeRules")
+            and item.get("behavior") == "allow"):
+        sugg.append(item)
+sugg = sugg[:8]
 rid = uuid.uuid4().hex
 req = {"id": rid, "tool": tool, "summary": s,
        "sessionId": d.get("session_id", ""),
-       "createdAt": time.time(), "expiresAt": time.time() + 40}
+       "createdAt": time.time(), "expiresAt": time.time() + 40,
+       "suggestions": sugg, "hasSuggestions": bool(sugg)}
 p = os.path.expanduser("~/.roxy-pet/claude/requests/" + rid + ".json")
 tmp = p + ".tmp"
 with open(tmp, "w", encoding="utf-8") as f:
@@ -54,19 +65,45 @@ print(rid)
 deadline=$(( $(date +%s) + 35 ))
 while [ "$(date +%s)" -lt "$deadline" ]; do
   if [ -f "$repdir/$id.json" ]; then
-    dec="$(python3 -c '
-import json,sys
+    out="$(python3 - "$repdir/$id.json" "$reqdir/$id.json" <<'PY'
+import json, sys
 try:
-    print(json.load(open(sys.argv[1], encoding="utf-8")).get("decision", ""))
+    dec = json.load(open(sys.argv[1], encoding="utf-8")).get("decision", "")
 except Exception:
-    print("")
-' "$repdir/$id.json" 2>/dev/null)"
+    dec = ""
+try:
+    req = json.load(open(sys.argv[2], encoding="utf-8"))
+except Exception:
+    req = {}
+if dec == "allow":
+    decision = {"behavior": "allow"}
+elif dec == "deny":
+    decision = {"behavior": "deny", "message": "用户在桌宠里拒绝了这次操作"}
+elif dec == "allow_session":
+    updates = []
+    for item in (req.get("suggestions") or []):
+        if (isinstance(item, dict)
+                and item.get("type") in ("addRules", "replaceRules", "removeRules")
+                and item.get("behavior") == "allow"):
+            updates.append({
+                "type": item["type"],
+                "rules": item.get("rules", []),
+                "behavior": "allow",
+                "destination": "session",
+            })
+    decision = {"behavior": "allow"}
+    if updates:
+        decision["updatedPermissions"] = updates[:8]
+elif dec == "ask":
+    decision = None
+else:
+    decision = None
+if decision is not None:
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PermissionRequest", "decision": decision}}, ensure_ascii=False))
+PY
+)"
     rm -f "$repdir/$id.json" "$reqdir/$id.json"
-    if [ "$dec" = "allow" ]; then
-      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"}}}'
-    elif [ "$dec" = "deny" ]; then
-      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"用户在桌宠里拒绝了这次操作"}}}'
-    fi
+    [ -n "$out" ] && printf '%s\n' "$out"
     exit 0
   fi
   sleep 0.25
