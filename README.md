@@ -67,9 +67,7 @@
 ```
 RoxyPet-GitHub/
 ├── README.md
-├── LICENSE              # 代码 MIT；素材附粉丝使用说明
-├── CHANGELOG.md
-├── .gitignore
+├── LICENSE              # MIT
 ├── 01-src/              # 源码
 │   ├── main.swift       # 主程序（窗口 / 动画 / 气泡 / 菜单 / 联动）
 │   ├── speech.swift     # 洛琪希台词库（运行池 1009 条；`--export-speech` 导出 roxy.json）
@@ -109,7 +107,7 @@ RoxyPet-GitHub/
 └── 07-docs/             # 角色扩展 · 语料 · 素材制作记录
 ```
 
-根目录的构建产物（`Roxy.app`、`*.dmg`）由 `.gitignore` 排除、不入库——仓库本体是纯源码与素材，安装包一律走 Releases 的 dmg。
+根目录的构建产物（`Roxy.app`、`*.dmg`）不入库——仓库本体是纯源码与素材，安装包一律走 Releases 的 dmg。
 
 ---
 
