@@ -803,6 +803,8 @@ final class PetController: NSObject, NSApplicationDelegate {
         loadTaskHistory()
         setupStatusItem()
         PetController.detectHarnesses()
+        // 升级后把旧的“多选开关”迁移成跟随当前任务执行器。
+        syncHarnessIntegration(enableDshExtras: false)
         if UserDefaults.standard.object(forKey: "roxyOwnerTitle") == nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                 self?.promptForTitle(firstRun: true)
@@ -1690,7 +1692,6 @@ final class PetController: NSObject, NSApplicationDelegate {
         statePollAcc += dt
         if statePollAcc < STATE_POLL_INTERVAL { return }
         statePollAcc = 0
-        let d = UserDefaults.standard
         let nowEpoch = Date().timeIntervalSince1970
 
         var working = false
@@ -1726,7 +1727,9 @@ final class PetController: NSObject, NSApplicationDelegate {
         }
 
         let base = NSHomeDirectory() + "/.roxy-pet/"
-        let watchClaude = d.object(forKey: "roxyWatchClaude") == nil ? true : d.bool(forKey: "roxyWatchClaude")
+        // 任务执行器就是唯一开关：选定谁就自动联动谁，不再单独维护“状态联动”勾选。
+        let activeHarness = PetController.currentHarness()
+        let watchClaude = activeHarness == "claude"
         if watchClaude {
             if FileManager.default.fileExists(atPath: base + "state.claude") {
                 consider("claude", base + "state.claude")
@@ -1741,13 +1744,13 @@ final class PetController: NSObject, NSApplicationDelegate {
                 }
             }
         }
-        if d.bool(forKey: "roxyWatchCodex") {
+        if activeHarness == "codex" {
             consider("codex", base + "state.codex")
         }
-        if d.object(forKey: "roxyWatchDsh") == nil ? true : d.bool(forKey: "roxyWatchDsh") {
+        if activeHarness == "dsh" {
             consider("dsh", base + "state.dsh")
         }
-        if d.bool(forKey: "roxyWatchOpencode") {
+        if activeHarness == "opencode" {
             // opencode 无官方钩子：用运行中的 `opencode run` 进程做"进行中"信号
             let running = PetController.processRunning(match: "opencode run")
             if running {
@@ -1787,6 +1790,9 @@ final class PetController: NSObject, NSApplicationDelegate {
     // dsh-plugin-roxy 会把会话状态写到 state.dsh / last_reply.dsh，
     // 把权限请求写到 dsh/approval.json；这里负责心跳与批准弹窗。
     private func pollDshBridge(dt: Double) {
+        // 只有把 Harness 选为任务执行器时才接管心跳与权限审批；
+        // 否则不写心跳，桥插件会自动把审批交还给 Harness 自己的界面。
+        guard PetController.currentHarness() == "dsh" else { return }
         dshHeartbeatAcc += dt
         if dshHeartbeatAcc >= 5 {
             dshHeartbeatAcc = 0
@@ -1837,6 +1843,7 @@ final class PetController: NSObject, NSApplicationDelegate {
 
     /// DeepSeek Harness：对话同步刷新 + 余额实时显示（每 60 秒；开关在设置里）。
     private func pollDshBilling(dt: Double) {
+        guard PetController.currentHarness() == "dsh" else { return }
         guard PetController.isDshConnected() else { return }
         // 记录窗口开着时，定期把 DSH 对话拉进来（桥插件写文件，不占 token、不打扰会话）
         dshHistoryAcc += dt
@@ -2101,14 +2108,6 @@ final class PetController: NSObject, NSApplicationDelegate {
     @objc private func jumpNow() {         // 菜单「跳一下」：随时手动触发跳跃
         setPetHidden(false)
         triggerJump()
-    }
-
-    @objc private func toggleClaudeWatch() {
-        let d = UserDefaults.standard
-        let cur = d.object(forKey: "roxyWatchClaude") == nil ? true : d.bool(forKey: "roxyWatchClaude")
-        d.set(!cur, forKey: "roxyWatchClaude")
-        statusItem?.menu = makeMenu(forStatusBar: true)
-        speak(!cur ? "Claude Code 的提醒已经打开啦。" : "Claude Code 的提醒先关掉了。")
     }
 
     private func speakLocalLine() {
@@ -2517,6 +2516,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         guard sender.tag >= 0 && sender.tag < names.count else { return }
         let h = names[sender.tag]
         UserDefaults.standard.set(h, forKey: "roxyHarness")
+        syncHarnessIntegration(enableDshExtras: h == "dsh")
         statusItem?.menu = makeMenu(forStatusBar: true)
         let label: String
         switch h {
@@ -2864,6 +2864,31 @@ final class PetController: NSObject, NSApplicationDelegate {
         return harnessPaths.keys.sorted().first ?? "chat"
     }
 
+    /// 任务执行器是唯一开关：选定哪家，就自动同步这家的联动状态。
+    /// 旧的 roxyWatch* 键仍写一份，供旧版本/脚本兼容；轮询本身只看 currentHarness。
+    private func syncHarnessIntegration(enableDshExtras: Bool) {
+        let d = UserDefaults.standard
+        let h = PetController.currentHarness()
+        d.set(h == "claude", forKey: "roxyWatchClaude")
+        d.set(h == "codex", forKey: "roxyWatchCodex")
+        d.set(h == "opencode", forKey: "roxyWatchOpencode")
+        d.set(h == "dsh", forKey: "roxyWatchDsh")
+        if h == "dsh" && enableDshExtras {
+            d.set(true, forKey: "roxyDshConversation")
+            d.set(true, forKey: "roxyDshBalanceLive")
+        }
+    }
+
+    private func integrationSummary(for h: String) -> String {
+        switch h {
+        case "claude": return "已自动联动：Claude Code —— 干活跑动 · 完工回复 · 权限/等待提示"
+        case "codex": return "已自动联动：Codex —— 干活跑动 · 完工回复（含回复转述）"
+        case "opencode": return "已自动联动：opencode —— 运行中跑动 · 结束挥手"
+        case "dsh": return "已自动联动：Harness —— 干活跑动 · 完工回复 · 对话同步 · 权限批准 · 实时余额"
+        default: return "仅对话模式：不联动任何命令行工具"
+        }
+    }
+
     private static func promptTitle() -> String {
         let t = UserDefaults.standard.string(forKey: "roxyOwnerTitle") ?? ""
         return t.isEmpty ? "您" : t
@@ -3024,11 +3049,10 @@ final class PetController: NSObject, NSApplicationDelegate {
     private var swKeyField: NSSecureTextField?
     private var swModelBox: NSComboBox?
     private var swHarnessRadios: [NSButton] = []
-    private var swWatchBoxes: [NSButton] = []
+    private var swIntegrationLabel: NSTextField?
     private var swStatusLabel: NSTextField?
     // DeepSeek Harness 分组
     private var swDshStatusLabel: NSTextField?
-    private var swDshWatchBox: NSButton?
     private var swDshConvBox: NSButton?
     private var swDshLiveBox: NSButton?
     /// 未连接时隐藏的 Harness 明细行（只留状态 + 重新检测）
@@ -3116,13 +3140,12 @@ final class PetController: NSObject, NSApplicationDelegate {
         let dshButtons = NSStackView(views: [recheck, queryBtn])
         dshButtons.orientation = .horizontal
         dshButtons.spacing = 8
-        let dshWatch = NSButton(checkboxWithTitle: "状态联动：干活跑动 · 完工挥手 · 权限批准", target: nil, action: nil)
         let dshConv = NSButton(checkboxWithTitle: "对话同步：把双向对话显示在「记录」里", target: nil, action: nil)
         let dshLive = NSButton(checkboxWithTitle: "实时显示 DeepSeek 余额：每 60 秒刷新，完工时显示本轮花费", target: nil, action: nil)
         let dshHint = NSTextField(labelWithString: "需要在 Harness 里安装 04-integration/dsh-plugin（dsh-plugin-roxy）")
         dshHint.font = NSFont.systemFont(ofSize: 11)
         dshHint.textColor = .tertiaryLabelColor
-        let dshToggles = vstack([dshWatch, dshConv, dshLive], spacing: 4)
+        let dshToggles = vstack([dshConv, dshLive], spacing: 4)
 
         // ---- 任务执行器 ----
         let hDefs: [(String, String)] = [("claude", "Claude Code"), ("codex", "Codex"), ("opencode", "opencode"), ("dsh", "Harness"), ("chat", "仅对话（不执行命令）")]
@@ -3136,24 +3159,16 @@ final class PetController: NSObject, NSApplicationDelegate {
             radios.append(rb)
         }
         let radioStack = vstack(radios, spacing: 5)
-        let harnessNote = NSTextField(labelWithString: "这里只决定「吩咐她做事」交给谁；哪些 CLI 的干活、完工和权限提示会传到桌宠，在下面的「状态联动」里勾选。")
+        let harnessNote = NSTextField(labelWithString: "选定后自动联动这家工具的对话、干活、完工和权限提醒，不需要再单独勾选。")
         harnessNote.font = NSFont.systemFont(ofSize: 11)
         harnessNote.textColor = .secondaryLabelColor
         harnessNote.lineBreakMode = .byWordWrapping
         harnessNote.preferredMaxLayoutWidth = 520
-
-        // ---- 状态联动（其它 CLI）----
-        let watchDefs: [(String, String)] = [("claude", "Claude Code —— 干活跑动 · 完工回复 · 权限/等待提示"), ("codex", "Codex —— 完工挥手（含回复转述）"), ("opencode", "opencode —— 进程检测：运行中跑动 · 结束挥手")]
-        var watches: [NSButton] = []
-        for (i, wd) in watchDefs.enumerated() {
-            let cb = NSButton(checkboxWithTitle: wd.1, target: nil, action: nil)
-            cb.tag = i
-            watches.append(cb)
-        }
-        let watchStack = vstack(watches, spacing: 4)
-        let watchNote = NSTextField(labelWithString: "可多选：勾上哪家，她就在哪家干活时有反应")
-        watchNote.font = NSFont.systemFont(ofSize: 11)
-        watchNote.textColor = .secondaryLabelColor
+        let integrationNote = NSTextField(labelWithString: "")
+        integrationNote.font = NSFont.systemFont(ofSize: 11)
+        integrationNote.textColor = .secondaryLabelColor
+        integrationNote.lineBreakMode = .byWordWrapping
+        integrationNote.preferredMaxLayoutWidth = 520
 
         let saveBtn = NSButton(title: "保存并应用", target: self, action: #selector(saveSettingsWindow))
         saveBtn.bezelStyle = .rounded
@@ -3167,8 +3182,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         let root = vstack([
             groupTitle("对话"), chatGrid, separatorLine(),
             groupTitle("Harness"), dshStatus, dshButtons, dshToggles, dshHint, separatorLine(),
-            groupTitle("任务执行器"), radioStack, harnessNote, separatorLine(),
-            groupTitle("状态联动"), watchStack, watchNote, btns,
+            groupTitle("任务执行器"), radioStack, harnessNote, integrationNote, separatorLine(), btns,
         ], spacing: 8)
         root.translatesAutoresizingMaskIntoConstraints = false
         let content = NSView(frame: NSRect(x: 0, y: 0, width: 620, height: 820))
@@ -3187,10 +3201,9 @@ final class PetController: NSObject, NSApplicationDelegate {
         swKeyField = fKey
         swModelBox = mBox
         swHarnessRadios = radios
-        swWatchBoxes = watches
+        swIntegrationLabel = integrationNote
         swStatusLabel = status
         swDshStatusLabel = dshStatus
-        swDshWatchBox = dshWatch
         swDshConvBox = dshConv
         swDshLiveBox = dshLive
         swDshExtraViews = [queryBtn, dshToggles, dshHint]
@@ -3208,14 +3221,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         if let idx = names.firstIndex(of: cur) {
             for (i, rb) in swHarnessRadios.enumerated() { rb.state = (i == idx) ? .on : .off }
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
-        let watchDefaults = [true, false, false]
-        for (i, cb) in swWatchBoxes.enumerated() {
-            let on = d.object(forKey: watchKeys[i]) == nil ? watchDefaults[i] : d.bool(forKey: watchKeys[i])
-            cb.state = on ? .on : .off
-        }
-        let dshWatchOn = d.object(forKey: "roxyWatchDsh") == nil ? true : d.bool(forKey: "roxyWatchDsh")
-        swDshWatchBox?.state = dshWatchOn ? .on : .off
+        swIntegrationLabel?.stringValue = integrationSummary(for: cur)
         let dshConvOn = d.object(forKey: "roxyDshConversation") == nil ? true : d.bool(forKey: "roxyDshConversation")
         swDshConvBox?.state = dshConvOn ? .on : .off
         let dshLiveOn = d.object(forKey: "roxyDshBalanceLive") == nil ? true : d.bool(forKey: "roxyDshBalanceLive")
@@ -3244,17 +3250,10 @@ final class PetController: NSObject, NSApplicationDelegate {
            names[on.tag] != (d.string(forKey: "roxyHarness") ?? "claude") {
             return false
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
-        let watchDefaults = [true, false, false]
-        for (i, cb) in swWatchBoxes.enumerated() {
-            let cur = d.object(forKey: watchKeys[i]) == nil ? watchDefaults[i] : d.bool(forKey: watchKeys[i])
-            if (cb.state == .on) != cur { return false }
-        }
         func unchanged(_ box: NSButton?, _ key: String, _ def: Bool) -> Bool {
             let cur = d.object(forKey: key) == nil ? def : d.bool(forKey: key)
             return (box?.state == .on) == cur
         }
-        if !unchanged(swDshWatchBox, "roxyWatchDsh", true) { return false }
         if !unchanged(swDshConvBox, "roxyDshConversation", true) { return false }
         if !unchanged(swDshLiveBox, "roxyDshBalanceLive", true) { return false }
         return true
@@ -3278,16 +3277,15 @@ final class PetController: NSObject, NSApplicationDelegate {
         d.set((swKeyField?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines), forKey: "roxyApiKey")
         d.set((swModelBox?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines), forKey: "roxyApiModel")
         let names = ["claude", "codex", "opencode", "dsh", "chat"]
+        let oldHarness = d.string(forKey: "roxyHarness") ?? "claude"
+        var newHarness = oldHarness
         if let on = swHarnessRadios.first(where: { $0.state == .on }) {
-            d.set(names[on.tag], forKey: "roxyHarness")
+            newHarness = names[on.tag]
+            d.set(newHarness, forKey: "roxyHarness")
         }
-        let watchKeys = ["roxyWatchClaude", "roxyWatchCodex", "roxyWatchOpencode"]
-        for (i, cb) in swWatchBoxes.enumerated() {
-            d.set(cb.state == .on, forKey: watchKeys[i])
-        }
-        d.set(swDshWatchBox?.state == .on, forKey: "roxyWatchDsh")
         d.set(swDshConvBox?.state == .on, forKey: "roxyDshConversation")
         d.set(swDshLiveBox?.state == .on, forKey: "roxyDshBalanceLive")
+        syncHarnessIntegration(enableDshExtras: oldHarness != newHarness)
         statusItem?.menu = makeMenu(forStatusBar: true)
         refreshSettingsFields()
         speak("设置保存好啦。")
@@ -3315,6 +3313,10 @@ final class PetController: NSObject, NSApplicationDelegate {
     @objc private func harnessRadioChanged(_ sender: NSButton) {
         // 手动互斥（不依赖 AppKit 的自动分组规则，任何布局下都可靠）
         for rb in swHarnessRadios { rb.state = (rb === sender) ? .on : .off }
+        let names = ["claude", "codex", "opencode", "dsh", "chat"]
+        if sender.tag >= 0 && sender.tag < names.count {
+            swIntegrationLabel?.stringValue = integrationSummary(for: names[sender.tag])
+        }
     }
 
     /// 重新探测所有 CLI，并刷新设置里的标题、Harness 状态与菜单。
@@ -3474,11 +3476,6 @@ final class PetController: NSObject, NSApplicationDelegate {
         let look = NSMenuItem(title: character.screenTitle, action: #selector(lookAtScreen), keyEquivalent: "")
         look.target = self
         menu.addItem(look)
-        let claudeWatch = NSMenuItem(title: "Claude Code 提醒（干活 / 完工 / 权限）", action: #selector(toggleClaudeWatch), keyEquivalent: "")
-        claudeWatch.target = self
-        let cw = UserDefaults.standard.object(forKey: "roxyWatchClaude") == nil ? true : UserDefaults.standard.bool(forKey: "roxyWatchClaude")
-        claudeWatch.state = cw ? .on : .off
-        menu.addItem(claudeWatch)
         menu.addItem(.separator())
         let hist = NSMenuItem(title: "查看\(character.historyTitle)", action: #selector(showTaskHistory), keyEquivalent: "")
         hist.target = self
@@ -3489,7 +3486,7 @@ final class PetController: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
         // DeepSeek Harness 相关操作统一收进一个子菜单：
         // 连接状态 / 余额 / 刷新余额 / 对话同步 / 实时余额 / 连接设置。
-        if PetController.isDshConnected() {
+        if PetController.currentHarness() == "dsh" && PetController.isDshConnected() {
             let d = UserDefaults.standard
             let dshItem = NSMenuItem(title: "DeepSeek Harness", action: nil, keyEquivalent: "")
             let dshMenu = NSMenu()

@@ -48,7 +48,7 @@
    - 4.1 [使用](#41-使用)
    - 4.2 [与 Claude Code 联动（可选）](#42-与-claude-code-联动可选)
      - 4.2.1 [任务执行器（可切换）](#421-任务执行器可切换)
-     - 4.2.2 [状态联动（可多选）](#422-状态联动可多选)
+     - 4.2.2 [自动联动（跟随任务执行器）](#422-自动联动跟随任务执行器)
      - 4.2.3 [DeepSeek Harness 联动](#423-deepseek-harness-联动)
    - 4.3 [自定义与扩展](#43-自定义与扩展)
    - 4.4 [语料为什么有两种格式](#44-语料为什么有两种格式)
@@ -419,18 +419,18 @@ cd RoxyPet-GitHub/03-scripts
 
 > 四种 CLI 均以无头模式运行，并以各自的"自动执行"参数工作——**请只吩咐你信任的任务**。
 
-#### 4.2.2 状态联动（可多选）
+#### 4.2.2 自动联动（跟随任务执行器）
 
-在 设置 →「状态联动」里勾选任意组合，她在对应工具干活时就有反应：
+任务执行器就是联动总开关：在 设置 →「任务执行器」里选定哪一家，她就自动接通哪一家的对话、干活、完工和权限提醒，不需要再单独勾选。
 
 | 工具 | 机制 | 效果 | 需要做什么 |
 |---|---|---|---|
 | **Claude Code** | hooks → `state.claude` | 干活跑动 / 完工挥手+回复转述 / 等待提醒 | 配好上面的 hooks（`hook.sh`）|
 | **Codex** | `notify` → `codex-notify.sh` | 完工挥手 + 回复转述 | `~/.codex/config.toml`：`notify = ["…/.roxy-pet/codex-notify.sh", "turn-ended"]`（若已有 notify 程序，在脚本里先转发，见脚本注释）|
-| **opencode** | 进程检测（`opencode run`） | 运行中跑动 / 结束挥手 | 无需配置，勾选即可 |
+| **opencode** | 进程检测（`opencode run`） | 运行中跑动 / 结束挥手 | 无需配置，把执行器切到 opencode 即可 |
 | **DeepSeek Harness** | 桥插件 → `state.dsh` | 干活跑动 / 完工挥手+回复转述 / 权限批准 | 安装 `04-integration/dsh-plugin`（见 4.2.3）|
 
-「任务执行器」（派活给谁）与「状态联动」（盯谁干活）相互独立：你可以派活给 Claude Code，同时盯着 Codex 和 opencode 的动态。
+同一时间只联动当前选中的执行器：派活给 Claude Code 就自动盯 Claude Code，切到 Harness 就自动盯 Harness（并自动开启对话同步与实时余额）。
 
 #### 4.2.3 DeepSeek Harness 联动
 
@@ -446,10 +446,10 @@ dsh plugin --profile desktop add /path/to/RoxyPet-GitHub/04-integration/dsh-plug
 - **超时**：默认 120 秒没人回答 → `cancelled`（fail-closed）
 - **自动检测**：每次启动 App 都会自动探测本机的 `dsh`（登录 shell / 交互 shell / Homebrew / npm / bun / cargo / asdf 等常见位置），设置里打开也会重新探测；运行中装了 Harness，5 分钟内也会自动接上
 - **余额查询**：设置 → Harness →「查询余额」→ `GET https://api.deepseek.com/user/balance`，显示总额 / 赠送 / 充值
-- **设置分组**：连接状态（含 dsh 路径）/ 重新检测 / 状态联动 / 对话同步 / 实时余额都在「设置 → DeepSeek Harness」一栏；接入前主菜单不出现 DeepSeek 入口
+- **设置分组**：连接状态（含 dsh 路径）/ 重新检测 / 对话同步 / 实时余额都在「设置 → DeepSeek Harness」一栏；把任务执行器切到 Harness 时自动联动并开启同步与实时余额；接入前主菜单不出现 DeepSeek 入口
 - **对话同步**：桥插件把双向对话写到 `~/.roxy-pet/dsh/conversation.json`，桌宠「记录」窗口按时间合并显示（不占用模型 token）
 - **实时余额**：每 60 秒刷新一次；Harness 回合结束时显示本轮花费（可在设置里关掉）
-- **状态联动开关**：同一分组里，默认开启
+- **联动开关**：把任务执行器切到 Harness 即自动开启；切走则自动停用（桥插件会把审批交还 Harness 自己的界面）
 
 ---
 
